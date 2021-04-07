@@ -1,7 +1,41 @@
 {
-  "extends": ["plugin:adonis/typescriptApp", "prettier", "prettier/@typescript-eslint"],
-  "plugins": ["prettier"],
-  "rules": {
-    "prettier/prettier": ["error"]
+  "parser": "@typescript-eslint/parser",
+  "extends": ["plugin:adonis/typescriptApp", "prettier"],
+  "plugins": ["prettier", "jsdoc", "import"],
+  "parserOptions": {
+    "ecmaVersion": 2018, // Allows for the parsing of modern ECMAScript features
+    "sourceType": "module", // Allows for the use of imports
+    "ecmaFeatures": {
+      "jsx": true // Allows for the parsing of JSX
+    }
+  },
+  "rules":  {
+    "eqeqeq": "error",
+    "jsdoc/require-jsdoc": [
+      2,
+      {
+        "require": {
+          "FunctionDeclaration": true,
+          "MethodDefinition": true,
+          "ClassDeclaration": false,
+          "ArrowFunctionExpression": true,
+          "FunctionExpression": true
+        }
+      }
+    ],
+    "camelcase": "error",
+    "jsdoc/require-description": 2,
+    "jsdoc/check-alignment": 1,
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
+  },
+  "settings": {
+    "jsdoc": {
+      "mode": "typescript"
+    }
   }
 }

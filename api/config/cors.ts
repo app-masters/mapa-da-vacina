@@ -5,7 +5,7 @@
  * file.
  */
 
-import { CorsConfig } from '@ioc:Adonis/Core/Cors'
+import { CorsConfig } from '@ioc:Adonis/Core/Cors';
 
 const corsConfig: CorsConfig = {
   /*
@@ -97,14 +97,7 @@ const corsConfig: CorsConfig = {
   | https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers
   |
   */
-  exposeHeaders: [
-    'cache-control',
-    'content-language',
-    'content-type',
-    'expires',
-    'last-modified',
-    'pragma',
-  ],
+  exposeHeaders: ['cache-control', 'content-language', 'content-type', 'expires', 'last-modified', 'pragma'],
 
   /*
   |--------------------------------------------------------------------------
@@ -128,7 +121,7 @@ const corsConfig: CorsConfig = {
   | https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age
   |
   */
-  maxAge: 90,
-}
+  maxAge: 90
+};
 
-export default corsConfig
+export default corsConfig;
