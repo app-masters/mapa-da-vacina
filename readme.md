@@ -14,7 +14,7 @@ Para rodar o backend é preciso:
 - Executar `yarn` para instalar as dependências
 - Executar `yarn dev`
 
-Neste momento o servidor local já deverá estar recebendo requisições. Acesse [http://0.0.0.0:3333/](http://0.0.0.0:3333/) ou [http://0.0.0.0:3333/health](http://0.0.0.0:3333/health) para confirmar o status do seu servidor local.
+Neste momento o servidor local já deverá estar recebendo requisições. Acesse [http://0.0.0.0:3333/](http://0.0.0.0:3333/) para confirmar o status do seu servidor local.
 
 
 ## Banco de dados
