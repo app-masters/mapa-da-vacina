@@ -19,4 +19,4 @@ Neste momento o servidor local já deverá estar recebendo requisições. Acesse
 
 ## Banco de dados
 
-Estamos usando o Firestore para amazenar as informações. visualizar o modelo do banco [aqui](https://dbdesigner.page.link/nSCPRWBXio6X8ZF3A).
+Estamos usando o Firestore para armazenar as informações.
