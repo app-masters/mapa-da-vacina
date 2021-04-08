@@ -1,0 +1,21 @@
+{
+  "private": true,
+  "engines": {
+    "node": ">=15"
+  },
+  "scripts": {
+    "checks": "lerna run checks",
+    "bootstrap": "lerna bootstrap"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lerna run checks",
+      "pre-push": "lerna run checks"
+    }
+  },
+  "name": "carers",
+  "dependencies": {}
+}
