@@ -1,6 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import PrefectureRepository from 'App/Models/Prefecture';
-import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
+import { getSlug } from 'App/Helpers';
 
 //import Prefecture from '@ioc:Adonis/Providers/Firebase';
 
@@ -18,9 +18,9 @@ export default class PrefecturesController {
    */
   public async store({ request, response }: HttpContextContract) {
     const body = request.post();
-    const pref = PrefectureRepository.save({
+    const pref = await PrefectureRepository.save({
       name: body.name,
-      slug: body.name
+      slug: getSlug(body.name)
     });
     response.send(pref);
   }
@@ -41,7 +41,7 @@ export default class PrefecturesController {
     const pref = PrefectureRepository.save({
       id: body.id,
       name: body.name,
-      slug: body.name
+      slug: getSlug(body.name)
     });
     response.send(pref);
   }
