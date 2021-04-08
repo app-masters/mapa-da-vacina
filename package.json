@@ -5,7 +5,8 @@
   },
   "scripts": {
     "checks": "lerna run checks",
-    "bootstrap": "lerna bootstrap"
+    "bootstrap": "lerna bootstrap",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "lerna": "^4.0.0"
@@ -17,5 +18,7 @@
     }
   },
   "name": "carers",
-  "dependencies": {}
+  "dependencies": {
+    "husky": "6"
+  }
 }
