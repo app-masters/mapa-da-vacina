@@ -1,5 +1,4 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application';
-import PrefectureRepository from 'App/Models/Prefecture';
 import Firebase from '.';
 
 /*

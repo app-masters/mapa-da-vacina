@@ -19,8 +19,8 @@
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
-    "./providers/Firebase/FirebaseProvider.ts",
-    "./providers/AwsProvider"
+    "./providers/Firebase/FirebaseProvider",
+    "./providers/Aws/AwsProvider"
   ],
   "aceProviders": [
     "@adonisjs/repl"

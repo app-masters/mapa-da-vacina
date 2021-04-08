@@ -1,4 +1,5 @@
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { ApplicationContract } from '@ioc:Adonis/Core/Application';
+import Aws from '.';
 
 /*
 |--------------------------------------------------------------------------
@@ -19,24 +20,29 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 | }
 |
 */
-export default class AwProvider {
-  public static needsApplication = true
-  constructor (protected application: ApplicationContract) {
-  }
+export default class AwsProvider {
+  public static needsApplication = true;
+  /**
+   * Constructor
+   * @param application
+   */
+  constructor(protected application: ApplicationContract) {}
 
-  public register () {
+  /**
+   * Register Aws
+   */
+  public register() {
     // Register your own bindings
+    this.application.container.singleton('Adonis/Providers/Aws', () => {
+      const Config = this.application.config;
+      return new Aws(Config);
+    });
   }
 
-  public async boot () {
-    // All bindings are ready, feel free to use them
-  }
-
-  public async ready () {
-    // App is ready
-  }
-
-  public async shutdown () {
+  /**
+   * Shutdown
+   */
+  public async shutdown() {
     // Cleanup, since app is going down
   }
 }
