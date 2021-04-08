@@ -1,4 +1,5 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application';
+import PrefectureRepository from 'App/Models/Prefecture';
 import Firebase from '.';
 
 /*
@@ -18,7 +19,6 @@ export default class FirebaseProvider {
    */
   public register() {
     // Register your own bindings
-
     this.application.container.singleton('Adonis/Providers/Firebase', () => {
       const Config = this.application.config;
       return new Firebase(Config);

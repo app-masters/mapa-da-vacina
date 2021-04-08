@@ -1,14 +1,11 @@
 declare module '@ioc:Adonis/Providers/Firebase' {
   import * as firebase from 'firebase-admin';
-
-  export interface FirebaseConfig {
-    credential: string;
-    databaseURL: string;
-  }
+  import { FirestoreStorage } from 'firestore-storage';
 
   export interface FirebaseInterface {
     app: firebase.app.App;
     db: firebase.firestore.Firestore;
+    storage: FirestoreStorage;
   }
 
   const FirebaseProvider: FirebaseInterface;

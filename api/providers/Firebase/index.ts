@@ -2,10 +2,12 @@ import { ConfigContract } from '@ioc:Adonis/Core/Config';
 import { FirebaseInterface } from '@ioc:Adonis/Providers/Firebase';
 
 import firebase from 'firebase-admin';
+import { FirestoreStorage } from 'firestore-storage';
 
 export default class Firebase implements FirebaseInterface {
   public app: firebase.app.App;
   public db: firebase.firestore.Firestore;
+  public storage: FirestoreStorage;
   /**
    * Constructor
    * @param Config
@@ -23,6 +25,7 @@ export default class Firebase implements FirebaseInterface {
         databaseURL: databaseURL
       });
       this.db = this.app.firestore();
+      this.storage = new FirestoreStorage(this.db);
     } else {
       console.log('Undefined Google Credentials');
     }

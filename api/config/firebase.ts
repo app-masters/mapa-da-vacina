@@ -1,5 +1,9 @@
 import Env from '@ioc:Adonis/Core/Env';
-import { FirebaseConfig } from '@ioc:Adonis/Providers/Firebase';
+
+interface FirebaseConfig {
+  credential: string;
+  databaseURL: string;
+}
 
 const firebaseConfig: FirebaseConfig = {
   credential: Env.get('GOOGLE_APPLICATION_CREDENTIALS') as string,
