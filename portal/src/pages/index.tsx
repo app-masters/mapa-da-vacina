@@ -1,15 +1,21 @@
-import { NextPage } from 'next';
+import { GetStaticProps, NextPage } from 'next';
+import HomeView from '../views/Home';
 
 /**
  * Home page
  * @params NextPage
  */
 const Home: NextPage = () => {
-  return (
-    <div>
-      <h1>Filometro Portal</h1>
-    </div>
-  );
+  return <HomeView />;
 };
+
+/**
+ * getStaticProps
+ */
+// export const getStaticProps: GetStaticProps = async (context) => {
+//   const res = await fetch('https://...');
+//   const data = await res.json();
+//   return { props: { data }, revalidate: 20 };
+// };
 
 export default Home;
