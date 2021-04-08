@@ -23,3 +23,9 @@ import Route from '@ioc:Adonis/Core/Route';
 Route.get('/', async () => {
   return { hello: 'world' };
 });
+
+// Prefecture
+Route.get('/prefectures', 'PrefecturesController.index');
+Route.post('/prefectures', 'PrefecturesController.store');
+Route.get('/prefectures/:id', 'PrefecturesController.show');
+Route.delete('/prefectures/:id', 'PrefecturesController.destroy');
