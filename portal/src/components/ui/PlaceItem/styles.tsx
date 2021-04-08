@@ -13,12 +13,12 @@ export const CardItemWrapper = styled(Row)`
   overflow: hidden;
 `;
 
-export const CardItemLeftContent = styled(Col)<ColProps & { backgroundColor: string }>`
+export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
   display: flex;
   flex-direction: column;
   padding: ${(props) => props.theme.spacing.sm};
   max-width: 120px;
-  background-color: ${(props) => props.backgroundColor || props.theme.colors.primary};
+  background-color: ${(props) => props.bgcolor || props.theme.colors.primary};
   justify-content: center;
   align-items: center;
   color: ${(props) => props.theme.colors.background};
