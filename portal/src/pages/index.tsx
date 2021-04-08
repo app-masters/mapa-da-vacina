@@ -1,15 +1,12 @@
 import { NextPage } from 'next';
+import HomeView from '../views/Home';
 
 /**
  * Home page
  * @params NextPage
  */
 const Home: NextPage = () => {
-  return (
-    <div>
-      <h1>Filometro Portal</h1>
-    </div>
-  );
+  return <HomeView />;
 };
 
 export default Home;
