@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 import { Card } from 'antd';
 import { CardProps } from 'antd/lib/card';
-import { CardItem } from '../../../lib/CardItem';
 import { InputStyled } from '../../ui/Input/styles';
+import { Place } from '../../../lib/Place';
 
-export type CardListTemplateProps = CardProps & { data: CardItem[] };
+export type PlaceListTemplateProps = CardProps & { data: Place[]; header?: React.ReactNode };
 
-export const CardListWrapper = styled(Card)`
+export const PlaceListWrapper = styled(Card)`
   .ant-card-head-title {
     font-size: 32px;
     font-weight: 700;
@@ -40,7 +40,7 @@ export const ButtonIconWrapper = styled.div<{ active?: boolean }>`
   }
 `;
 
-export const CardListSearchWrapper = styled.div`
+export const PlaceListSearchWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   color: ${(props) => props.theme.colors.background};

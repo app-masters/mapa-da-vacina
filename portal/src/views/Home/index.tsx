@@ -2,14 +2,15 @@ import { HomeWrapper, HomeHeaderWrapper, HomeContentWrapper, HomeFooterWrapper }
 import Image from 'next/image';
 import Card from '../../components/ui/Card';
 import { Space } from 'antd';
-import CardList from '../../components/elements/CardList';
+import PlaceList from '../../components/elements/PlaceList';
 import Button from '../../components/ui/Button';
 import Github from '../../components/ui/Icons/Github';
+import { Prefectures } from '../../lib/Prefectures';
 
 /**
  * CardItem
  */
-const Home: React.FC = () => {
+const Home: React.FC<{ data: Prefectures }> = ({ data }) => {
   return (
     <HomeWrapper>
       <div className="page-body">
@@ -19,12 +20,15 @@ const Home: React.FC = () => {
         </HomeHeaderWrapper>
         <HomeContentWrapper>
           <Space size="large" wrap>
-            <Card value={32} description="Pontos de vacinação na cidade" />
-            <Card value={13} description="Pontos de vacinação abertos agora" />
+            <Card value={!data.places ? 0 : data.places.length} description="Pontos de vacinação na cidade" />
+            <Card
+              value={!data.places ? 0 : data.places.filter((f) => f.open).length}
+              description="Pontos de vacinação abertos agora"
+            />
           </Space>
         </HomeContentWrapper>
         <HomeContentWrapper>
-          <CardList />
+          <PlaceList places={data.places || []} />
         </HomeContentWrapper>
       </div>
       <HomeFooterWrapper>
