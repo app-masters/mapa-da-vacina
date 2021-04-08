@@ -4,6 +4,11 @@ import styled from 'styled-components';
 export const HomeWrapper = styled(Layout)`
   min-height: 100vh;
   background: url('/images/background.png') !important;
+  .page-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
 `;
 
 export const HomeHeaderWrapper = styled.div`

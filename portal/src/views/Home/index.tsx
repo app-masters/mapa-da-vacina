@@ -12,19 +12,21 @@ import Github from '../../components/ui/Icons/Github';
 const Home: React.FC = () => {
   return (
     <HomeWrapper>
-      <HomeHeaderWrapper>
-        <Image src={'/images/logo-app.png'} width={230} height={80} />
-        <Image src={'/images/logo-jf.png'} width={140} height={80} />
-      </HomeHeaderWrapper>
-      <HomeContentWrapper>
-        <Space size="large" wrap>
-          <Card value={32} description="Pontos de vacinação na cidade" />
-          <Card value={13} description="Pontos de vacinação abertos agora" />
-        </Space>
-      </HomeContentWrapper>
-      <HomeContentWrapper>
-        <CardList />
-      </HomeContentWrapper>
+      <div className="page-body">
+        <HomeHeaderWrapper>
+          <Image src={'/images/logo-app.png'} width={230} height={80} />
+          <Image src={'/images/logo-jf.png'} width={140} height={80} />
+        </HomeHeaderWrapper>
+        <HomeContentWrapper>
+          <Space size="large" wrap>
+            <Card value={32} description="Pontos de vacinação na cidade" />
+            <Card value={13} description="Pontos de vacinação abertos agora" />
+          </Space>
+        </HomeContentWrapper>
+        <HomeContentWrapper>
+          <CardList />
+        </HomeContentWrapper>
+      </div>
       <HomeFooterWrapper>
         <div>
           <Button type="outline">Criar filometro pra minha prefeitura</Button>
@@ -34,7 +36,7 @@ const Home: React.FC = () => {
           </a>
           <a className="appmasters-a" href="http://appmasters.io/pt" target="_blank" rel="noreferrer">
             Desenvolvido pela
-            <Image src={'/images/appmasters-logo.png'} width={130} height={30} />
+            <Image src={'/images/appmasters-logo.png'} width={130} height={25} />
           </a>
         </div>
       </HomeFooterWrapper>
