@@ -9,6 +9,7 @@
     "prepare": "husky install"
   },
   "devDependencies": {
+    "husky": "^4.3.0",
     "lerna": "^4.0.0"
   },
   "husky": {
@@ -17,8 +18,5 @@
       "pre-push": "lerna run checks"
     }
   },
-  "name": "carers",
-  "dependencies": {
-    "husky": "6"
-  }
+  "name": "carers"
 }
