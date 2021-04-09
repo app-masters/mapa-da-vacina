@@ -9,9 +9,11 @@ export interface UserType extends BaseModel {
   invitedAt?: Date;
   signedUpAt?: Date;
   active: boolean;
+  placeId?: string;
+  prefectureId?: string;
 }
 
-export class UserRepository extends BaseRepository<UserType> {
+class UserRepository extends BaseRepository<UserType> {
   private static instance: UserRepository;
 
   /**
