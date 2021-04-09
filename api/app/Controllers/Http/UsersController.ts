@@ -74,7 +74,7 @@ export default class UsersController {
       }
 
       // if it wasn't a user, try and admin
-      const admin = await Admin.get({ phone: data.phone });
+      const admin = await Admin.find({ phone: data.phone });
       if (admin) return response.status(200).send(admin);
 
       // if coudn't find any user
