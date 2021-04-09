@@ -2,6 +2,10 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 export default class UserValidator {
+  /**
+   * Construtor
+   * @param ctx
+   */
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -24,11 +28,11 @@ export default class UserValidator {
    *    ```
    */
   public schema = schema.create({
-    phone: schema.string({}, [rules.mobile()]),
-    name: schema.string(),
-    role: schema.string(),
+    phone: schema.string({}, [rules.phone()]),
+    name: schema.string({}, [rules.nameSurname()]),
+    role: schema.enum(['prefectureAdmin', 'placeAdmin', 'queueObserver', 'superAdmin'] as const),
     prefectureId: schema.string(),
-    placeId: schema.string()
+    placeId: schema.string.optional({}, [rules.requiredWhen('role', 'in', ['placeAdmin', 'queueObserver'])])
   });
 
   /**
@@ -42,5 +46,9 @@ export default class UserValidator {
    * }
    *
    */
-  public messages = {};
+  public messages = {
+    required: '{{ field }} é obrigatório para o convite.',
+    enum: 'O campo {{ field }} deve ser um dentre {{ options.choices }}.',
+    requiredWhen: 'O valor {{ field }} é necessário quando {{ options.otherField }} é {{ options.value }}.'
+  };
 }
