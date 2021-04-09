@@ -34,6 +34,7 @@
     "@adonisjs/repl": "^1.0.0",
     "firebase-admin": "^9.6.0",
     "firestore-storage": "^4.3.1",
+    "libphonenumber-js": "^1.9.16",
     "proxy-addr": "^2.0.6",
     "reflect-metadata": "^0.1.13",
     "slugify": "^1.5.0",
