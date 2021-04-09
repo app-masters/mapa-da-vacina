@@ -1,4 +1,4 @@
-import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
+import { BaseRepository, BaseModel } from 'firestore-storage';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import PlaceRepository, { PlaceType } from './Place';

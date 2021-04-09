@@ -6,7 +6,7 @@ export interface AdminType extends BaseModel {
   phone: string;
   role: string;
   name: string;
-  active: boolean;
+  uid?: string;
 }
 
 class AdminRepository extends BaseRepository<AdminType> {

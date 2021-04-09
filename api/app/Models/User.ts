@@ -6,11 +6,12 @@ export interface UserType extends BaseModel {
   phone: string;
   role: string;
   name: string;
+  active: boolean;
+  prefectureId: string;
   invitedAt?: Date;
   signedUpAt?: Date;
-  active: boolean;
   placeId?: string;
-  prefectureId?: string;
+  uid?: string;
 }
 
 class UserRepository extends BaseRepository<UserType> {
