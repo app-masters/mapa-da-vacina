@@ -28,7 +28,7 @@ validator.rule('phone', (value, _, { pointer, arrayExpressionPointer, errorRepor
   mutate(normalized);
 });
 
-validator.rule('nameSurname', (value, _, { pointer, arrayExpressionPointer, errorReporter, mutate }) => {
+validator.rule('nameSurname', (value, _, { mutate }) => {
   /**
    * Skip validation when value is not a string. The string
    * schema rule will handle it
