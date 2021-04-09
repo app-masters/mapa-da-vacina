@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p $PORT",
     "check-prettier": "prettier --write \"src/**/*.{js,ts,tsx}\"",
     "check-lint": "eslint \"{src,cypress}/**/*.{js,ts,tsx}\" --max-warnings 0",
     "check-typescript": "tsc --noEmit",
