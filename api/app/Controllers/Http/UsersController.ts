@@ -68,8 +68,8 @@ export default class UsersController {
           user.active = true;
           await UserRepository.save(user, user.prefectureId);
         }
-        const prefecture = Prefecture.findById(user.prefectureId);
-        const place = user.placeId ? Prefecture.findById(user.placeId) : undefined;
+        const prefecture = await Prefecture.findById(user.prefectureId);
+        const place = user.placeId ? await Place.findById(user.prefectureId, user.placeId) : undefined;
         return response.status(200).send({ user, prefecture, place });
       }
 
