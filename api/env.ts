@@ -21,5 +21,9 @@ export default Env.rules({
   APP_NAME: Env.schema.string(),
   NODE_ENV: Env.schema.enum(['development', 'production', 'testing'] as const),
   GOOGLE_APPLICATION_CREDENTIALS: Env.schema.string(),
-  GOOGLE_DATABASE_URL: Env.schema.string()
+  GOOGLE_DATABASE_URL: Env.schema.string(),
+  AWS_ACCESS_KEY: Env.schema.string(),
+  AWS_SECRET_ACCESS_KEY: Env.schema.string(),
+  AWS_REGION: Env.schema.string(),
+  AWS_DEV_PHONE: Env.schema.string()
 });
