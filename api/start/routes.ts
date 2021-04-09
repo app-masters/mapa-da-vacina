@@ -29,3 +29,6 @@ Route.get('/prefectures', 'PrefecturesController.index');
 Route.post('/prefectures', 'PrefecturesController.store');
 Route.get('/prefectures/:id', 'PrefecturesController.show');
 Route.delete('/prefectures/:id', 'PrefecturesController.destroy');
+
+// User
+Route.post('/invite', 'UsersController.invite');
