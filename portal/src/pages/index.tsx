@@ -14,8 +14,9 @@ const Home: NextPage<{ data: Prefectures }> = ({ data }) => {
  * getStaticProps
  */
 export const getStaticProps: GetStaticProps = async () => {
-  const res = await fetch('http://localhost:3333/prefectures/7zsx4B9x6bi3hPXKJAUw');
-  const data = await res.json();
+  //const res = await fetch('http://localhost:3333/prefectures/7zsx4B9x6bi3hPXKJAUw');
+  //await res.json();
+  const data = {};
   return { props: { data }, revalidate: 60 };
 };
 
