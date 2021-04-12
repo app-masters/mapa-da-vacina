@@ -32,7 +32,7 @@ Route.delete('/prefectures/:id', 'PrefecturesController.destroy');
 
 // User
 Route.post('/invite', 'UsersController.invite').middleware(['auth']);
-Route.post('/validate-user', 'UsersController.validate');
+Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 
 //Test
 Route.get('/test/sms', 'TestController.testSms');

@@ -4,6 +4,7 @@ import { errorFactory } from 'App/Exceptions/ErrorFactory';
 
 export interface QueueUpdateType extends BaseModel {
   userId: string;
+  placeId: string;
   queueStatus: string;
   queueUpdatedAt: Date;
 }
