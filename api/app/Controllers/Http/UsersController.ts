@@ -56,7 +56,7 @@ export default class UsersController {
       const prefecture = await Prefecture.getById(data.prefectureId);
       let placeTitle: string = '';
       if (newUser.role === 'placeAdmin' && data.placeId) {
-        placeTitle = await (await Place.getById(data.placeId, data.prefectureId)).title;
+        placeTitle = await (await Place.getById(data.prefectureId, data.placeId)).title;
       }
       await SmsMessages.sendInviteSms(newUser, prefecture.name, placeTitle);
 
