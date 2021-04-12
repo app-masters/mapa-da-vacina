@@ -14,12 +14,19 @@
   },
   "preloads": [
     "./start/routes",
-    "./start/kernel"
+    "./start/kernel",
+    {
+      "file": "./start/validationRules",
+      "environment": [
+        "web"
+      ]
+    }
   ],
   "providers": [
     "./providers/AppProvider",
     "@adonisjs/core",
-    "./providers/Firebase/FirebaseProvider.ts"
+    "./providers/Firebase/FirebaseProvider",
+    "./providers/Aws/AwsProvider"
   ],
   "aceProviders": [
     "@adonisjs/repl"

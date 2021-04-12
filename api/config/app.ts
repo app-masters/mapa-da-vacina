@@ -27,6 +27,10 @@ import { ValidatorConfig } from '@ioc:Adonis/Core/Validator';
 */
 export const appKey: string = Env.get('APP_KEY');
 
+export const nodeEnv: string = Env.get('NODE_ENV');
+
+export const urlFrontAdmin: string = Env.get('URL_FRONT_ADMIN');
+
 /*
 |--------------------------------------------------------------------------
 | Http server configuration
