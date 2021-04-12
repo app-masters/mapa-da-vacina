@@ -6,7 +6,7 @@ import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import UserRepository, { UserType } from 'App/Models/User';
 import Prefecture from 'App/Models/Prefecture';
 import Place from 'App/Models/Place';
-import Admin from 'App/Models/Admin';
+import Admin, { AdminType } from 'App/Models/Admin';
 
 // Validators
 import UserValidator from 'App/Validators/UserValidator';
@@ -24,7 +24,21 @@ export default class UsersController {
       const data = await request.validate(UserValidator);
       if (!request.decodedIdToken) throw new Error('Usuário deve estar autenticado.');
 
-      const admin = await Admin.get({ phone: request.decodedIdToken.phone_number });
+      let admin: UserType | AdminType;
+      const user = await UserRepository.find({ phone: request.decodedIdToken.phone_number }, data.prefectureId);
+
+      if (user) {
+        admin = user;
+      } else {
+        const userAdmin = await Admin.find({ phone: request.decodedIdToken.phone_number });
+        if (userAdmin) {
+          admin = userAdmin;
+        } else {
+          throw new Error('Usuário não encontrado.');
+        }
+      }
+
+      // const admin = await Admin.get({ phone: request.decodedIdToken.phone_number });
 
       if (
         (admin.role === 'superAdmin' && data.role !== 'prefectureAdmin') ||
