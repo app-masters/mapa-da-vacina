@@ -26,11 +26,19 @@ export const styleBreakpoints: BreakpointsList = {
 };
 
 export type ColorsList = {
+  primary: string;
   background: string;
+  white: string;
+  gray: string;
+  darkGray: string;
 };
 
 export const colors: ColorsList = {
-  background: '#f0f2f5'
+  primary: '#2980b9',
+  background: '#f0f2f5',
+  white: '#FFFFFF',
+  gray: '#333333',
+  darkGray: '#747474'
 };
 
 export type SpacingList = {

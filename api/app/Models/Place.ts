@@ -4,6 +4,7 @@ import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import AgendaRepository, { AgendaType } from './Agenda';
 
 export interface PlaceType extends BaseModel {
+  prefectureId: string;
   title: string;
   internalTitle: string;
   addressStreet: string;
