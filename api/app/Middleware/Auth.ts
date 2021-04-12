@@ -17,9 +17,14 @@ export default class Auth {
       if (!idToken) return response.status(401).send({ message: 'Usuário não autorizado.' });
 
       const decodedToken = await FirebaseProvider.app.auth().verifyIdToken(idToken);
-      console.log('decodedToken', JSON.stringify(decodedToken));
-      const phone = decodedToken.phone_number;
+      if (!decodedToken.uid) {
+        return response.status(401).send({ message: 'Usuário não encontrado.' });
+      }
 
+      console.log('decodedToken', JSON.stringify(decodedToken));
+      request.decodedIdToken = decodedToken;
+
+      /*const phone = decodedToken.phone_number;
       // then checks for our user in Firestore matching any user with the phone
       const userSnapshot = await FirebaseProvider.db.collectionGroup('user').where('phone', '==', phone).limit(1).get();
       if (userSnapshot.docs.length > 0) {
@@ -34,7 +39,7 @@ export default class Auth {
 
       if (!request.user) {
         return response.status(401).send({ message: 'Usuário não encontrado.' });
-      }
+      }*/
       // code for middleware goes here. ABOVE THE NEXT CALL
       await next();
     } catch (err) {

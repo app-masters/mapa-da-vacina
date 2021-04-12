@@ -24,7 +24,7 @@ validator.rule('phone', (value, _, { pointer, arrayExpressionPointer, errorRepor
     return;
   }
 
-  const normalized = phoneNumber.nationalNumber;
+  const normalized = phoneNumber.number;
   mutate(normalized);
 });
 

@@ -1,12 +1,20 @@
+// IoC
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
-import UserValidator from 'App/Validators/UserValidator';
-import ValidateValidator from 'App/Validators/ValidateValidator';
+import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
+
+// Repositories
 import UserRepository, { UserType } from 'App/Models/User';
-import SmsMessages from 'App/Models/Messages/SmsMessages';
 import Prefecture from 'App/Models/Prefecture';
 import Place from 'App/Models/Place';
-import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import Admin from 'App/Models/Admin';
+
+// Validators
+import UserValidator from 'App/Validators/UserValidator';
+import ValidateValidator from 'App/Validators/ValidateValidator';
+
+// Resources
+import SmsMessages from 'App/Models/Messages/SmsMessages';
+
 export default class UsersController {
   /**
    * Invite a new user
@@ -14,9 +22,9 @@ export default class UsersController {
   public async invite({ request, response }: HttpContextContract) {
     try {
       const data = await request.validate(UserValidator);
+      if (!request.decodedIdToken) throw new Error('Usuário deve estar autenticado.');
 
-      const admin = request.user;
-      if (!admin) throw new Error('Erro ao obter usuário registrado.');
+      const admin = await Admin.get({ phone: request.decodedIdToken.phone_number });
 
       if (
         (admin.role === 'superAdmin' && data.role !== 'prefectureAdmin') ||
@@ -50,6 +58,9 @@ export default class UsersController {
   public async validate({ request, response }: HttpContextContract) {
     try {
       const data = await request.validate(ValidateValidator);
+      if (!request.decodedIdToken) throw new Error('Usuário deve estar autenticado.');
+
+      const userToken = request.decodedIdToken;
 
       // checks for our user in Firestore matching any user with the phone
       const userSnapshot = await FirebaseProvider.db
@@ -60,7 +71,7 @@ export default class UsersController {
 
       if (userSnapshot.docs.length > 0) {
         const user = userSnapshot.docs[0].data() as UserType;
-        console.log('user', user);
+        user.id = userSnapshot.docs[0].id;
         // first sign in
         if (!user.uid && !user.signedUpAt) {
           user.uid = data.uid;
@@ -70,6 +81,14 @@ export default class UsersController {
         }
         const prefecture = await Prefecture.findById(user.prefectureId);
         const place = user.placeId ? await Place.findById(user.prefectureId, user.placeId) : undefined;
+
+        // Set custom claims in firebase auth
+        await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
+          role: user.role,
+          prefectureId: user.prefectureId,
+          placeId: user.placeId
+        });
+
         return response.status(200).send({ user, prefecture, place });
       }
 
