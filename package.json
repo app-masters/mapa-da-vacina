@@ -5,11 +5,10 @@
   },
   "scripts": {
     "checks": "lerna run checks",
-    "bootstrap": "lerna bootstrap",
-    "prepare": "husky install"
+    "bootstrap": "lerna bootstrap"
   },
   "devDependencies": {
-    "husky": "^6.0.0",
+    "husky": "^4.3.0",
     "lerna": "^4.0.0"
   },
   "husky": {
