@@ -25,10 +25,11 @@ Route.get('/', async () => {
 });
 
 // Prefecture
-Route.get('/prefectures', 'PrefecturesController.index');
-Route.post('/prefectures', 'PrefecturesController.store');
-Route.get('/prefectures/:id', 'PrefecturesController.show');
-Route.delete('/prefectures/:id', 'PrefecturesController.destroy');
+Route.get('/prefecture', 'PrefecturesController.index');
+Route.post('/prefecture', 'PrefecturesController.store');
+Route.get('/prefecture/:id', 'PrefecturesController.show');
+Route.delete('/prefecture/:id', 'PrefecturesController.destroy');
+Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 
 // User
 Route.post('/invite', 'UsersController.invite').middleware(['auth']);

@@ -6,29 +6,22 @@ import PlaceRepository, { PlaceType } from './Place';
 export interface PrefectureType extends BaseModel {
   name: string;
   slug: string;
+  city: string;
+  state: string;
+  numPlaces: number;
+  numPlacesOpen: number;
+  active: boolean;
   places?: PlaceType[];
 }
 
 class PrefectureRepository extends BaseRepository<PrefectureType> {
   private static instance: PrefectureRepository;
-  //public prefectures: PrefectureType[];
 
   /**
    * Construtor
    */
   constructor() {
-    console.log('INIT');
-
     super(FirebaseProvider.storage, errorFactory);
-    /*FirebaseProvider.db.collection('prefecture').onSnapshot(
-      (docSnapshot) => {
-        console.log(`Received doc snapshot`);
-        this.prefectures = docSnapshot.docs.map((d) => d.data() as PrefectureType);
-      },
-      (err) => {
-        console.log(`Encountered error: ${err}`);
-      }
-    );*/
   }
 
   /**

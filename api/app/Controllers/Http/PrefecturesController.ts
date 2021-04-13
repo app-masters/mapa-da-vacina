@@ -9,7 +9,17 @@ export default class PrefecturesController {
    * Index
    */
   public async index({ response }: HttpContextContract) {
-    const prefectures = await PrefectureRepository.list({});
+    const prefectures = await PrefectureRepository.list();
+    response.send(prefectures);
+  }
+
+  /**
+   * List Active prefectures
+   */
+  public async listActive({ response }: HttpContextContract) {
+    const prefectures = await PrefectureRepository.query((qb) => {
+      return qb.where('active', '==', true).orderBy('city', 'asc');
+    });
     response.send(prefectures);
   }
 
@@ -20,7 +30,12 @@ export default class PrefecturesController {
     const body = request.post();
     const pref = await PrefectureRepository.save({
       name: body.name,
-      slug: getSlug(body.name)
+      slug: getSlug(body.name),
+      city: body.city,
+      state: body.state,
+      numPlaces: 0,
+      numPlacesOpen: 0,
+      active: true
     });
     response.send(pref);
   }
