@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "check-prettier": "prettier --write \"src/**/*.{js,ts,tsx}\"",
+    "check-prettier": "prettier-check \"{src,cypress}/**/*.{js,ts,tsx}\"",
     "check-lint": "eslint \"src/**/*.{js,ts,tsx}\" --max-warnings 0",
     "check-typescript": "tsc --noEmit",
     "checks": "yarn run check-lint && yarn run check-prettier && yarn run check-typescript",
