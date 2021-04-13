@@ -10,10 +10,11 @@ export interface PlaceType extends BaseModel {
   addressStreet: string;
   addressDistrict: string;
   addressCityState: string;
+  addressZip: string;
   googleMapsUrl: string;
   type: string;
   open: boolean;
-  queueStatus: boolean;
+  queueStatus: string;
   queueUpdatedAt: Date;
   agendas?: AgendaType[];
 }
