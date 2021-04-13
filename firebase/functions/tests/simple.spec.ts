@@ -3,7 +3,7 @@ import * as firebase from "@firebase/testing";
 
 const PROJECT_ID = "filometro-dev-3d";
 
-const getFirestore = (auth) => {
+const getFirestore = (auth: Record<string, unknown>) => {
   return firebase
     .initializeTestApp({ projectId: PROJECT_ID, auth: auth })
     .firestore();
