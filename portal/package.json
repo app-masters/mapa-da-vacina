@@ -9,7 +9,7 @@
     "check-prettier": "prettier --write \"src/**/*.{js,ts,tsx}\"",
     "check-lint": "eslint \"{src,cypress}/**/*.{js,ts,tsx}\" --max-warnings 0",
     "check-typescript": "tsc --noEmit",
-    "checks": "yarn run check-lint && yarn run check-prettier && yarn run check-typescript"
+    "checks": "yarn run check-lint && yarn run check-prettier && yarn run check-typescript && yarn check --integrity"
   },
   "dependencies": {
     "antd": "^4.15.0",
