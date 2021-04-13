@@ -9,6 +9,6 @@ export type User = {
   prefectureId?: string;
   placeId?: string;
   active: boolean;
-  signedUpAt?: Date | string | { seconds?: number; nanoseconds?: number };
-  invitedAt?: Date | string | { seconds?: number; nanoseconds?: number };
+  signedUpAt?: { seconds?: number };
+  invitedAt?: { seconds?: number };
 };

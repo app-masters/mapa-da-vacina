@@ -30,11 +30,9 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
   prefectures,
   places,
   userRole,
-  userPrefecture,
-  userPlace
+  userPrefecture
 }) => {
   const [selectedRole, setSelectedRole] = React.useState<string>(undefined);
-  const [selectedPrefecture, setSelectedPrefecture] = React.useState<string>(undefined);
 
   /**
    * closeModal
@@ -42,7 +40,6 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
   const closeModal = () => {
     setOpen(false);
     setSelectedRole(undefined);
-    setSelectedPrefecture(undefined);
   };
 
   const selectOptions: { label: string; value: string }[] = React.useMemo(() => {
@@ -67,19 +64,12 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
   }, [userRole]);
 
   const selectPrefectures: { label: string; value: string }[] = React.useMemo(() => {
-    return prefectures.map((pref) => ({ label: pref.name, value: pref.id }));
+    return (prefectures || []).map((i) => ({ label: i.name, value: i.id }));
   }, [prefectures]);
 
   const selectPlaces: { label: string; value: string }[] = React.useMemo(() => {
-    let listOfPlaces: Place[] = [];
-    if (!selectedPrefecture) return [];
-    if (userRole === userRoles.superAdmin) {
-      listOfPlaces = places.filter((f) => f.prefectureId === selectedPrefecture);
-    } else {
-      listOfPlaces = places.filter((f) => f.id === userPlace);
-    }
-    return (listOfPlaces || []).map((i) => ({ value: i.id, label: i.title }));
-  }, [selectedPrefecture, userRole, places, userPlace]);
+    return (places || []).map((i) => ({ value: i.id, label: i.title }));
+  }, [places]);
 
   return (
     <ModalWrapper visible={open} destroyOnClose onCancel={closeModal} footer={null}>
@@ -108,9 +98,10 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
             <Form.Item
               label="Prefeitura"
               name="prefectureId"
+              initialValue={prefectures[0].id}
               rules={[{ required: true, message: 'Por favor informe uma prefeitura' }]}
             >
-              <Select disabled={loading} onChange={(value) => setSelectedPrefecture(value as string)}>
+              <Select disabled={loading}>
                 {selectPrefectures
                   .filter((f) => (userRole === userRoles.superAdmin ? true : f.value === userPrefecture))
                   .map((option) => (
@@ -124,13 +115,11 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
           {selectedRole === userRoles.placeAdmin && (
             <Form.Item label="Local" name="placeId" rules={[{ required: true, message: 'Por favor informe um local' }]}>
               <Select disabled={loading}>
-                {!selectedPrefecture
-                  ? null
-                  : (selectPlaces || []).map((option) => (
-                      <Select.Option key={option.value} value={option.value}>
-                        {option.label}
-                      </Select.Option>
-                    ))}
+                {(selectPlaces || []).map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
               </Select>
             </Form.Item>
           )}

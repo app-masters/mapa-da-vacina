@@ -1,11 +1,11 @@
 import Layout from '../../layout';
-import { ContainerWrapper, Section } from './styles';
-import { Table, Popconfirm, Typography } from 'antd';
+import { TableWrapper, Section } from './styles';
+import { Popconfirm, Typography, Collapse } from 'antd';
 import Button from '../../components/ui/Button';
 import React from 'react';
 import FormInvitation from '../../components/elements/FormInvitation';
 import { User } from '../../lib/User';
-import { userRoles, userRolesLabel, userRoleType } from '../../utils/constraints';
+import { userRoles, userRolesLabel } from '../../utils/constraints';
 import { disableUser } from '../../utils/firestore';
 import { Prefecture } from '../../lib/Prefecture';
 import { Place } from '../../lib/Place';
@@ -14,13 +14,13 @@ type UsersViewProps = {
   users: User[];
   prefectures: Prefecture[];
   places: Place[];
-  userRole: userRoleType;
+  user: User;
 };
 
 /**
  * Users page
  */
-const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, userRole }) => {
+const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user }) => {
   /**
    * handleDisableUser
    */
@@ -48,18 +48,18 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, userRole 
          */
         render: (text) => <a>{userRolesLabel[text]}</a>
       },
-      {
-        title: 'Prefeitura',
-        dataIndex: 'prefectureId',
-        key: 'prefectureId',
-        /**
-         * render
-         */
-        render: (text) => {
-          const prefecture = prefectures.find((f) => f.id === text);
-          return <a>{prefecture?.name}</a>;
-        }
-      },
+      // {
+      //   title: 'Prefeitura',
+      //   dataIndex: 'prefectureId',
+      //   key: 'prefectureId',
+      //   /**
+      //    * render
+      //    */
+      //   render: (text) => {
+      //     const prefecture = prefectures.find((f) => f.id === text);
+      //     return <a>{prefecture?.name}</a>;
+      //   }
+      // },
       {
         title: 'Local',
         dataIndex: 'placeId',
@@ -79,7 +79,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, userRole 
         /**
          * render
          */
-        render: (_, record: User) => <a>{new Date(record.invitedAt as string).toLocaleDateString('pt-br')}</a>
+        render: (_, record: User) => <a>{new Date(record.invitedAt?.seconds * 1000).toLocaleDateString('pt-br')}</a>
       },
       {
         title: '',
@@ -106,38 +106,82 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, userRole 
       }
     ];
 
-    if (userRole !== userRoles.superAdmin) {
+    if (user.role !== userRoles.superAdmin) {
       dataColumns = dataColumns.filter((f) => f.key !== 'prefectureId');
     }
 
     return dataColumns;
-  }, [handleDisableUser, userRole, prefectures, places]);
+  }, [handleDisableUser, user.role, places]);
 
   const listUsers = React.useMemo(() => {
-    return (users || []).map((user) => ({ key: user.id, ...user }));
+    return (users || [])
+      .map((user) => ({ key: user.id, ...user }))
+      .filter((f) => f.role !== userRoles.superAdmin)
+      .sort((a, b) => b.invitedAt?.seconds - a.invitedAt?.seconds);
+  }, [users]);
+
+  const superAdmin = React.useMemo(() => {
+    return (users || []).map((user) => ({ key: user.id, ...user })).filter((f) => f.role === userRoles.superAdmin);
   }, [users]);
 
   return (
-    <Layout userRole={userRole}>
-      <ContainerWrapper>
-        <Table
-          pagination={false}
-          columns={columns.filter((f) => f.key !== 'invitedAt')}
-          dataSource={listUsers.filter((f) => f.active)}
-        />
-      </ContainerWrapper>
+    <Layout userRole={user.role}>
       <Section>
-        <div>
-          <Typography.Title level={3}>Convites enviados</Typography.Title>
-          <FormInvitation prefectures={prefectures} places={places} />
-        </div>
-        <ContainerWrapper>
-          <Table
-            pagination={false}
-            columns={columns.filter((f) => f.key !== 'action')}
-            dataSource={listUsers.filter((f) => !f.signedUpAt)}
-          />
-        </ContainerWrapper>
+        {user.role === userRoles.superAdmin && (
+          <Collapse style={{ marginBottom: 16 }}>
+            <Collapse.Panel
+              key={'superAdmin'}
+              header={<Typography.Title level={4}>{'Super Administradores'}</Typography.Title>}
+            >
+              <TableWrapper
+                pagination={false}
+                columns={columns.filter((f) => f.key !== 'invitedAt')}
+                locale={{ emptyText: 'Nenhum dado' }}
+                dataSource={superAdmin}
+              />
+              <div className="subtitle-container">
+                <Typography.Title level={4}>Convites enviados</Typography.Title>
+              </div>
+              <TableWrapper
+                pagination={false}
+                columns={columns.filter((f) => f.key !== 'action')}
+                locale={{ emptyText: 'Nenhum dado' }}
+                dataSource={superAdmin.filter((f) => !f.signedUpAt)}
+              />
+            </Collapse.Panel>
+          </Collapse>
+        )}
+        {prefectures && prefectures.length > 0 && (
+          <Collapse defaultActiveKey={[prefectures[0]?.id]}>
+            {prefectures.map((prefecture) => (
+              <Collapse.Panel
+                key={prefecture.id}
+                header={<Typography.Title level={4}>{prefecture.name || prefecture.slug}</Typography.Title>}
+              >
+                <TableWrapper
+                  pagination={false}
+                  columns={columns.filter((f) => f.key !== 'invitedAt')}
+                  locale={{ emptyText: 'Nenhum dado' }}
+                  dataSource={listUsers.filter((f) => f.active && f.prefectureId === prefecture.id)}
+                />
+                <div className="subtitle-container">
+                  <Typography.Title level={4}>Convidar Usuários</Typography.Title>
+                  <FormInvitation
+                    prefectures={[prefecture]}
+                    places={places.filter((f) => f.prefectureId === prefecture.id)}
+                    user={user}
+                  />
+                </div>
+                <TableWrapper
+                  pagination={false}
+                  columns={columns.filter((f) => f.key !== 'action')}
+                  locale={{ emptyText: 'Nenhum dado' }}
+                  dataSource={listUsers.filter((f) => !f.signedUpAt && f.prefectureId === prefecture.id)}
+                />
+              </Collapse.Panel>
+            ))}
+          </Collapse>
+        )}
       </Section>
     </Layout>
   );
