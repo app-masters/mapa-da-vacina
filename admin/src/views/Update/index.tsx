@@ -4,22 +4,22 @@ import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
-import { userRoleType, placeQueueStatusType, userRoles } from '../../utils/constraints';
+import { userRoleType, placeQueueStatusType } from '../../utils/constraints';
 import { createQueueUpdate, updatePlace } from '../../utils/firestore';
 import { placeQueue } from '../../utils/constraints';
 
-type DashboardViewProps = {
+type UpdateViewProps = {
   userRole: userRoleType;
   user: User;
   places: Place[];
-  prefecture: Prefecture;
+  prefectures: Prefecture[];
 };
 
 /**
- * Dashboard page
+ * Update page
  * @params NextPage
  */
-const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, places }) => {
+const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places }) => {
   const [loading, setLoading] = React.useState<boolean>();
 
   /**
@@ -65,19 +65,20 @@ const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, p
 
   return (
     <Layout userRole={userRole}>
-      {!!(userRole === userRoles.queueObserver || userRole === userRoles.placeAdmin) && (
+      {(prefectures || []).map((prefecture) => (
         <PlaceQueue
+          key={prefecture.id}
           loading={loading}
           userRole={userRole}
           prefecture={prefecture}
           user={user}
-          places={places}
+          places={places.filter((f) => f.prefectureId === prefecture.id)}
           placeQueueUpdate={handleUpdatePlaceQueue}
           placeStatusUpdate={handleUpdatePlaceStatus}
         />
-      )}
+      ))}
     </Layout>
   );
 };
 
-export default Dashboard;
+export default Update;

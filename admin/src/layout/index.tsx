@@ -6,6 +6,8 @@ import Router, { useRouter } from 'next/router';
 import { userRoleType } from '../utils/constraints';
 import { useAuthUser } from 'next-firebase-auth';
 import { clearAuthCookies } from '../utils/auth';
+import { DesktopOutlined, UserOutlined, ProfileOutlined, LogoutOutlined } from '@ant-design/icons';
+import { useResponsiveContext } from '../providers/ResponsiveProvider';
 
 const { Sider } = ALayout;
 const { SubMenu } = Menu;
@@ -25,14 +27,21 @@ const viewKeys: MenuProps[] = [
     key: 'dashboard',
     route: '/dashboard',
     title: 'Dashboard',
-    icon: null
+    icon: <DesktopOutlined />
   },
   {
     key: 'users',
     route: '/users',
     title: 'Usuários',
     roles: ['superAdmin', 'prefectureAdmin', 'placeAdmin'],
-    icon: null
+    icon: <UserOutlined />
+  },
+  {
+    key: 'update',
+    route: '/update',
+    title: 'Atualizar',
+    roles: ['superAdmin', 'prefectureAdmin'],
+    icon: <ProfileOutlined />
   }
 ];
 
@@ -44,6 +53,7 @@ const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) =>
   const authUser = useAuthUser();
 
   const router = useRouter();
+  const { isMobile } = useResponsiveContext();
 
   const selectedPlace: MenuProps = React.useMemo(() => {
     const pathname = router.pathname.split('/');
@@ -57,6 +67,10 @@ const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) =>
     }
   }, [router]);
 
+  React.useEffect(() => {
+    if (isMobile) setCollapsed(true);
+  }, [isMobile]);
+
   /**
    * exit
    */
@@ -68,7 +82,12 @@ const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) =>
 
   return (
     <LayoutWrapper>
-      <Sider theme="light" collapsible collapsed={collapsed} onCollapse={setCollapsed}>
+      <Sider
+        theme="light"
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(collapse) => setCollapsed(isMobile ? true : collapse)}
+      >
         <div className="logo" />
         <Menu theme="light" defaultSelectedKeys={selectedPlace ? [selectedPlace.key] : null} mode="inline">
           {viewKeys
@@ -92,7 +111,7 @@ const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) =>
                 </Menu.Item>
               );
             })}
-          <Menu.Item key="exit" onClick={handleExit} icon={null}>
+          <Menu.Item key="exit" onClick={handleExit} icon={<LogoutOutlined />}>
             Sair
           </Menu.Item>
         </Menu>
