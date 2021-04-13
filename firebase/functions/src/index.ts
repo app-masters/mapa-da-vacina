@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 admin.initializeApp();
-const db = admin.firestore();
+// const db = admin.firestore();
 
 export const createQueueUpdate = functions.firestore
   .document(
@@ -15,5 +15,5 @@ export const createQueueUpdate = functions.firestore
     const newValue = snap.data();
 
     const placeRef = queueRef.parent.parent;
-    return placeRef?.update({ queueStatus: newValue.queueStatus });
+    return placeRef?.update({ queueStatus: newValue.queueStatus, open: newValue.open });
   });
