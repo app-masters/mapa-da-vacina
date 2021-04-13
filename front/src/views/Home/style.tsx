@@ -70,6 +70,9 @@ export const HomeFooterWrapper = styled.footer`
       flex-direction: column;
       font-weight: 300;
       font-size: 18px;
+      :hover {
+        color: ${(props) => props.theme.colors.primary};
+      }
     }
     @media (max-width: ${(props) => props.theme.breakpoints.md}) {
       flex-direction: column;

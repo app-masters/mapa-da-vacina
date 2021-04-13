@@ -7,44 +7,46 @@ import { User } from '../../lib/User';
 import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
 import { userRoles } from '../../utils/constraints';
 import { returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
-import DashboardView from '../../views/Dashboard';
+import UpdateView from '../../views/Update';
 
-type DashboardProps = {
+type UpdateProps = {
   user: User;
   prefecture: Prefecture;
   token: string;
 };
 
 /**
- * Dashboard page
+ * Update page
  * @params NextPage
  */
-const Dashboard: NextPage<{ data: DashboardProps }> = ({ data }) => {
-  const [prefecture, setPrefecture] = React.useState<Prefecture>(null);
+const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
+  const [prefectures, setPrefectures] = React.useState<Prefecture[]>(null);
   const [places, setPlaces] = React.useState<Place[]>([]);
   shouldPersistUser(data);
 
   React.useEffect(() => {
-    const unsubscribePrefectures = returnCollectionByName('prefecture')
-      .doc(data.user.prefectureId)
-      .onSnapshot((snap) => {
+    const unsubscribePrefectures = returnCollectionByName('prefecture').onSnapshot((snaps) => {
+      let listOfPrefectures: Prefecture[] = [];
+      snaps.docs.forEach((snap) => {
         const data = { id: snap.id, ...snap.data() } as Prefecture;
-        setPrefecture(data);
+        listOfPrefectures.push(data);
       });
 
-    const unsubscribePlaces = returnCollectionGroupByName('place')
-      .where('prefectureId', '==', data.user.prefectureId)
-      .onSnapshot((snap) => {
-        let list: Place[] = [];
-        snap.docs.forEach((doc) => {
-          const data = { id: doc.id, ...doc.data() } as Place;
-          list.push(data);
-        });
-        if (data.user.role === userRoles.placeAdmin || data.user.role === userRoles.queueObserver) {
-          list = list.filter((f) => f.id === data.user.placeId);
-        }
-        setPlaces(list);
+      if (data.user.role === userRoles.prefectureAdmin) {
+        listOfPrefectures = listOfPrefectures.filter((f) => f.id === data.user.prefectureId);
+      }
+
+      setPrefectures(listOfPrefectures);
+    });
+
+    const unsubscribePlaces = returnCollectionGroupByName('place').onSnapshot((snap) => {
+      const list = [];
+      snap.docs.forEach((doc) => {
+        const data = { id: doc.id, ...doc.data() } as Place;
+        list.push(data);
       });
+      setPlaces(list);
+    });
 
     return () => {
       unsubscribePrefectures();
@@ -52,7 +54,7 @@ const Dashboard: NextPage<{ data: DashboardProps }> = ({ data }) => {
     };
   }, [data]);
 
-  return <DashboardView userRole={data.user.role} user={data.user} prefecture={prefecture} places={places} />;
+  return <UpdateView userRole={data.user.role} user={data.user} prefectures={prefectures} places={places} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({
@@ -66,4 +68,4 @@ export const getServerSideProps = withAuthUserTokenSSR({
 
 export default withAuthUser({
   whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN
-})(Dashboard);
+})(Update);

@@ -13,9 +13,11 @@
     "debug": "node --inspect-brk ./node_modules/next/dist/bin/next"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.6.2",
     "antd": "^4.15.0",
     "antd-mask-input": "^0.1.15",
     "axios": "^0.21.1",
+    "dayjs": "^1.10.4",
     "firebase": "^8.3.2",
     "firebase-admin": "^9.6.0",
     "firebaseui": "^4.8.0",

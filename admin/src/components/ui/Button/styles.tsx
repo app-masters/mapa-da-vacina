@@ -14,12 +14,21 @@ export const ButtonStyled: React.FC<ButtonProps> = styled(Button)<ButtonProps>`
     if (props.type === 'primary') {
       return `
         display: flex;
+        justify-content: center;
         align-items: center;
         background: ${colors.primary} !important;
         border-color: ${colors.primary} !important;
         padding-left: ${spacing.sm} !important;
         span {
             padding-left: ${spacing.sm} !important;
+        }
+        :disabled {
+          background-color: ${colors.disabled} !important;
+          border-color: ${colors.disabled} !important;
+          color: ${colors.darkGray};
+          :hover {
+            color: ${colors.darkGray};
+          }
         }
       `;
     }

@@ -1,0 +1,32 @@
+name: Check code standards
+on: [push]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "15.x"
+
+      - name: Restore lerna node_modules
+        uses: actions/cache@v2
+        id: node-modules-cache
+        with:
+          path: |
+            node_modules
+            api/node_modules
+            front/node_modules
+          key: -${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('api/yarn.lock') }}-${{ hashFiles('admin/yarn.lock') }}-${{ hashFiles('front/yarn.lock') }}
+
+      - name: Install dependences
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: yarn install && yarn lerna bootstrap
+
+      - name: Run checks on API
+        run: cd api && yarn run checks
+        
+      - name: Run checks on front
+        run: cd front && yarn run checks

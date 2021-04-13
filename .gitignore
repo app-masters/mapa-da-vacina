@@ -15,4 +15,8 @@ node_modules
 # Mac files
 .DS_Store
 
+# Enviroment
+.env
+.history
+
 
