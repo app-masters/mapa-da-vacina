@@ -8,7 +8,7 @@
     "start-production": "node build/server.js",
     "dev": "node ace serve --watch",
     "lint": "eslint . --ext=.ts",
-    "format": "prettier --write .",
+    "format": "prettier-check .",
     "check-prettier": "prettier-check \"**/*.{js,ts}\"",
     "check-lint": "eslint \"**/*.{js,ts}\" --max-warnings 0 ",
     "checks": "yarn run check-lint && yarn run check-prettier && yarn check --integrity"
