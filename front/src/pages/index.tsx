@@ -1,23 +1,40 @@
+import { useEffect, useState, useCallback } from 'react';
 import { GetStaticProps, NextPage } from 'next';
 import { Prefectures } from '../lib/Prefectures';
+import { getPrefectureData } from '../utils/prefecture';
 import HomeView from '../views/Home';
 
 /**
  * Home page
  * @params NextPage
  */
-const Home: NextPage<{ data: Prefectures }> = ({ data }) => {
+const Home: NextPage<{ data: Prefectures }> = () => {
+  // Local state
+  const [data, setData] = useState({} as Prefectures);
+
+  // Dealing with the fetch and re-fetch of the data
+  const getAndSetPrefectureData = useCallback(async () => {
+    const prefectureData = await getPrefectureData();
+    setData(prefectureData);
+    if (prefectureData && prefectureData.id) {
+      // If the data is defined, update it after some time
+      setTimeout(getAndSetPrefectureData, 10000);
+    }
+  }, []);
+
+  // Fetching prefecture data
+  useEffect(() => {
+    getAndSetPrefectureData();
+  }, [getAndSetPrefectureData]);
+
   return <HomeView data={data} />;
 };
 
 /**
- * getStaticProps
+ * Generating static page with no data
  */
 export const getStaticProps: GetStaticProps = async () => {
-  //const res = await fetch('http://localhost:3333/prefectures/7zsx4B9x6bi3hPXKJAUw');
-  //await res.json();
-  const data = {};
-  return { props: { data }, revalidate: 60 };
+  return { props: { data: {} } };
 };
 
 export default Home;
