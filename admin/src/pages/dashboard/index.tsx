@@ -5,6 +5,7 @@ import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
 import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
+import { userRoles } from '../../utils/constraints';
 import { returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
 import DashboardView from '../../views/Dashboard';
 
@@ -34,11 +35,14 @@ const Dashboard: NextPage<{ data: DashboardProps }> = ({ data }) => {
     const unsubscribePlaces = returnCollectionGroupByName('place')
       .where('prefectureId', '==', data.user.prefectureId)
       .onSnapshot((snap) => {
-        const list = [];
+        let list: Place[] = [];
         snap.docs.forEach((doc) => {
           const data = { id: doc.id, ...doc.data() } as Place;
           list.push(data);
         });
+        if (data.user.role === userRoles.placeAdmin || data.user.role === userRoles.queueObserver) {
+          list = list.filter((f) => f.id === data.user.placeId);
+        }
         setPlaces(list);
       });
 
