@@ -13,9 +13,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lerna run checks",
       "pre-push": "lerna run checks"
     }
   },
-  "name": "carers"
+  "name": "mapa-da-vacina"
 }
