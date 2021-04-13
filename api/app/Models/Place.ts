@@ -13,6 +13,7 @@ export interface PlaceType extends BaseModel {
   addressZip: string;
   googleMapsUrl: string;
   type: string;
+  active: boolean;
   open: boolean;
   queueStatus: string;
   queueUpdatedAt: Date;
@@ -29,16 +30,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   constructor() {
     console.log('INIT PLACES');
     super(FirebaseProvider.storage, errorFactory);
-    /*FirebaseProvider.db.collectionGroup('place').onSnapshot(
-      (docSnapshot) => {
-        console.log(`Received doc snapshot`);
-        console.log(docSnapshot.docChanges().map((d) => d.doc.data() as PlaceType));
-        this.places = docSnapshot.docs.map((d) => d.data() as PlaceType);
-      },
-      (err) => {
-        console.log(`Encountered error: ${err}`);
-      }
-    );*/
   }
 
   /**
@@ -57,7 +48,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
-    const documents = await this.list({}, prefId);
+    const documents = await this.list({ active: true }, prefId);
 
     for (const document of documents) {
       document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);

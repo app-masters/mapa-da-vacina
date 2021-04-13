@@ -11,9 +11,8 @@ export type Place = {
   type?: string;
   open?: boolean;
   queueStatus?: string;
-  //Timestamp firebase
   queueUpdatedAt?: {
-    _seconds: number;
+    seconds: number;
   };
   createdAt?: Date;
   updatedAt?: Date;
