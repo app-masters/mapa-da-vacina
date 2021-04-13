@@ -23,12 +23,12 @@ Estamos usando o Firestore para armazenar as informações.
 
 # Frontend
 
-O frontend está dividido em outros dois projetos, **_admin_** que será usado tanto para o admin quanto para o ponto de vacinação e **_portal_** que será por onde o usuário verá os pontos de vacinação.
+O frontend está dividido em outros dois projetos, **_admin_** que será usado tanto para o admin quanto para o ponto de vacinação e **_front_** que será por onde o usuário verá os pontos de vacinação.
 
 ## Executando o projeto
 
 1. Clone o repositório.
-2. Navegue até a pasta do projeto (`/filometro/admin` e ou `/filometro/portal`)
+2. Navegue até a pasta do projeto (`/filometro/admin` e ou `/filometro/front`)
 3. Execute `yarn` para instalar as dependências.
 4. Após finalizar a instalação das dependências execute `yarn dev` para iniciar o projeto.
 
