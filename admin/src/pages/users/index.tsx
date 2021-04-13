@@ -20,6 +20,7 @@ type UsersProps = {
  * @params NextPage
  */
 const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [users, setUsers] = React.useState<User[]>([]);
   const [prefectures, setPrefectures] = React.useState<Prefecture[]>([]);
   const [places, setPlaces] = React.useState<Place[]>([]);
@@ -27,25 +28,29 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
   shouldPersistUser(data);
 
   React.useEffect(() => {
+    setLoading(true);
     /**
      * unsubscribe
      */
     const unsubscribeUsers = listUsersByPrefecture().onSnapshot((snap) => {
       const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as User));
       setUsers(data);
+      setLoading(false);
     });
 
     const unsubscribePrefectures = returnCollectionByName('prefecture').onSnapshot((doc) => {
       let list = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Prefecture));
-      if (data.user.role === userRoles.prefectureAdmin) {
+      if (data.user.role !== userRoles.superAdmin) {
         list = list.filter((f) => f.id === data.user.prefectureId);
       }
       setPrefectures(list);
+      setLoading(false);
     });
 
     const unsubscribePlaces = returnCollectionGroupByName('place').onSnapshot((doc) => {
       const data = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Place));
       setPlaces(data);
+      setLoading(false);
     });
 
     return () => {
@@ -55,7 +60,7 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
     };
   }, [data.user.prefectureId, data.user.role]);
 
-  return <UsersView users={users} prefectures={prefectures} places={places} user={data.user} />;
+  return <UsersView loading={loading} users={users} prefectures={prefectures} places={places} user={data.user} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({

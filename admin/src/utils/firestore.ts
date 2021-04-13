@@ -39,10 +39,12 @@ export const disableUser = async (id: string, userId: string) => {
 /**
  * updatePlace
  */
-export const updatePlace = async (id: string, place) => {
+export const updatePlace = async (id: string, prefectureId: string, place) => {
   return await firebase
     .firestore()
-    .collectionGroup('place')
+    .collection('prefecture')
+    .doc(prefectureId)
+    .collection('place')
     .get()
     .then((snap) => {
       snap.docs.forEach((doc) => {

@@ -20,11 +20,13 @@ type UpdateProps = {
  * @params NextPage
  */
 const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [prefectures, setPrefectures] = React.useState<Prefecture[]>(null);
   const [places, setPlaces] = React.useState<Place[]>([]);
   shouldPersistUser(data);
 
   React.useEffect(() => {
+    setLoading(true);
     const unsubscribePrefectures = returnCollectionByName('prefecture').onSnapshot((snaps) => {
       let listOfPrefectures: Prefecture[] = [];
       snaps.docs.forEach((snap) => {
@@ -37,15 +39,21 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
       }
 
       setPrefectures(listOfPrefectures);
+      setLoading(false);
     });
 
     const unsubscribePlaces = returnCollectionGroupByName('place').onSnapshot((snap) => {
-      const list = [];
+      const list: Place[] = [];
       snap.docs.forEach((doc) => {
         const data = { id: doc.id, ...doc.data() } as Place;
         list.push(data);
       });
-      setPlaces(list);
+      setPlaces(
+        list.sort((a, b) => {
+          return a.title < b.title ? -1 : a.title > b.title ? 1 : 0;
+        })
+      );
+      setLoading(false);
     });
 
     return () => {
@@ -54,7 +62,15 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
     };
   }, [data]);
 
-  return <UpdateView userRole={data.user.role} user={data.user} prefectures={prefectures} places={places} />;
+  return (
+    <UpdateView
+      userRole={data.user.role}
+      user={data.user}
+      prefectures={prefectures}
+      places={places}
+      pageLoading={loading}
+    />
+  );
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({

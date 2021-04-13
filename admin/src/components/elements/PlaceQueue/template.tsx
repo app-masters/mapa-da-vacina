@@ -45,17 +45,23 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
   loading,
   placeQueueUpdate
 }) => {
-  const [modalOpen, setModalOpen] = React.useState<{ open: boolean; placeId: string; prefectureId: string }>({
+  const [modalOpen, setModalOpen] = React.useState<{
+    open: boolean;
+    placeId: string;
+    prefectureId: string;
+    clickedOption: string;
+  }>({
     open: false,
     prefectureId: undefined,
-    placeId: undefined
+    placeId: undefined,
+    clickedOption: undefined
   });
 
   /**
    * handleCloseModal
    */
   const handleCloseModal = () => {
-    setModalOpen({ open: false, placeId: undefined, prefectureId: undefined });
+    setModalOpen({ open: false, placeId: undefined, prefectureId: undefined, clickedOption: undefined });
   };
 
   /**
@@ -83,6 +89,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
    * onSubmitForm
    */
   const onSubmitForm = async (value: placeQueueStatusType) => {
+    setModalOpen({ ...modalOpen, clickedOption: value });
     await placeQueueUpdate(modalOpen.placeId, modalOpen.prefectureId, value);
     handleCloseModal();
   };
@@ -93,7 +100,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
         <h1>{`Prefeitura de ${prefecture?.name}`}</h1>
         {places.map((place) => {
           const formattedDate = new Date(place.queueUpdatedAt?.seconds * 1000);
-          const haveWarning = dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
+          const haveWarning = !place.open ? false : dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
           return (
             <PlaceQueueItem warning={haveWarning} key={place.id}>
               <PlaceQueueItemAvatar xs={24} sm={24} md={4} lg={2} color={placeQueueColor[place.queueStatus]}>
@@ -127,13 +134,22 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
                   <Button type={place.open ? 'default' : 'primary'} onClick={() => confirmModal(place)}>
                     {place.open ? 'Fechar ponto de vacinação' : 'Abrir ponto de vacinação'}
                   </Button>
-                  <Button
-                    disabled={!place.open}
-                    type="primary"
-                    onClick={() => setModalOpen({ open: true, placeId: place.id, prefectureId: place.prefectureId })}
-                  >
-                    Atualizar fila
-                  </Button>
+                  {place.open && (
+                    <Button
+                      disabled={!place.open}
+                      type="primary"
+                      onClick={() =>
+                        setModalOpen({
+                          open: true,
+                          placeId: place.id,
+                          prefectureId: place.prefectureId,
+                          clickedOption: undefined
+                        })
+                      }
+                    >
+                      Atualizar fila
+                    </Button>
+                  )}
                 </Space>
               </Col>
             </PlaceQueueItem>
@@ -151,12 +167,16 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
           <Space style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }} wrap direction="vertical">
             {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => (
               <QueueButton
-                disabled={loading}
+                disabled={loading && modalOpen.clickedOption === option}
                 key={option}
                 color={placeQueueColor[option]}
-                onClick={() => onSubmitForm(option)}
+                onClick={() => {
+                  if (!loading) {
+                    onSubmitForm(option);
+                  }
+                }}
               >
-                {loading && <LoadingOutlined spin style={{ marginRight: 8 }} />}
+                {loading && modalOpen.clickedOption === option && <LoadingOutlined spin style={{ marginRight: 8 }} />}
                 {placeQueueLabel[option]}
               </QueueButton>
             ))}

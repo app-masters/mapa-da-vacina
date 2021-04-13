@@ -39,7 +39,7 @@ const viewKeys: MenuProps[] = [
   {
     key: 'update',
     route: '/update',
-    title: 'Atualizar',
+    title: 'Pontos de Vacinação',
     roles: ['superAdmin', 'prefectureAdmin'],
     icon: <ProfileOutlined />
   }

@@ -20,39 +20,53 @@ type DashboardProps = {
  * @params NextPage
  */
 const Dashboard: NextPage<{ data: DashboardProps }> = ({ data }) => {
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [prefecture, setPrefecture] = React.useState<Prefecture>(null);
   const [places, setPlaces] = React.useState<Place[]>([]);
   shouldPersistUser(data);
 
   React.useEffect(() => {
-    const unsubscribePrefectures = returnCollectionByName('prefecture')
-      .doc(data.user.prefectureId)
-      .onSnapshot((snap) => {
-        const data = { id: snap.id, ...snap.data() } as Prefecture;
-        setPrefecture(data);
-      });
-
-    const unsubscribePlaces = returnCollectionGroupByName('place')
-      .where('prefectureId', '==', data.user.prefectureId)
-      .onSnapshot((snap) => {
-        let list: Place[] = [];
-        snap.docs.forEach((doc) => {
-          const data = { id: doc.id, ...doc.data() } as Place;
-          list.push(data);
+    if (data.user.role !== userRoles.superAdmin) {
+      setLoading(true);
+      const unsubscribePrefectures = returnCollectionByName('prefecture')
+        .doc(data.user.prefectureId)
+        .onSnapshot((snap) => {
+          const data = { id: snap.id, ...snap.data() } as Prefecture;
+          setPrefecture(data);
+          setLoading(false);
         });
-        if (data.user.role === userRoles.placeAdmin || data.user.role === userRoles.queueObserver) {
-          list = list.filter((f) => f.id === data.user.placeId);
-        }
-        setPlaces(list);
-      });
 
-    return () => {
-      unsubscribePrefectures();
-      unsubscribePlaces();
-    };
+      const unsubscribePlaces = returnCollectionGroupByName('place')
+        .where('prefectureId', '==', data.user.prefectureId)
+        .onSnapshot((snap) => {
+          let list: Place[] = [];
+          snap.docs.forEach((doc) => {
+            const data = { id: doc.id, ...doc.data() } as Place;
+            list.push(data);
+          });
+          if (data.user.role === userRoles.placeAdmin || data.user.role === userRoles.queueObserver) {
+            list = list.filter((f) => f.id === data.user.placeId);
+          }
+          setPlaces(list);
+          setLoading(false);
+        });
+
+      return () => {
+        unsubscribePrefectures();
+        unsubscribePlaces();
+      };
+    }
   }, [data]);
 
-  return <DashboardView userRole={data.user.role} user={data.user} prefecture={prefecture} places={places} />;
+  return (
+    <DashboardView
+      userRole={data.user.role}
+      user={data.user}
+      prefecture={prefecture}
+      places={places}
+      pageLoading={loading}
+    />
+  );
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({
