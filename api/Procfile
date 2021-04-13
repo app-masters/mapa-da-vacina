@@ -1,1 +1,1 @@
-web: ls && cd build && ls && ls build && ENV_SILENT=true node server.js
+web: ls && cd build && ls && ENV_SILENT=true node server.js
