@@ -49,11 +49,11 @@ export const totalizeOpenPlaces = functions.firestore
       }
     } else {
       if (beforeValue?.active && !afterValue?.active) {
-        // if was open and then closed, decrement 1
+        // if was active and then not active, decrement 1
         incrementNumber = -1;
         if (beforeValue.open) incrementOpen = -1;
       } else if (!beforeValue?.active && afterValue?.active) {
-        // if was closed and then open, increment 1
+        // if was not active and then active, increment 1
         incrementNumber = 1;
         if (afterValue.open) incrementOpen = 1;
       } else if (beforeValue?.active && afterValue?.active) {
