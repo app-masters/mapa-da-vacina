@@ -7,6 +7,7 @@ import { User } from '../../lib/User';
 import React from 'react';
 import { Prefecture } from '../../lib/Prefecture';
 import { Place } from '../../lib/Place';
+import { userRoles } from '../../utils/constraints';
 
 type UsersProps = {
   user: User;
@@ -30,39 +31,21 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
      * unsubscribe
      */
     const unsubscribeUsers = listUsersByPrefecture().onSnapshot((snap) => {
-      const data = snap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      const formattedData = data.map(
-        (
-          user: User & {
-            invitedAt: { seconds: number; nanoseconds: number };
-            signedUpAt: { seconds: number; nanoseconds: number };
-          }
-        ) => ({
-          ...user,
-          invitedAt: user.invitedAt ? new Date(user.invitedAt.seconds * 1000) : null,
-          signedUpAt: user.signedUpAt ? new Date(user.signedUpAt.seconds * 1000) : null
-        })
-      );
-      setUsers(formattedData);
+      const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as User));
+      setUsers(data);
     });
 
     const unsubscribePrefectures = returnCollectionByName('prefecture').onSnapshot((doc) => {
-      const listOfSnaps = [];
-      doc.forEach((snap) => {
-        listOfSnaps.push({ id: snap.id, ...snap.data() });
-      });
-      setPrefectures(listOfSnaps);
+      let list = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Prefecture));
+      if (data.user.role === userRoles.prefectureAdmin) {
+        list = list.filter((f) => f.id === data.user.prefectureId);
+      }
+      setPrefectures(list);
     });
 
     const unsubscribePlaces = returnCollectionGroupByName('place').onSnapshot((doc) => {
-      const listOfSnaps = [];
-      doc.forEach((snap) => {
-        listOfSnaps.push({ id: snap.id, ...snap.data() });
-      });
-      setPlaces(listOfSnaps);
+      const data = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Place));
+      setPlaces(data);
     });
 
     return () => {
@@ -70,9 +53,9 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
       unsubscribePrefectures();
       unsubscribePlaces();
     };
-  }, []);
+  }, [data.user.prefectureId, data.user.role]);
 
-  return <UsersView users={users} prefectures={prefectures} places={places} userRole={data.user.role} />;
+  return <UsersView users={users} prefectures={prefectures} places={places} user={data.user} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({

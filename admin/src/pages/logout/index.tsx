@@ -2,9 +2,8 @@ import { NextPage } from 'next';
 import { AuthAction, useAuthUser, withAuthUser, withAuthUserSSR } from 'next-firebase-auth';
 import Router from 'next/router';
 import React from 'react';
-import Button from '../../components/ui/Button';
 import { clearAuthCookies } from '../../utils/auth';
-import { LayoutWrapper } from './styles';
+import LayoutView from '../../views/Logout';
 
 /**
  * Dashboard page
@@ -21,20 +20,7 @@ const Logout: NextPage = () => {
     clearAuthCookies();
     Router.push('/auth');
   };
-  return (
-    <LayoutWrapper>
-      <div>
-        <h1>
-          O número informado não se encontra na base de dados, por favor entre em contato com o administrador da região
-        </h1>
-        <div>
-          <Button type="primary" onClick={handleLogout}>
-            Sair
-          </Button>
-        </div>
-      </div>
-    </LayoutWrapper>
-  );
+  return <LayoutView handleLogout={handleLogout} />;
 };
 
 export const getServerSideProps = withAuthUserSSR({
