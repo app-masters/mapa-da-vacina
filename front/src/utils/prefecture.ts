@@ -23,7 +23,7 @@ export const getPrefectureData = async (): Promise<Prefectures> => {
       }
     }
     console.log('prefectureId', prefectureId);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prefectures/${prefectureId}`);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`);
     const data = await res.json();
     return data;
   } catch (error) {
