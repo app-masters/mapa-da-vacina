@@ -16,6 +16,7 @@
     "next": "10.1.3",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "rollbar": "^2.21.1",
     "styled-components": "^5.2.3"
   },
   "devDependencies": {
