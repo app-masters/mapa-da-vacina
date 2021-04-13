@@ -62,7 +62,7 @@ export default class ImportPlaces extends BaseCommand {
             if (error.code === 6) {
               prefectureDoc.ref
                 .collection('place')
-                .doc(slug + 'asdas')
+                .doc(slug)
                 .update({
                   ...place,
                   addressZip: sanitizeZip(place.addressZip),
