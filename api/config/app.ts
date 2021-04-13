@@ -12,6 +12,9 @@ import { LoggerConfig } from '@ioc:Adonis/Core/Logger';
 import { ProfilerConfig } from '@ioc:Adonis/Core/Profiler';
 import { ValidatorConfig } from '@ioc:Adonis/Core/Validator';
 
+
+console.log('config ENV', process.env);
+
 /*
 |--------------------------------------------------------------------------
 | Application secret key
