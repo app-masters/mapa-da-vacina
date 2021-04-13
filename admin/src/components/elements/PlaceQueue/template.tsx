@@ -93,7 +93,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
         <h1>{`Prefeitura de ${prefecture?.name}`}</h1>
         {places.map((place) => {
           const formattedDate = new Date(place.queueUpdatedAt?.seconds * 1000);
-          const haveWarning = dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
+          const haveWarning = !place.open ? false : dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
           return (
             <PlaceQueueItem warning={haveWarning} key={place.id}>
               <PlaceQueueItemAvatar xs={24} sm={24} md={4} lg={2} color={placeQueueColor[place.queueStatus]}>
