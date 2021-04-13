@@ -6,7 +6,7 @@ export interface AgendaType extends BaseModel {
   closedAt: Date;
   openedAt: Date;
   open: boolean;
-  vacines: number;
+  vaccines: number;
   date: Date;
 }
 

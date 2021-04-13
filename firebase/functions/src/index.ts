@@ -15,5 +15,5 @@ export const createQueueUpdate = functions.firestore
     const newValue = snap.data();
 
     const placeRef = queueRef.parent.parent;
-    return placeRef?.update({ queueStatus: newValue.queueStatus });
+    return placeRef?.update({ queueStatus: newValue.queueStatus, open: newValue.open });
   });
