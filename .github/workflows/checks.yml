@@ -19,7 +19,7 @@ jobs:
             node_modules
             api/node_modules
             front/node_modules
-          key: -${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('api/yarn.lock') }}-${{ hashFiles('admin/yarn.lock') }}-${{ hashFiles('portal/yarn.lock') }}
+          key: -${{ runner.os }}-${{ hashFiles('yarn.lock') }}-${{ hashFiles('api/yarn.lock') }}-${{ hashFiles('admin/yarn.lock') }}-${{ hashFiles('front/yarn.lock') }}
 
       - name: Install dependences
         if: steps.node-modules-cache.outputs.cache-hit != 'true'

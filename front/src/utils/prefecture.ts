@@ -5,10 +5,14 @@ import { Prefectures } from '../lib/Prefectures';
  */
 export const getPrefectureData = async (): Promise<Prefectures> => {
   try {
+    // Defining NEXT_PUBLIC_PREFECTURE_ID as prefecture ID
     let prefectureId = process.env.NEXT_PUBLIC_PREFECTURE_ID;
     if (!prefectureId) {
       // No prefecture id defined, getting from online variable
-      prefectureId = JSON.parse(process.env.NEXT_PUBLIC_HEROKU)[window.location.host];
+      const possibleId = window.location.host.split('.')[0];
+      if (JSON.parse(process.env.NEXT_PUBLIC_HEROKU).indexOf(possibleId) > -1) {
+        prefectureId = possibleId;
+      }
       if (!prefectureId) {
         // No prefecture found online either, throw error
         throw Error('You need to define a NEXT_PUBLIC_PREFECTURE_ID on your .env to be able to fetch the data');
