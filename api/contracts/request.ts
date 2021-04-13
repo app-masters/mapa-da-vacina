@@ -1,8 +1,7 @@
 declare module '@ioc:Adonis/Core/Request' {
-  import { UserType } from 'App/Models/User';
-  import { AdminType } from 'App/Models/Admin';
+  import { auth } from 'firebase-admin';
 
   interface RequestContract {
-    user?: UserType | AdminType;
+    decodedIdToken?: auth.DecodedIdToken;
   }
 }

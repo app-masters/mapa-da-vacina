@@ -1,6 +1,11 @@
 import { AppProps } from 'next/app';
+import { ConfigProvider } from 'antd';
 import { ThemeProvider } from 'styled-components';
+import initAuth from '../utils/initAuth';
 import { theme } from '../styles/theme';
+import '../styles/globals.css';
+
+initAuth();
 
 /**
  * Page _app
@@ -8,9 +13,11 @@ import { theme } from '../styles/theme';
  */
 const App = ({ Component, pageProps }: AppProps) => {
   return (
-    <ThemeProvider theme={theme}>
-      <Component {...pageProps} />
-    </ThemeProvider>
+    <ConfigProvider>
+      <ThemeProvider theme={theme}>
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </ConfigProvider>
   );
 };
 

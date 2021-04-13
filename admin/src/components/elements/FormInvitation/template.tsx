@@ -1,0 +1,154 @@
+import { Form, Input, Select } from 'antd';
+import React from 'react';
+import { userRoleType, userRoles, userRolesLabel } from '../../../utils/constraints';
+import { FormWrapper, FormActionWrapper, ModalWrapper } from './styles';
+import Button from '../../ui/Button';
+import MaskedInput from 'antd-mask-input';
+import { Prefecture } from '../../../lib/Prefecture';
+import { Place } from '../../../lib/Place';
+
+export type FormInvitationTemplateProps = {
+  onSubmit: (values: unknown) => void;
+  setOpen: (open: boolean) => void;
+  open: boolean;
+  loading: boolean;
+  userRole: userRoleType;
+  prefectures: Prefecture[];
+  places: Place[];
+  userPrefecture: string;
+  userPlace: string;
+};
+
+/**
+ * FormInvitationTemplate
+ */
+const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
+  onSubmit,
+  open,
+  setOpen,
+  loading,
+  prefectures,
+  places,
+  userRole,
+  userPrefecture,
+  userPlace
+}) => {
+  const [selectedRole, setSelectedRole] = React.useState<string>(undefined);
+  const [selectedPrefecture, setSelectedPrefecture] = React.useState<string>(undefined);
+
+  /**
+   * closeModal
+   */
+  const closeModal = () => {
+    setOpen(false);
+    setSelectedRole(undefined);
+    setSelectedPrefecture(undefined);
+  };
+
+  const selectOptions: { label: string; value: string }[] = React.useMemo(() => {
+    let listOfOptions = [];
+    for (const attr in userRolesLabel) {
+      if (attr !== userRoles.superAdmin) {
+        listOfOptions.push({
+          label: userRolesLabel[attr],
+          value: attr
+        });
+      }
+    }
+
+    if (userRole === userRoles.prefectureAdmin) {
+      listOfOptions = listOfOptions.filter((f) => f.value !== userRoles.superAdmin);
+    }
+    if (userRole === userRoles.placeAdmin) {
+      listOfOptions = listOfOptions.filter((f) => f.value === userRoles.queueObserver);
+    }
+
+    return listOfOptions;
+  }, [userRole]);
+
+  const selectPrefectures: { label: string; value: string }[] = React.useMemo(() => {
+    return prefectures.map((pref) => ({ label: pref.name, value: pref.id }));
+  }, [prefectures]);
+
+  const selectPlaces: { label: string; value: string }[] = React.useMemo(() => {
+    let listOfPlaces: Place[] = [];
+    if (!selectedPrefecture) return [];
+    if (userRole === userRoles.superAdmin) {
+      listOfPlaces = places.filter((f) => f.prefectureId === selectedPrefecture);
+    } else {
+      listOfPlaces = places.filter((f) => f.id === userPlace);
+    }
+    return (listOfPlaces || []).map((i) => ({ value: i.id, label: i.title }));
+  }, [selectedPrefecture, userRole, places, userPlace]);
+
+  return (
+    <ModalWrapper visible={open} destroyOnClose onCancel={closeModal} footer={null}>
+      <FormWrapper>
+        <Form layout="vertical" size="large" onFinish={onSubmit}>
+          <Form.Item label="Nome" name="name" rules={[{ required: true, message: 'Por favor informe um nome' }]}>
+            <Input disabled={loading} />
+          </Form.Item>
+          <Form.Item
+            label="Telefone"
+            name="phone"
+            rules={[{ required: true, message: 'Por favor informe um telefone' }]}
+          >
+            <MaskedInput disabled={loading} mask="(11) 11111-1111" />
+          </Form.Item>
+          <Form.Item label="Cargo" name="role" rules={[{ required: true, message: 'Por favor informe um cargo' }]}>
+            <Select disabled={loading} onChange={(value) => setSelectedRole(value as string)}>
+              {selectOptions.map((option) => (
+                <Select.Option key={option.value} value={option.value}>
+                  {option.label}
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          {!!(selectedRole === userRoles.prefectureAdmin || selectedRole === userRoles.placeAdmin) && (
+            <Form.Item
+              label="Prefeitura"
+              name="prefectureId"
+              rules={[{ required: true, message: 'Por favor informe uma prefeitura' }]}
+            >
+              <Select disabled={loading} onChange={(value) => setSelectedPrefecture(value as string)}>
+                {selectPrefectures
+                  .filter((f) => (userRole === userRoles.superAdmin ? true : f.value === userPrefecture))
+                  .map((option) => (
+                    <Select.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Select.Option>
+                  ))}
+              </Select>
+            </Form.Item>
+          )}
+          {selectedRole === userRoles.placeAdmin && (
+            <Form.Item label="Local" name="placeId" rules={[{ required: true, message: 'Por favor informe um local' }]}>
+              <Select disabled={loading}>
+                {!selectedPrefecture
+                  ? null
+                  : (selectPlaces || []).map((option) => (
+                      <Select.Option key={option.value} value={option.value}>
+                        {option.label}
+                      </Select.Option>
+                    ))}
+              </Select>
+            </Form.Item>
+          )}
+
+          <Form.Item>
+            <FormActionWrapper>
+              <Button disabled={loading} type="ghost" onClick={closeModal}>
+                Cancelar
+              </Button>
+              <Button loading={loading} type="primary" htmlType="submit">
+                Salvar
+              </Button>
+            </FormActionWrapper>
+          </Form.Item>
+        </Form>
+      </FormWrapper>
+    </ModalWrapper>
+  );
+};
+
+export default FormInvitationTemplate;
