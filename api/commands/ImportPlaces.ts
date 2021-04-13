@@ -58,11 +58,11 @@ export default class ImportPlaces extends BaseCommand {
           })
           .then(() => console.log('Created ' + slug))
           .catch((error) => {
-            // ALREADY_EXISTIS => update
+            // ALREADY_EXISTS => update
             if (error.code === 6) {
               prefectureDoc.ref
                 .collection('place')
-                .doc(slug)
+                .doc(slug + 'asdas')
                 .update({
                   ...place,
                   addressZip: sanitizeZip(place.addressZip),
@@ -70,10 +70,10 @@ export default class ImportPlaces extends BaseCommand {
                 })
                 .then(() => console.log('Updated ' + slug))
                 .catch((error) => {
-                  return error;
+                  throw new Error('Erro ao atualizar place ' + error);
                 });
             } else {
-              return error;
+              throw new Error('Erro ao criar place ' + error);
             }
           });
       }
