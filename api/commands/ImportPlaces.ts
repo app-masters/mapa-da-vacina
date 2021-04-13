@@ -34,29 +34,48 @@ export default class ImportPlaces extends BaseCommand {
     try {
       // Read CSV file...
       const places = await csvtojson().fromFile(this.path);
-      console.log(places);
+      // console.log("CSV file", places);
 
-      // Para cada linha com um "place"
+      const prefectureDoc = await FirebaseProvider.db.collection('prefecture').doc(this.prefectureId).get();
+
+      if (!prefectureDoc.exists) {
+        throw new Error('Não foi possível encontrar a prefeitura informada.');
+      }
+      // For each place...
       for (const place of places) {
         const slug = getSlug(place.title);
         // Ignore agenda for now
         delete place.agenda;
-        const res = await FirebaseProvider.db
-          .collection('prefecture')
-          .doc(this.prefectureId)
+        await prefectureDoc.ref
           .collection('place')
           .doc(slug)
-          .set(
-            {
-              ...place,
-              addressZip: sanitizeZip(place.addressZip),
-              active: true,
-              open: false,
-              prefectureId: this.prefectureId
-            },
-            { merge: true }
-          );
-        console.log(res);
+          .create({
+            ...place,
+            addressZip: sanitizeZip(place.addressZip),
+            active: true,
+            open: false,
+            prefectureId: this.prefectureId
+          })
+          .then(() => console.log('Created ' + slug))
+          .catch((error) => {
+            // ALREADY_EXISTIS => update
+            if (error.code === 6) {
+              prefectureDoc.ref
+                .collection('place')
+                .doc(slug)
+                .update({
+                  ...place,
+                  addressZip: sanitizeZip(place.addressZip),
+                  prefectureId: this.prefectureId
+                })
+                .then(() => console.log('Updated ' + slug))
+                .catch((error) => {
+                  return error;
+                });
+            } else {
+              return error;
+            }
+          });
       }
     } catch (error) {
       console.log(error);
