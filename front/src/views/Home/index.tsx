@@ -40,7 +40,7 @@ const Home: React.FC<{ data: Prefectures }> = ({ data }) => {
           </a>
           <a className="appmasters-a" href="http://appmasters.io/pt" target="_blank" rel="noreferrer">
             Desenvolvido pela
-            <Image src={'/images/appmasters-logo.png'} width={130} height={25} />
+            <Image src={'/images/appmasters-logo.png'} width={128} height={23} />
           </a>
         </div>
       </HomeFooterWrapper>

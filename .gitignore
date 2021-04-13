@@ -17,5 +17,6 @@ node_modules
 
 # Enviroment
 .env
+.history
 
 
