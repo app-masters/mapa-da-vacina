@@ -51,7 +51,6 @@ export default class UsersController {
       if (existUser) return response.status(401).send(`Número de telefone já convidado para esta prefeitura.`);
 
       const newUser = await UserRepository.save({ ...data, active: false, invitedAt: new Date() }, data.prefectureId);
-      console.log(newUser);
       // Todo: get data from listener instead of querying again
       const prefecture = await Prefecture.getById(data.prefectureId);
       let placeTitle: string = '';
@@ -62,7 +61,8 @@ export default class UsersController {
 
       return response.status(200).send(newUser);
     } catch (error) {
-      return response.status(500).send(error);
+      console.log(error);
+      return response.status(500).send({ error });
     }
   }
 

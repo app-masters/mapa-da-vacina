@@ -58,3 +58,15 @@ export const formatPhoneToE164 = (phoneNumber: string) => {
   }
   return formatedNumber;
 };
+
+/**
+ * Sanitize a zip, return it with only numbers, or null
+ */
+export const sanitizeZip = (zip: string) => {
+  if (!zip) return;
+  let match = zip.match(/\d+/g);
+  if (!match) return;
+  const zipCode = match.join('');
+  if (zipCode.length !== 8) return;
+  return zipCode;
+};
