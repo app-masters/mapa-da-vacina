@@ -2,7 +2,7 @@ import { Space } from 'antd';
 import PlaceListTemplate from './template';
 import Car from '../../ui/Icons/Car';
 import PersonPin from '../../ui/Icons/PersonPin';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { ButtonIconWrapper } from './styles';
 import { Place } from '../../../lib/Place';
 import { placeType } from '../../../utils/constraints';

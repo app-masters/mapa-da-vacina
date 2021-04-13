@@ -1,4 +1,6 @@
 import firebase from 'firebase';
+import { User } from '../lib/User';
+import { userRoles } from './constraints';
 
 /**
  * returnCollectionByName
@@ -18,8 +20,11 @@ export const returnCollectionGroupByName = (collection: string) => {
  * listUsersByPrefecture
  */
 export const listUsersByPrefecture = () => {
-  const prefecture = JSON.parse(localStorage.getItem('@auth-prefecture'));
-  return firebase.firestore().collection('prefecture').doc(prefecture?.id).collection('user');
+  const user = JSON.parse(localStorage.getItem('@auth-user')) as User;
+  if (user.role === userRoles.superAdmin) {
+    return firebase.firestore().collectionGroup('user');
+  }
+  return firebase.firestore().collection('prefecture').doc(user.prefectureId).collection('user');
 };
 
 /**
