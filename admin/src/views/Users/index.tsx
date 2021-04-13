@@ -1,6 +1,6 @@
 import Layout from '../../layout';
 import { TableWrapper, Section } from './styles';
-import { Popconfirm, Typography, Collapse } from 'antd';
+import { Popconfirm, Typography, Collapse, Spin } from 'antd';
 import Button from '../../components/ui/Button';
 import React from 'react';
 import FormInvitation from '../../components/elements/FormInvitation';
@@ -14,13 +14,14 @@ type UsersViewProps = {
   users: User[];
   prefectures: Prefecture[];
   places: Place[];
+  loading: boolean;
   user: User;
 };
 
 /**
  * Users page
  */
-const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user }) => {
+const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loading }) => {
   /**
    * handleDisableUser
    */
@@ -120,69 +121,43 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user }) =
       .sort((a, b) => b.invitedAt?.seconds - a.invitedAt?.seconds);
   }, [users]);
 
-  const superAdmin = React.useMemo(() => {
-    return (users || []).map((user) => ({ key: user.id, ...user })).filter((f) => f.role === userRoles.superAdmin);
-  }, [users]);
-
   return (
     <Layout userRole={user.role}>
-      <Section>
-        {user.role === userRoles.superAdmin && (
-          <Collapse style={{ marginBottom: 16 }}>
-            <Collapse.Panel
-              key={'superAdmin'}
-              header={<Typography.Title level={4}>{'Super Administradores'}</Typography.Title>}
-            >
-              <TableWrapper
-                pagination={false}
-                columns={columns.filter((f) => f.key !== 'invitedAt')}
-                locale={{ emptyText: 'Nenhum dado' }}
-                dataSource={superAdmin}
-              />
-              <div className="subtitle-container">
-                <Typography.Title level={4}>Convites enviados</Typography.Title>
-              </div>
-              <TableWrapper
-                pagination={false}
-                columns={columns.filter((f) => f.key !== 'action')}
-                locale={{ emptyText: 'Nenhum dado' }}
-                dataSource={superAdmin.filter((f) => !f.signedUpAt)}
-              />
-            </Collapse.Panel>
-          </Collapse>
-        )}
-        {prefectures && prefectures.length > 0 && (
-          <Collapse defaultActiveKey={[prefectures[0]?.id]}>
-            {prefectures.map((prefecture) => (
-              <Collapse.Panel
-                key={prefecture.id}
-                header={<Typography.Title level={4}>{prefecture.name || prefecture.slug}</Typography.Title>}
-              >
-                <TableWrapper
-                  pagination={false}
-                  columns={columns.filter((f) => f.key !== 'invitedAt')}
-                  locale={{ emptyText: 'Nenhum dado' }}
-                  dataSource={listUsers.filter((f) => f.active && f.prefectureId === prefecture.id)}
-                />
-                <div className="subtitle-container">
-                  <Typography.Title level={4}>Convidar Usuários</Typography.Title>
-                  <FormInvitation
-                    prefectures={[prefecture]}
-                    places={places.filter((f) => f.prefectureId === prefecture.id)}
-                    user={user}
+      <Spin size="large" spinning={loading}>
+        <Section>
+          {prefectures && prefectures.length > 0 && (
+            <Collapse defaultActiveKey={[prefectures[0]?.id]}>
+              {prefectures.map((prefecture) => (
+                <Collapse.Panel
+                  key={prefecture.id}
+                  header={<Typography.Title level={4}>{prefecture.name || prefecture.slug}</Typography.Title>}
+                >
+                  <TableWrapper
+                    pagination={false}
+                    columns={columns.filter((f) => f.key !== 'invitedAt')}
+                    locale={{ emptyText: 'Nenhum dado' }}
+                    dataSource={listUsers.filter((f) => f.active && f.prefectureId === prefecture.id)}
                   />
-                </div>
-                <TableWrapper
-                  pagination={false}
-                  columns={columns.filter((f) => f.key !== 'action')}
-                  locale={{ emptyText: 'Nenhum dado' }}
-                  dataSource={listUsers.filter((f) => !f.signedUpAt && f.prefectureId === prefecture.id)}
-                />
-              </Collapse.Panel>
-            ))}
-          </Collapse>
-        )}
-      </Section>
+                  <div className="subtitle-container">
+                    <Typography.Title level={4}>Convidar Usuários</Typography.Title>
+                    <FormInvitation
+                      prefectures={[prefecture]}
+                      places={places.filter((f) => f.prefectureId === prefecture.id)}
+                      user={user}
+                    />
+                  </div>
+                  <TableWrapper
+                    pagination={false}
+                    columns={columns.filter((f) => f.key !== 'action')}
+                    locale={{ emptyText: 'Nenhum dado' }}
+                    dataSource={listUsers.filter((f) => !f.signedUpAt && f.prefectureId === prefecture.id)}
+                  />
+                </Collapse.Panel>
+              ))}
+            </Collapse>
+          )}
+        </Section>
+      </Spin>
     </Layout>
   );
 };
