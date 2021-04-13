@@ -58,10 +58,12 @@ export default class UsersController {
       if (newUser.role === 'placeAdmin' && data.placeId) {
         placeTitle = await (await Place.getById(data.prefectureId, data.placeId)).title;
       }
+
       await SmsMessages.sendInviteSms(newUser, prefecture.name, placeTitle);
 
       return response.status(200).send(newUser);
     } catch (error) {
+      console.log(error);
       return response.status(500).send(error);
     }
   }
