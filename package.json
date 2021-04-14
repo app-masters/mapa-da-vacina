@@ -16,5 +16,8 @@
       "pre-push": "lerna run checks"
     }
   },
-  "name": "mapa-da-vacina"
+  "name": "mapa-da-vacina",
+  "dependencies": {
+    "rollbar": "^2.21.1"
+  }
 }

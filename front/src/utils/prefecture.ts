@@ -1,5 +1,5 @@
 import { Prefectures } from '../lib/Prefectures';
-// import logging from './logging';
+import logging from './logging';
 
 /**
  * Get prefecture ID
@@ -27,7 +27,7 @@ export const getPrefectureData = async (): Promise<Prefectures> => {
     const data = await res.json();
     return data;
   } catch (error) {
-    console.error(error);
+    logging.error(error);
     return {} as Prefectures;
   }
 };
