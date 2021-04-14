@@ -60,7 +60,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
     }
     const { AuthUser } = ctx;
 
-    if (AuthUser && user) {
+    if (AuthUser && user?.id) {
       return {
         data: {
           user: user,
@@ -85,7 +85,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
       shouldPersist: true
     };
   } catch (err) {
-    console.log(ctx.AuthUser.id);
+    console.error(err);
     if (err.status !== 401) {
       redirect(ctx, '/logout');
     }
@@ -117,8 +117,8 @@ export const shouldPersistUser = (data: { user: User; prefecture: Prefecture; to
  */
 export const clearAuthCookies = () => {
   if (process.browser) {
-    document.cookie = `user=; path=/`;
-    document.cookie = `prefecture=; path=/`;
+    document.cookie = `user=; path=/; expires=${new Date()}`;
+    document.cookie = `prefecture=; path=/; expires=${new Date()}`;
     localStorage.clear();
   }
 };
