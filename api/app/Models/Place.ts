@@ -78,12 +78,14 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
-   * findByIdWithSubcolletions
+   * findByPrefectureWithCurrentAgenda
    * @param id
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
-    const documents = await this.listActive(prefId);
+    const documents = await this.query((qb) => {
+      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('type', 'desc').orderBy('title', 'asc');
+    }, prefId);
 
     for (const document of documents) {
       if (!document.id) return [];
@@ -121,7 +123,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
-   * Colection path
+   * Collection path
    * @param documentIds
    * @returns Place collection path
    */
