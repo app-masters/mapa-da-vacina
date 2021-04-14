@@ -20,7 +20,7 @@ const Home: NextPage<{ data: Prefectures }> = () => {
     setData(prefectureData);
     if (prefectureData && prefectureData.id) {
       // If the data is defined, update it after some time
-      setTimeout(getAndSetPrefectureData, 10000);
+      setTimeout(getAndSetPrefectureData, 60000);
     }
     setLoading(false);
   }, []);

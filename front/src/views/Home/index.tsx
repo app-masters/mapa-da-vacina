@@ -15,7 +15,7 @@ const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading
     <HomeWrapper>
       <div className="page-body">
         <HomeHeaderWrapper>
-          <Image src={'/images/logo-app-white.png'} width={280} height={40} />
+          <Image src={'/images/logo-white.svg'} width={280} height={40} />
           <Image src={'/images/logo-jf.png'} width={140} height={80} />
         </HomeHeaderWrapper>
         <HomeContentWrapper>

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const HomeWrapper = styled(Layout)`
   min-height: 100vh;
   background: rgb(68, 144, 161);
-  background: linear-gradient(112deg, rgba(68, 144, 161, 1) 0%, rgba(95, 206, 193, 1) 100%);
+  background: linear-gradient(0deg, rgba(95, 206, 193, 1) 0%, rgba(68, 144, 161, 1) 100%);
   .page-body {
     flex: 1;
     display: flex;
