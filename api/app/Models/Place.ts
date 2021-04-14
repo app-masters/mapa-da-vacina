@@ -48,7 +48,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
-    const documents = await this.list({ active: true }, prefId);
+    const documents = await this.query((qb) => {
+      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('title', 'asc');
+    }, prefId);
 
     for (const document of documents) {
       document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);

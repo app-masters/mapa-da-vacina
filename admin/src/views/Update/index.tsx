@@ -27,15 +27,15 @@ const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places
   /**
    * handleUpdatePlaceStatus
    */
-  const handleUpdatePlaceStatus = async (place: Place, newStatus: boolean) => {
+  const handleUpdatePlaceStatus = async (place: Place, isOpen: boolean) => {
     try {
       setLoading(true);
       await updatePlace(place.id, place.prefectureId, {
-        open: newStatus,
-        queueStatus: newStatus ? placeQueue.noQueue : null,
+        open: isOpen,
+        queueStatus: isOpen ? placeQueue.noQueue : placeQueue.closed,
         queueUpdatedAt: new Date()
       });
-      if (newStatus) {
+      if (isOpen) {
         createQueueUpdate(place.id, place.prefectureId, placeQueue.noQueue);
       }
       setLoading(false);

@@ -27,16 +27,16 @@ const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, p
   /**
    * handleUpdatePlaceStatus
    */
-  const handleUpdatePlaceStatus = async (place: Place, newStatus: boolean) => {
+  const handleUpdatePlaceStatus = async (place: Place, isOpen: boolean) => {
     try {
       setLoading(true);
       await updatePlace(place.id, place.prefectureId, {
-        open: newStatus,
-        queueStatus: newStatus ? placeQueue.noQueue : null,
+        open: isOpen,
+        queueStatus: isOpen ? placeQueue.noQueue : placeQueue.closed,
         queueUpdatedAt: new Date()
       });
-      if (newStatus) {
-        createQueueUpdate(place.id, place.prefectureId, placeQueue.noQueue);
+      if (isOpen) {
+        await createQueueUpdate(place.id, place.prefectureId, placeQueue.noQueue);
       }
       setLoading(false);
     } catch (err) {
