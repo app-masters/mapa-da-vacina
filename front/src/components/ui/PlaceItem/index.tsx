@@ -26,16 +26,14 @@ const CardItem: React.FC<{ item: Place }> = ({ item }) => {
         {placeQueueLabel[item.queueStatus]}
       </CardItemLeftContent>
       <CardItemContent lg={15} md={15} xs={24} sm={24}>
-        <h1 className="item-type">{item.internalTitle}</h1>
         <h1 className="item-place">{item.title}</h1>
         <p>{`${item.addressStreet} - ${item.addressCityState}, ${item.addressCityState} - ${item.addressZip}`}</p>
       </CardItemContent>
-      <CardItemExtra lg={5} md={5} xs={24} sm={24}>
-        <p>
-          Atualizado em:{' '}
-          {item.queueUpdatedAt ? new Date(item.queueUpdatedAt._seconds * 1000).toLocaleDateString('pt-BR') : ''}
-        </p>
-      </CardItemExtra>
+      {item.queueUpdatedAt && item.open ? (
+        <CardItemExtra lg={5} md={5} xs={24} sm={24}>
+          <p>Atualizado em: {new Date(item.queueUpdatedAt._seconds * 1000).toLocaleDateString('pt-BR')}</p>
+        </CardItemExtra>
+      ) : null}
     </CardItemWrapper>
   );
 };

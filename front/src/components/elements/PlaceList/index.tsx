@@ -87,7 +87,12 @@ const PlaceList: React.FC<{ places: Place[] }> = ({ places }) => {
               onChange={(e) => setSearch({ ...search, zip: e.target.value })}
             />
           </div>
-          <Button icon={<Search />} type="primary" size="large" onClick={() => setFilter({ ...filter, ...search })}>
+          <Button
+            icon={<Search />}
+            type="primary"
+            size="large"
+            onClick={() => alert('Ainda não implementado nesta versão')}
+          >
             Buscar
           </Button>
         </Space>

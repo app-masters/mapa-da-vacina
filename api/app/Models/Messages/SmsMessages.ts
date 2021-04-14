@@ -9,9 +9,9 @@ export default class SmsMessages {
    */
   public static async sendInviteSms(user: UserType, city?: string | undefined, placeTitle?: string | undefined) {
     const userFunction = {
-      superAdmin: 'administrar o sistema filômetro',
-      prefectureAdmin: `administrar a prefeitura de ${city} no filômetro`,
-      placeAdmin: `administrar ${placeTitle} no filômetro`,
+      superAdmin: 'administrar o sistema Mapa da Vacina',
+      prefectureAdmin: `administrar a prefeitura de ${city} no Mapa da Vacina`,
+      placeAdmin: `administrar ${placeTitle} no Mapa da Vacina`,
       queueObserver: 'atualizar a situação da fila no sistema'
     };
     const message = `Você foi convidado para ${userFunction[user.role]} - Comece agora acessando ${Config.get(
