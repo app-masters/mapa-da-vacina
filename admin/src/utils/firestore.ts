@@ -58,7 +58,12 @@ export const updatePlace = async (id: string, prefectureId: string, place) => {
 /**
  * updatePlace
  */
-export const createQueueUpdate = async (placeId: string, prefectureId: string, status: placeQueueStatusType) => {
+export const createQueueUpdate = async (
+  placeId: string,
+  prefectureId: string,
+  open: boolean,
+  status: placeQueueStatusType
+) => {
   const user = JSON.parse(localStorage.getItem('@auth-user'));
   return await firebase
     .firestore()
@@ -70,6 +75,7 @@ export const createQueueUpdate = async (placeId: string, prefectureId: string, s
     .add({
       createdAt: new Date(),
       placeId,
+      open,
       queueStatus: status,
       userId: user.id
     });

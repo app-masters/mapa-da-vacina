@@ -17,6 +17,7 @@ module.exports = {
   },
   rules: {
     camelcase: 'error',
+    'require-await': 'error',
     'react/prop-types': 'off',
     'react/display-name': 'off',
     'react/no-unescaped-entities': 'off',
