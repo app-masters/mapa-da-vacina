@@ -8,7 +8,7 @@ import { Prefecture } from '../../../lib/Prefecture';
 import { Place } from '../../../lib/Place';
 
 export type FormInvitationTemplateProps = {
-  onSubmit: (values: unknown) => void;
+  onSubmit: (values: unknown) => Promise<void>;
   setOpen: (open: boolean) => void;
   open: boolean;
   loading: boolean;
@@ -71,10 +71,19 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
     return (places || []).map((i) => ({ value: i.id, label: i.title }));
   }, [places]);
 
+  const placeRoles = [userRoles.superAdmin, userRoles.prefectureAdmin];
+
   return (
     <ModalWrapper visible={open} destroyOnClose onCancel={closeModal} footer={null}>
       <FormWrapper>
-        <Form layout="vertical" size="large" onFinish={onSubmit}>
+        <Form
+          layout="vertical"
+          size="large"
+          onFinish={async (values: unknown) => {
+            await onSubmit(values);
+            closeModal();
+          }}
+        >
           <Form.Item label="Nome" name="name" rules={[{ required: true, message: 'Por favor informe um nome' }]}>
             <Input disabled={loading} />
           </Form.Item>
@@ -112,7 +121,10 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
               </Select>
             </Form.Item>
           )}
-          {selectedRole === userRoles.placeAdmin && (
+          {!!(
+            selectedRole === userRoles.placeAdmin ||
+            (selectedRole === userRoles.queueObserver && placeRoles.includes(userRole))
+          ) && (
             <Form.Item label="Local" name="placeId" rules={[{ required: true, message: 'Por favor informe um local' }]}>
               <Select disabled={loading}>
                 {(selectPlaces || []).map((option) => (
