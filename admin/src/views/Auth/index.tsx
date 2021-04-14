@@ -36,7 +36,7 @@ const Auth: React.FC = () => {
   React.useEffect(() => {
     if (process.browser && typeof window !== 'undefined') {
       require('firebaseui/dist/firebaseui.css');
-      const firebaseui = require('../../utils/firebaseui_pt_br');
+      const firebaseui = require('../../../firebaseui_pt_br');
       const element = document.getElementById('#firebase-auth');
       const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
       ui.start(element, firebaseAuthConfig);
