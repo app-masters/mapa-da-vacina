@@ -44,7 +44,7 @@ export default class PrefecturesController {
    * Find a prefecture by id
    */
   public async show({ response, params }: HttpContextContract) {
-    const prefecture = await PrefectureRepository.findByIdWithPlacesAndUsers(params.id);
+    const prefecture = await PrefectureRepository.findByIdWithPlaces(params.id);
     response.send(prefecture);
   }
 

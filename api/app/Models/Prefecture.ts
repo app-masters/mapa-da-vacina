@@ -39,7 +39,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * @param id
    * @returns
    */
-  public async findByIdWithPlacesAndUsers(id: string) {
+  public async findByIdWithPlaces(id: string) {
     const document = await this.getById(id);
 
     const collections = await FirebaseProvider.db.collection(this.getCollectionPath()).doc(id).listCollections();

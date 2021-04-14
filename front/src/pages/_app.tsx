@@ -3,6 +3,7 @@ import { ConfigProvider } from 'antd';
 import { ThemeProvider } from 'styled-components';
 import { theme } from '../styles/theme';
 import '../styles/globals.css';
+import ErrorBoundary from '../components/elements/errorBoundary';
 
 /**
  * Page _app
@@ -10,11 +11,13 @@ import '../styles/globals.css';
  */
 const App = ({ Component, pageProps }: AppProps) => {
   return (
-    <ConfigProvider>
-      <ThemeProvider theme={theme}>
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </ConfigProvider>
+    <ErrorBoundary>
+      <ConfigProvider>
+        <ThemeProvider theme={theme}>
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </ConfigProvider>
+    </ErrorBoundary>
   );
 };
 

@@ -25,6 +25,7 @@ const Logout: NextPage = () => {
 
 export const getServerSideProps = withAuthUserSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN
+  // eslint-disable-next-line require-await
 })(async () => {
   return {
     props: {}
