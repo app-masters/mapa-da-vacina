@@ -114,7 +114,7 @@ export default class UsersController {
       return response
         .status(401)
         .send(
-          'Seu telefone não está na lista de convites para utilizar o filômetro, fale com o responsável pelo ponto de vacinação ou da prefeitura'
+          'Seu telefone não está na lista de convites para utilizar o Mapa da Vacina, fale com o responsável pelo ponto de vacinação ou da prefeitura'
         );
     } catch (error) {
       return response.status(500).send(error);
