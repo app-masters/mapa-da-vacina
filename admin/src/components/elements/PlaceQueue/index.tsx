@@ -2,6 +2,7 @@ import React from 'react';
 import { Place } from '../../../lib/Place';
 import { placeQueue, placeQueueStatusType } from '../../../utils/constraints';
 import { createQueueUpdate } from '../../../utils/firestore';
+import logging from '../../../utils/logging';
 import PlaceQueueTemplate, { PlaceQueueProps } from './template';
 
 /**
@@ -21,7 +22,7 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
       setLoading(false);
     } catch (err) {
       setLoading(false);
-      console.log(err);
+      logging.error(err);
     }
   };
 
@@ -35,7 +36,7 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
       setLoading(false);
     } catch (err) {
       setLoading(false);
-      console.log(err);
+      logging.error(err);
     }
   };
 

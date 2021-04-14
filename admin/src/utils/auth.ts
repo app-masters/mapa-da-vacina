@@ -5,6 +5,7 @@ import cookies from 'next-cookies';
 import { User } from '../lib/User';
 import { Prefecture } from '../lib/Prefecture';
 import { API } from './api';
+import logging from './logging';
 
 /**
  * Redirect user on server and client side
@@ -85,8 +86,9 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
       shouldPersist: true
     };
   } catch (err) {
-    console.error(err);
+    logging.error(err);
     if (err.status !== 401) {
+      logging.debug('User is being redirected to logout', { error: err, ctx });
       redirect(ctx, '/logout');
     }
     redirect(ctx, '/auth');
