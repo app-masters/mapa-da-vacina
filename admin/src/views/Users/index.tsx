@@ -34,11 +34,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
       {
         title: 'Nome',
         dataIndex: 'name',
-        key: 'name',
-        /**
-         * render
-         */
-        render: (text) => <a>{text}</a>
+        key: 'name'
       },
       {
         title: 'Cargo',
@@ -47,7 +43,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
         /**
          * render
          */
-        render: (text) => <a>{userRolesLabel[text]}</a>
+        render: (text) => userRolesLabel[text]
       },
       // {
       //   title: 'Prefeitura',
@@ -70,7 +66,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
          */
         render: (text) => {
           const place = places.find((f) => f.id === text);
-          return <a>{place?.title}</a>;
+          return place?.title;
         }
       },
       {
@@ -80,7 +76,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
         /**
          * render
          */
-        render: (_, record: User) => <a>{new Date(record.invitedAt?.seconds * 1000).toLocaleDateString('pt-br')}</a>
+        render: (_, record: User) => new Date(record.invitedAt?.seconds * 1000).toLocaleDateString('pt-br')
       },
       {
         title: '',

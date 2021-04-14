@@ -5,6 +5,7 @@ import React from 'react';
 import { Place } from '../../../lib/Place';
 import { API } from '../../../utils/api';
 import { User } from '../../../lib/User';
+import { userRoles } from '../../../utils/constraints';
 
 type FormInvitationProps = {
   prefectures: Prefecture[];
@@ -25,6 +26,12 @@ const FormInvitation: React.FC<FormInvitationProps> = ({ prefectures, places, us
   const onSubmitForm = async (values) => {
     setLoading(true);
     try {
+      if (user.role === userRoles.placeAdmin) {
+        values.placeId = user.placeId;
+      }
+      if (!values.prefectureId) {
+        values.prefectureId = prefectures[0].id;
+      }
       await API.post('/invite', values);
       setLoading(false);
       setOpen(false);
