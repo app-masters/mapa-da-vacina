@@ -12,7 +12,7 @@
     "format": "prettier-check .",
     "check-prettier": "prettier-check \"**/*.{js,ts}\"",
     "check-lint": "eslint \"**/*.{js,ts}\" --max-warnings 0 ",
-    "checks": "yarn run check-lint && yarn run check-prettier && yarn check --integrity"
+    "checks": "yarn check --integrity && yarn run check-lint && yarn run check-prettier"
   },
   "devDependencies": {
     "@adonisjs/assembler": "^3.0.0",
