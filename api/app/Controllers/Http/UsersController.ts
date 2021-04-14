@@ -22,15 +22,16 @@ export default class UsersController {
   public async invite({ request, response }: HttpContextContract) {
     try {
       const data = await request.validate(UserValidator);
-      if (!request.decodedIdToken) throw new Error('Usuário deve estar autenticado.');
+      if (!request.decodedIdToken || !request.decodedIdToken.phone_number)
+        throw new Error('Usuário deve estar autenticado.');
 
       let admin: UserType | AdminType;
-      const user = await UserRepository.find({ phone: request.decodedIdToken.phone_number }, data.prefectureId);
+      const user = await UserRepository.findByPhone(request.decodedIdToken.phone_number, data.prefectureId);
 
       if (user) {
         admin = user;
       } else {
-        const userAdmin = await Admin.find({ phone: request.decodedIdToken.phone_number });
+        const userAdmin = await Admin.findByPhone(request.decodedIdToken.phone_number);
         if (userAdmin) {
           admin = userAdmin;
         } else {
@@ -47,17 +48,19 @@ export default class UsersController {
       ) {
         return response.status(401).send(`Usuário ${admin.role} não pode convidar ${data.role}.`);
       }
-      const existUser = await UserRepository.find({ phone: data.phone }, data.prefectureId);
+      const existUser = await UserRepository.findByPhone(data.phone, data.prefectureId);
       if (existUser) return response.status(401).send(`Número de telefone já convidado para esta prefeitura.`);
 
       const newUser = await UserRepository.save({ ...data, active: false, invitedAt: new Date() }, data.prefectureId);
       // Todo: get data from listener instead of querying again
-      const prefecture = await Prefecture.getById(data.prefectureId);
-      let placeTitle: string = '';
+      const prefecture = await Prefecture.findById(data.prefectureId);
+      let placeTitle: string | undefined = '';
       if (newUser.role === 'placeAdmin' && data.placeId) {
-        placeTitle = await (await Place.getById(data.prefectureId, data.placeId)).title;
+        const place = await Place.findById(data.prefectureId, data.placeId);
+        console.log(place);
+        placeTitle = place?.title;
       }
-      await SmsMessages.sendInviteSms(newUser, prefecture.name, placeTitle);
+      await SmsMessages.sendInviteSms(newUser, prefecture?.name, placeTitle);
 
       return response.status(200).send(newUser);
     } catch (error) {
@@ -108,7 +111,13 @@ export default class UsersController {
 
       // if it wasn't a user, try and admin
       const admin = await Admin.find({ phone: data.phone });
-      if (admin) return response.status(200).send({ admin });
+      if (admin) {
+        // Set custom claims in firebase auth
+        await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
+          role: admin.role
+        });
+        return response.status(200).send({ admin });
+      }
 
       // if coudn't find any user
       return response

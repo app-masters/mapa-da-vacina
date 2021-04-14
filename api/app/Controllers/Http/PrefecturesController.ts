@@ -1,8 +1,6 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import PrefectureRepository from 'App/Models/Prefecture';
-import { getSlug } from 'App/Helpers';
-
-//import Prefecture from '@ioc:Adonis/Providers/Firebase';
+import Cache from 'memory-cache';
 
 export default class PrefecturesController {
   /**
@@ -17,55 +15,35 @@ export default class PrefecturesController {
    * List Active prefectures
    */
   public async listActive({ response }: HttpContextContract) {
-    const prefectures = await PrefectureRepository.query((qb) => {
-      return qb.where('active', '==', true).orderBy('city', 'asc');
-    });
-    response.send(prefectures);
-  }
-
-  /**
-   * Save a new prefecture
-   */
-  public async store({ request, response }: HttpContextContract) {
-    const body = request.post();
-    const pref = await PrefectureRepository.save({
-      name: body.name,
-      slug: getSlug(body.name),
-      city: body.city,
-      state: body.state,
-      numPlaces: 0,
-      numPlacesOpen: 0,
-      active: true
-    });
-    response.send(pref);
+    // cache 1 minuto
+    const cacheKey = 'prefectures-list';
+    // Tentar obter do cache
+    let data = Cache.get(cacheKey);
+    console.log('Reading cache: ', cacheKey);
+    // Se não tiver, salva no cache
+    if (!data) {
+      data = await PrefectureRepository.listActive();
+      console.log('Adding cache: ', cacheKey);
+      Cache.put(cacheKey, data, 60 * 1000);
+    }
+    response.send(data);
   }
 
   /**
    * Find a prefecture by id
    */
   public async show({ response, params }: HttpContextContract) {
-    const prefecture = await PrefectureRepository.findByIdWithPlaces(params.id);
-    response.send(prefecture);
-  }
+    const cacheKey = `prefecture-${params.id}`;
+    // Tentar obter do cache
+    let data = Cache.get(cacheKey);
+    console.log('Reading cache: ', cacheKey);
 
-  /**
-   * Update
-   */
-  public async update({ request, response }: HttpContextContract) {
-    const body = request.post();
-    const pref = PrefectureRepository.save({
-      id: body.id,
-      name: body.name,
-      slug: getSlug(body.name)
-    });
-    response.send(pref);
-  }
-
-  /**
-   * Delete
-   */
-  public async destroy({ response, params }: HttpContextContract) {
-    await PrefectureRepository.delete(params.id);
-    return response.status(200);
+    // Se não tiver, salva no cache
+    if (!data) {
+      data = await PrefectureRepository.findByIdWithPlaces(params.id);
+      console.log('Adding cache: ', cacheKey);
+      Cache.put(cacheKey, data, 50 * 1000);
+    }
+    response.send(data);
   }
 }
