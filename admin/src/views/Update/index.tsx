@@ -7,11 +7,13 @@ import { User } from '../../lib/User';
 import { userRoleType, placeQueueStatusType } from '../../utils/constraints';
 import { createQueueUpdate, updatePlace } from '../../utils/firestore';
 import { placeQueue } from '../../utils/constraints';
+import { Spin } from 'antd';
 
 type UpdateViewProps = {
   userRole: userRoleType;
   user: User;
   places: Place[];
+  pageLoading: boolean;
   prefectures: Prefecture[];
 };
 
@@ -19,7 +21,7 @@ type UpdateViewProps = {
  * Update page
  * @params NextPage
  */
-const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places }) => {
+const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>();
 
   /**
@@ -28,7 +30,7 @@ const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places
   const handleUpdatePlaceStatus = async (place: Place, newStatus: boolean) => {
     try {
       setLoading(true);
-      await updatePlace(place.id, {
+      await updatePlace(place.id, place.prefectureId, {
         open: newStatus,
         queueStatus: newStatus ? placeQueue.noQueue : null,
         queueUpdatedAt: new Date()
@@ -49,7 +51,7 @@ const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places
   const handleUpdatePlaceQueue = async (placeId: string, prefectureId: string, newStatus: placeQueueStatusType) => {
     try {
       setLoading(true);
-      await updatePlace(placeId, {
+      await updatePlace(placeId, prefectureId, {
         queueStatus: newStatus,
         queueUpdatedAt: new Date()
       });
@@ -65,18 +67,20 @@ const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places
 
   return (
     <Layout userRole={userRole}>
-      {(prefectures || []).map((prefecture) => (
-        <PlaceQueue
-          key={prefecture.id}
-          loading={loading}
-          userRole={userRole}
-          prefecture={prefecture}
-          user={user}
-          places={places.filter((f) => f.prefectureId === prefecture.id)}
-          placeQueueUpdate={handleUpdatePlaceQueue}
-          placeStatusUpdate={handleUpdatePlaceStatus}
-        />
-      ))}
+      <Spin size="large" spinning={pageLoading}>
+        {(prefectures || []).map((prefecture) => (
+          <PlaceQueue
+            key={prefecture.id}
+            loading={loading}
+            userRole={userRole}
+            prefecture={prefecture}
+            user={user}
+            places={places.filter((f) => f.prefectureId === prefecture.id)}
+            placeQueueUpdate={handleUpdatePlaceQueue}
+            placeStatusUpdate={handleUpdatePlaceStatus}
+          />
+        ))}
+      </Spin>
     </Layout>
   );
 };

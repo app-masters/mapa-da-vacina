@@ -7,11 +7,13 @@ import { User } from '../../lib/User';
 import { userRoleType, placeQueueStatusType, userRoles } from '../../utils/constraints';
 import { createQueueUpdate, updatePlace } from '../../utils/firestore';
 import { placeQueue } from '../../utils/constraints';
+import { Spin } from 'antd';
 
 type DashboardViewProps = {
   userRole: userRoleType;
   user: User;
   places: Place[];
+  pageLoading: boolean;
   prefecture: Prefecture;
 };
 
@@ -19,7 +21,7 @@ type DashboardViewProps = {
  * Dashboard page
  * @params NextPage
  */
-const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, places }) => {
+const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>();
 
   /**
@@ -28,7 +30,7 @@ const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, p
   const handleUpdatePlaceStatus = async (place: Place, newStatus: boolean) => {
     try {
       setLoading(true);
-      await updatePlace(place.id, {
+      await updatePlace(place.id, place.prefectureId, {
         open: newStatus,
         queueStatus: newStatus ? placeQueue.noQueue : null,
         queueUpdatedAt: new Date()
@@ -49,7 +51,7 @@ const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, p
   const handleUpdatePlaceQueue = async (placeId: string, prefectureId: string, newStatus: placeQueueStatusType) => {
     try {
       setLoading(true);
-      await updatePlace(placeId, {
+      await updatePlace(placeId, prefectureId, {
         queueStatus: newStatus,
         queueUpdatedAt: new Date()
       });
@@ -65,17 +67,19 @@ const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, p
 
   return (
     <Layout userRole={userRole}>
-      {!!(userRole === userRoles.queueObserver || userRole === userRoles.placeAdmin) && (
-        <PlaceQueue
-          loading={loading}
-          userRole={userRole}
-          prefecture={prefecture}
-          user={user}
-          places={places}
-          placeQueueUpdate={handleUpdatePlaceQueue}
-          placeStatusUpdate={handleUpdatePlaceStatus}
-        />
-      )}
+      <Spin size="large" spinning={pageLoading}>
+        {!!(userRole === userRoles.queueObserver || userRole === userRoles.placeAdmin) && (
+          <PlaceQueue
+            loading={loading}
+            userRole={userRole}
+            prefecture={prefecture}
+            user={user}
+            places={places}
+            placeQueueUpdate={handleUpdatePlaceQueue}
+            placeStatusUpdate={handleUpdatePlaceStatus}
+          />
+        )}
+      </Spin>
     </Layout>
   );
 };

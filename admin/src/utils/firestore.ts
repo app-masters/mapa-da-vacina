@@ -1,5 +1,6 @@
 import firebase from 'firebase';
-import { placeQueueStatusType } from './constraints';
+import { User } from '../lib/User';
+import { userRoles, placeQueueStatusType } from './constraints';
 
 /**
  * returnCollectionByName
@@ -19,8 +20,11 @@ export const returnCollectionGroupByName = (collection: string) => {
  * listUsersByPrefecture
  */
 export const listUsersByPrefecture = () => {
-  const prefecture = JSON.parse(localStorage.getItem('@auth-prefecture'));
-  return firebase.firestore().collection('prefecture').doc(prefecture?.id).collection('user');
+  const user = JSON.parse(localStorage.getItem('@auth-user')) as User;
+  if (user.role === userRoles.superAdmin) {
+    return firebase.firestore().collectionGroup('user');
+  }
+  return firebase.firestore().collection('prefecture').doc(user.prefectureId).collection('user');
 };
 
 /**
@@ -35,10 +39,12 @@ export const disableUser = async (id: string, userId: string) => {
 /**
  * updatePlace
  */
-export const updatePlace = async (id: string, place) => {
+export const updatePlace = async (id: string, prefectureId: string, place) => {
   return await firebase
     .firestore()
-    .collectionGroup('place')
+    .collection('prefecture')
+    .doc(prefectureId)
+    .collection('place')
     .get()
     .then((snap) => {
       snap.docs.forEach((doc) => {
