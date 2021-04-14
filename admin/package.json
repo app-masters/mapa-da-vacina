@@ -4,7 +4,7 @@
   "private": true,
   "license": "Commons Clause",
   "scripts": {
-    "dev": "next dev -p $PORT",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start -p $PORT",
     "check-prettier": "prettier-check \"{src,cypress}/**/*.{js,ts,tsx}\"",
