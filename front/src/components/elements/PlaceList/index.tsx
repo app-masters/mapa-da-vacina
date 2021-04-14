@@ -34,7 +34,7 @@ const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, titl
 /**
  * PlaceList
  */
-const PlaceList: React.FC<{ places: Place[] }> = ({ places }) => {
+const PlaceList: React.FC<{ places: Place[]; loading: boolean }> = ({ places, loading }) => {
   const [search, setSearch] = React.useState<{ age: string; zip: string }>({ age: undefined, zip: undefined });
   const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
     age: undefined,
@@ -61,6 +61,7 @@ const PlaceList: React.FC<{ places: Place[] }> = ({ places }) => {
     <PlaceListTemplate
       title="Locais de vacinação"
       data={data}
+      loading={loading}
       header={
         <Space wrap>
           <p>Encontre seu ponto</p>

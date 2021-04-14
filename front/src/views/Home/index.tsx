@@ -10,12 +10,12 @@ import { Prefectures } from '../../lib/Prefectures';
 /**
  * CardItem
  */
-const Home: React.FC<{ data: Prefectures }> = ({ data }) => {
+const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading }) => {
   return (
     <HomeWrapper>
       <div className="page-body">
         <HomeHeaderWrapper>
-          <Image src={'/images/logo-app.png'} width={230} height={80} />
+          <Image src={'/images/logo-app-white.png'} width={280} height={40} />
           <Image src={'/images/logo-jf.png'} width={140} height={80} />
         </HomeHeaderWrapper>
         <HomeContentWrapper>
@@ -28,7 +28,7 @@ const Home: React.FC<{ data: Prefectures }> = ({ data }) => {
           </Space>
         </HomeContentWrapper>
         <HomeContentWrapper>
-          <PlaceList places={data.places || []} />
+          <PlaceList places={data.places || []} loading={loading} />
         </HomeContentWrapper>
       </div>
       <HomeFooterWrapper>

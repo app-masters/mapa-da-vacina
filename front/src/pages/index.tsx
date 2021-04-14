@@ -10,16 +10,19 @@ import HomeView from '../views/Home';
  */
 const Home: NextPage<{ data: Prefectures }> = () => {
   // Local state
+  const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState({} as Prefectures);
 
   // Dealing with the fetch and re-fetch of the data
   const getAndSetPrefectureData = useCallback(async () => {
     const prefectureData = await getPrefectureData();
+    console.log('prefectureData', prefectureData);
     setData(prefectureData);
     if (prefectureData && prefectureData.id) {
       // If the data is defined, update it after some time
       setTimeout(getAndSetPrefectureData, 10000);
     }
+    setLoading(false);
   }, []);
 
   // Fetching prefecture data
@@ -27,7 +30,7 @@ const Home: NextPage<{ data: Prefectures }> = () => {
     getAndSetPrefectureData();
   }, [getAndSetPrefectureData]);
 
-  return <HomeView data={data} />;
+  return <HomeView loading={loading} data={data} />;
 };
 
 /**
