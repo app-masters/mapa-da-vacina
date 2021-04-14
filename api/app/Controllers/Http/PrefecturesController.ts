@@ -1,6 +1,5 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import PrefectureRepository from 'App/Models/Prefecture';
-import { getSlug } from 'App/Helpers';
 import Cache from 'memory-cache';
 
 export default class PrefecturesController {
@@ -20,6 +19,7 @@ export default class PrefecturesController {
     const cacheKey = 'prefectures-list';
     // Tentar obter do cache
     let data = Cache.get(cacheKey);
+    console.log('Reading cache: ', cacheKey);
     // Se não tiver, salva no cache
     if (!data) {
       data = await PrefectureRepository.listActive();
@@ -36,6 +36,8 @@ export default class PrefecturesController {
     const cacheKey = `prefecture-${params.id}`;
     // Tentar obter do cache
     let data = Cache.get(cacheKey);
+    console.log('Reading cache: ', cacheKey);
+
     // Se não tiver, salva no cache
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);

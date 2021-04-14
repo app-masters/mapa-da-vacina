@@ -80,14 +80,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     const document = await this.findById(id);
     if (!document) throw new Error("Couldn't find Prefecture with id: " + id);
 
-    let places: PlaceType[] = [];
-    for (const collection of PrefectureRepository.collections) {
-      console.log('Found subcollection: ', collection);
-      if (collection === 'place') {
-        places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
-      }
-    }
-    document.places = places;
+    document.places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
     return document;
   }
 
@@ -120,10 +113,8 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    */
   public async listActive() {
     if (this._activeObserver) {
-      console.log('Via observer prefecture');
       return this.prefectures.filter((pref) => pref.active).sort((p1, p2) => p1.city.localeCompare(p2.city));
     }
-    console.log('Via query prefecture');
     return await this.query((qb) => {
       return qb.where('active', '==', true).orderBy('city', 'asc');
     });

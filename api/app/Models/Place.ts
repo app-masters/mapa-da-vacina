@@ -98,8 +98,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns Active prefectures
    */
   public async listActive(prefectureId: string) {
-    console.log(this._activeObserver);
-
     if (this._activeObserver) {
       return this.places
         .filter((place) => place.active && place.prefectureId === prefectureId)
