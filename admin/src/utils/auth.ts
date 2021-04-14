@@ -62,6 +62,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
     const { AuthUser } = ctx;
 
     if (AuthUser && user?.id) {
+      logging.debug('User already on local cookies, skip validate', { ctx, user, prefecture, AuthUser });
       return {
         data: {
           user: user,
@@ -77,6 +78,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
       phone: AuthUser.claims.phone_number,
       uid: AuthUser.id
     });
+    logging.debug('User validated', { ctx, user, prefecture, AuthUser, response });
     return {
       data: {
         user: response.data.user || response.data.admin,
