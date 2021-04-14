@@ -87,7 +87,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
     for (const document of documents) {
       if (!document.id) return [];
-      document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);
+      //document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);
     }
 
     return documents;

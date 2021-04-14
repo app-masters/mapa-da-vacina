@@ -33,6 +33,8 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
       (docSnapshot) => {
         console.log(`Received doc snapshot user`);
         this._activeObserver = true;
+        console.log('Deleting cache: ', 'prefectures-list');
+        Cache.del('prefectures-list');
         this.prefectures = docSnapshot.docs.map((d) => {
           const cacheKey = `prefecture-${d.id}`;
           console.log('Deleting cache: ', cacheKey);
