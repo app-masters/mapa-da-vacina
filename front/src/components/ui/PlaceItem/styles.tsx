@@ -16,6 +16,7 @@ export const CardItemWrapper = styled(Row)`
 export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
   display: flex;
   flex-direction: column;
+  text-align: center;
   padding: ${(props) => props.theme.spacing.sm};
   max-width: 120px;
   background-color: ${(props) => props.bgcolor || props.theme.colors.primary};
@@ -23,7 +24,7 @@ export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
   align-items: center;
   color: ${(props) => props.theme.colors.background};
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
   text-transform: uppercase;
   @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     max-width: 100%;

@@ -6,6 +6,7 @@ import { Place } from '../../../lib/Place';
 import { API } from '../../../utils/api';
 import { User } from '../../../lib/User';
 import { userRoles } from '../../../utils/constraints';
+import logging from '../../../utils/logging';
 
 type FormInvitationProps = {
   prefectures: Prefecture[];
@@ -39,7 +40,7 @@ const FormInvitation: React.FC<FormInvitationProps> = ({ prefectures, places, us
     } catch (err) {
       setLoading(false);
       message.error(err.data ? err.data.message : 'Falha ao convidar usuário');
-      console.log('failed to invite user', err);
+      logging.error(err);
     }
   };
 
