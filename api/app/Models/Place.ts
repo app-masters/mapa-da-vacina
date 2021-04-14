@@ -3,6 +3,8 @@ import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import AgendaRepository, { AgendaType } from './Agenda';
 
+import Cache from 'memory-cache';
+
 export interface PlaceType extends BaseModel {
   prefectureId: string;
   title: string;
@@ -37,6 +39,10 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         console.log(`Received doc snapshot place`);
         this._activeObserver = true;
         this.places = docSnapshot.docs.map((d) => {
+          // deletar cache da prefeitura id
+          const cacheKey = `prefecture-${d.data().prefectureId}`;
+          // console.log('Deleting cache: ', cacheKey);
+          Cache.del(cacheKey);
           return {
             ...this.getObjectFromData(d.data()),
             id: d.id,
@@ -77,7 +83,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
-    const documents = await this.listActive(prefId); // list({ active: true }, prefId);
+    const documents = await this.listActive(prefId);
 
     for (const document of documents) {
       if (!document.id) return [];
@@ -98,12 +104,12 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       console.log('Via observer places');
       return this.places
         .filter((place) => place.active && place.prefectureId === prefectureId)
-        .sort((place) => {
-          return place.active ? -1 : 1; // `true` values first
-        });
+        .sort((a, b) => (a.active === b.active ? a.title.localeCompare(b.title) : a.active ? -1 : 1));
     }
     console.log('Via query places');
-    return await this.list({ active: true }, prefectureId);
+    return await this.query((qb) => {
+      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('title', 'asc');
+    }, prefectureId);
   }
 
   /**
@@ -111,7 +117,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @param ids
    * @returns
    */
-  public async findById(placeId: string, prefectureId: string): Promise<ReadModel<PlaceType> | null> {
+  public async findById(prefectureId: string, placeId: string): Promise<ReadModel<PlaceType> | null> {
     if (this._activeObserver) {
       return this.places.filter((p) => p.id === placeId && p.prefectureId === prefectureId)[0] as ReadModel<PlaceType>;
     }

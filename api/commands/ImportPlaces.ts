@@ -54,6 +54,7 @@ export default class ImportPlaces extends BaseCommand {
             addressZip: sanitizeZip(place.addressZip),
             active: true,
             open: false,
+            queueStatus: 'closed',
             prefectureId: this.prefectureId
           })
           .then(() => console.log('Created ' + slug))

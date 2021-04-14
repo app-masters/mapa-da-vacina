@@ -21,9 +21,9 @@ class AdminRepository extends BaseRepository<AdminType> {
   constructor() {
     super(FirebaseProvider.storage, errorFactory);
     console.log('INIT ADMIN');
-    this._snapshotObserver = FirebaseProvider.db.collection('prefecture').onSnapshot(
+    this._snapshotObserver = FirebaseProvider.db.collection('admin').onSnapshot(
       (docSnapshot) => {
-        console.log(`Received doc snapshot user`);
+        console.log(`Received doc snapshot admin`);
         this._activeObserver = true;
         this.admins = docSnapshot.docs.map((d) => {
           return {

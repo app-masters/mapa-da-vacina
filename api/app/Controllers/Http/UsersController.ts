@@ -57,6 +57,7 @@ export default class UsersController {
       let placeTitle: string | undefined = '';
       if (newUser.role === 'placeAdmin' && data.placeId) {
         const place = await Place.findById(data.prefectureId, data.placeId);
+        console.log(place);
         placeTitle = place?.title;
       }
       await SmsMessages.sendInviteSms(newUser, prefecture?.name, placeTitle);
@@ -102,7 +103,8 @@ export default class UsersController {
         await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
           role: user.role,
           prefectureId: user.prefectureId,
-          placeId: user.placeId
+          placeId: user.placeId,
+          active: true
         });
 
         return response.status(200).send({ user, prefecture, place });
@@ -116,7 +118,7 @@ export default class UsersController {
       return response
         .status(401)
         .send(
-          'Seu telefone não está na lista de convites para utilizar o filômetro, fale com o responsável pelo ponto de vacinação ou da prefeitura'
+          'Seu telefone não está na lista de convites para utilizar o Mapa da Vacina, fale com o responsável pelo ponto de vacinação ou da prefeitura'
         );
     } catch (error) {
       return response.status(500).send(error);

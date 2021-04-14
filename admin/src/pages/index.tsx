@@ -16,7 +16,7 @@ const Home: NextPage = () => {
 /**
  * getServerSideProps
  */
-export const getServerSideProps = async (ctx) => {
+export const getServerSideProps = (ctx) => {
   if (ctx.res) {
     ctx.res.writeHead(301, {
       Location: '/auth'

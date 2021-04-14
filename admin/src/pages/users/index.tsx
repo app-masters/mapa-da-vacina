@@ -33,8 +33,11 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
      * unsubscribe
      */
     const unsubscribeUsers = listUsersByPrefecture().onSnapshot((snap) => {
-      const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as User));
-      setUsers(data);
+      let list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as User));
+      if (data.user.role === userRoles.placeAdmin) {
+        list = list.filter((f) => f.placeId === data.user.placeId && f.role !== userRoles.prefectureAdmin);
+      }
+      setUsers(list);
       setLoading(false);
     });
 
@@ -48,8 +51,11 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
     });
 
     const unsubscribePlaces = returnCollectionGroupByName('place').onSnapshot((doc) => {
-      const data = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Place));
-      setPlaces(data);
+      let list = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Place));
+      if (data.user.role === userRoles.placeAdmin) {
+        list = list.filter((f) => f.id === data.user.placeId);
+      }
+      setPlaces(list);
       setLoading(false);
     });
 
@@ -58,7 +64,7 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
       unsubscribePrefectures();
       unsubscribePlaces();
     };
-  }, [data.user.prefectureId, data.user.role]);
+  }, [data.user.placeId, data.user.prefectureId, data.user.role]);
 
   return <UsersView loading={loading} users={users} prefectures={prefectures} places={places} user={data.user} />;
 };

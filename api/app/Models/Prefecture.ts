@@ -3,6 +3,8 @@ import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import PlaceRepository, { PlaceType } from './Place';
 
+import Cache from 'memory-cache';
+
 export interface PrefectureType extends BaseModel {
   name: string;
   slug: string;
@@ -32,6 +34,9 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
         console.log(`Received doc snapshot user`);
         this._activeObserver = true;
         this.prefectures = docSnapshot.docs.map((d) => {
+          const cacheKey = `prefecture-${d.id}`;
+          console.log('Deleting cache: ', cacheKey);
+          Cache.del(cacheKey);
           return {
             ...this.getObjectFromData(d.data()),
             id: d.id,
@@ -71,7 +76,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * @param id
    * @returns
    */
-  public async findByIdWithPlacesAndUsers(id: string) {
+  public async findByIdWithPlaces(id: string) {
     const document = await this.findById(id);
     if (!document) throw new Error("Couldn't find Prefecture with id: " + id);
 
@@ -80,9 +85,6 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
       console.log('Found subcollection: ', collection);
       if (collection === 'place') {
         places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
-      }
-      if (collection === 'user') {
-        // get users
       }
     }
     document.places = places;

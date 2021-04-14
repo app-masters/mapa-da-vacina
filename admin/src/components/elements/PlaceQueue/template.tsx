@@ -28,9 +28,9 @@ import dayjs from 'dayjs';
 export type PlaceQueueProps = {
   userRole: userRoleType;
   prefecture: Prefecture;
-  loading: boolean;
-  placeQueueUpdate: (placeId: string, prefectureId: string, status: placeQueueStatusType) => Promise<void>;
-  placeStatusUpdate: (place: Place, status: boolean) => void;
+  loading?: boolean;
+  placeQueueUpdate?: (placeId: string, prefectureId: string, status: placeQueueStatusType) => Promise<void>;
+  placeStatusUpdate?: (place: Place, status: boolean) => Promise<void>;
   places: Place[];
   user: User;
 };
@@ -81,7 +81,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
       /**
        * onOk
        */
-      onOk: () => placeStatusUpdate(place, !place.open)
+      onOk: async () => await placeStatusUpdate(place, !place.open)
     });
   };
 

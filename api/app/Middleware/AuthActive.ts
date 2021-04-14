@@ -2,9 +2,9 @@ import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 
 /**
- * Auth middleware checks only if google credentials exist
+ * Auth active middleware checks for google credentials and existing role
  */
-export default class Auth {
+export default class AuthActive {
   /**
    * Middleware handles
    * @param param0
@@ -18,8 +18,13 @@ export default class Auth {
       if (!idToken) return response.status(401).send({ message: 'Usuário não autorizado.' });
 
       const decodedToken = await FirebaseProvider.app.auth().verifyIdToken(idToken);
+
       if (!decodedToken.uid) {
         return response.status(401).send({ message: 'Usuário não encontrado.' });
+      }
+
+      if (!decodedToken.active || !decodedToken.role) {
+        return response.status(401).send({ message: 'Usuário não está ativo.' });
       }
 
       console.log('decodedToken', JSON.stringify(decodedToken));
