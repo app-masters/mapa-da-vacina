@@ -58,8 +58,6 @@ const Dashboard: NextPage<{ data: DashboardProps }> = ({ data }) => {
     }
   }, [data]);
 
-  console.log('Render dashboard');
-
   return (
     <DashboardView
       userRole={data.user.role}
@@ -74,7 +72,6 @@ const Dashboard: NextPage<{ data: DashboardProps }> = ({ data }) => {
 export const getServerSideProps = withAuthUserTokenSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN
 })(async (ctx) => {
-  console.log('Should I check the user?', ctx);
   const response = await shouldBeLoggedIn(ctx);
   return {
     props: response

@@ -5,7 +5,6 @@ import AuthView from '../../views/Auth';
  * Authentication page
  */
 const Auth = () => {
-  console.log('render auth');
   return <AuthView />;
 };
 
