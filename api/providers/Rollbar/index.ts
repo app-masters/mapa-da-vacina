@@ -28,7 +28,6 @@ export default class Rollbar {
         }
       }
     };
-
     // Create rollbar instance
     return new rollbar(config);
   }
