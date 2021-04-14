@@ -101,12 +101,10 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     console.log(this._activeObserver);
 
     if (this._activeObserver) {
-      console.log('Via observer places');
       return this.places
         .filter((place) => place.active && place.prefectureId === prefectureId)
         .sort((a, b) => (a.active === b.active ? a.title.localeCompare(b.title) : a.active ? -1 : 1));
     }
-    console.log('Via query places');
     return await this.query((qb) => {
       return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('title', 'asc');
     }, prefectureId);

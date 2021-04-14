@@ -103,8 +103,7 @@ export default class UsersController {
         await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
           role: user.role,
           prefectureId: user.prefectureId,
-          placeId: user.placeId,
-          active: true
+          placeId: user.placeId
         });
 
         return response.status(200).send({ user, prefecture, place });
@@ -112,7 +111,13 @@ export default class UsersController {
 
       // if it wasn't a user, try and admin
       const admin = await Admin.find({ phone: data.phone });
-      if (admin) return response.status(200).send({ admin });
+      if (admin) {
+        // Set custom claims in firebase auth
+        await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
+          role: admin.role
+        });
+        return response.status(200).send({ admin });
+      }
 
       // if coudn't find any user
       return response
