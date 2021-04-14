@@ -29,7 +29,7 @@ const getRollbarEnvironment = () => {
   // Local or Online?
   const frontUrl = process.browser ? window.location.host : process.env.NEXT_PUBLIC_FRONT_BASE_URL || '';
   const deployment = frontUrl.indexOf('localhost') < 0 ? 'online' : 'local';
-  return `front.${process.env.NODE_ENV}.${deployment}`;
+  return `admin.${process.env.NODE_ENV}.${deployment}`;
 };
 
 /**
