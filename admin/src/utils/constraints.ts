@@ -25,7 +25,7 @@ export const placeQueue: { [key: string]: placeQueueStatusType } = {
 };
 
 export const placeQueueLabel = {
-  close: 'Fechado',
+  closed: 'Fechado',
   noQueue: 'Sem fila',
   smallQueue: 'Pouca fila',
   mediumQueue: 'Filas moderadas',

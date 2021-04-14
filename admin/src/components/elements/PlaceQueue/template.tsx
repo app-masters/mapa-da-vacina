@@ -6,7 +6,8 @@ import {
   userRoleType,
   placeQueueLabel,
   placeQueueStatusType,
-  placeQueueColor
+  placeQueueColor,
+  placeQueue
 } from '../../../utils/constraints';
 import {
   PlaceQueueItem,
@@ -165,21 +166,24 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
       >
         <Form layout="vertical" size="large" onFinish={onSubmitForm}>
           <Space style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }} wrap direction="vertical">
-            {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => (
-              <QueueButton
-                disabled={loading && modalOpen.clickedOption === option}
-                key={option}
-                color={placeQueueColor[option]}
-                onClick={() => {
-                  if (!loading) {
-                    onSubmitForm(option);
-                  }
-                }}
-              >
-                {loading && modalOpen.clickedOption === option && <LoadingOutlined spin style={{ marginRight: 8 }} />}
-                {placeQueueLabel[option]}
-              </QueueButton>
-            ))}
+            {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => {
+              if (option === placeQueue.closed) return;
+              return (
+                <QueueButton
+                  disabled={loading && modalOpen.clickedOption === option}
+                  key={option}
+                  color={placeQueueColor[option]}
+                  onClick={() => {
+                    if (!loading) {
+                      onSubmitForm(option);
+                    }
+                  }}
+                >
+                  {loading && modalOpen.clickedOption === option && <LoadingOutlined spin style={{ marginRight: 8 }} />}
+                  {placeQueueLabel[option]}
+                </QueueButton>
+              );
+            })}
           </Space>
         </Form>
       </ModalQueue>
