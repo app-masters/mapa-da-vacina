@@ -1,8 +1,8 @@
 export const placeQueueLabel = {
-  'noQueue': 'Sem fila',
-  'smallQueue': 'Pouca fila',
-  'mediumQueue': 'Filas moderadas',
-  'longQueue': 'Filas intensas'
+  noQueue: 'Sem fila',
+  smallQueue: 'Pouca fila',
+  mediumQueue: 'Filas moderadas',
+  longQueue: 'Filas intensas'
 };
 
 export const placeType = {
@@ -16,8 +16,8 @@ export const placeTypeLabel = {
 };
 
 export const placeQueueColor = {
-  'noQueue': '#3FAFB5',
-  'smallQueue': '#E3C153',
-  'mediumQueue': '#ED902C',
-  'longQueue': '#A71319'
+  noQueue: '#3FAFB5',
+  smallQueue: '#E3C153',
+  mediumQueue: '#ED902C',
+  longQueue: '#A71319'
 };
