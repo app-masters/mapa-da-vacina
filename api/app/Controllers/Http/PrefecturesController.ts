@@ -24,7 +24,7 @@ export default class PrefecturesController {
     if (!data) {
       data = await PrefectureRepository.listActive();
       console.log('Adding cache: ', cacheKey);
-      Cache.put(cacheKey, data, 60 * 1000);
+      Cache.put(cacheKey, data);
     }
     response.send(data);
   }
@@ -42,7 +42,7 @@ export default class PrefecturesController {
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
       console.log('Adding cache: ', cacheKey);
-      Cache.put(cacheKey, data, 50 * 1000);
+      Cache.put(cacheKey, data);
     }
     response.send(data);
   }
