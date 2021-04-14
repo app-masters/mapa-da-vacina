@@ -96,7 +96,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
 /**
  * Check if the users must be persisted
  */
-export const shouldPersistUser = async (data: { user: User; prefecture: Prefecture; token: string }) => {
+export const shouldPersistUser = (data: { user: User; prefecture: Prefecture; token: string }) => {
   if (process.browser && data) {
     const localUser = localStorage.getItem('@auth-user');
     const localPrefecture = localStorage.getItem('@auth-prefecture');

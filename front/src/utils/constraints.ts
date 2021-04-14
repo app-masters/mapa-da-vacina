@@ -1,4 +1,5 @@
 export const placeQueueLabel = {
+  closed: 'Fechado',
   noQueue: 'Sem fila',
   smallQueue: 'Pouca fila',
   mediumQueue: 'Filas moderadas',
@@ -16,6 +17,7 @@ export const placeTypeLabel = {
 };
 
 export const placeQueueColor = {
+  closed: '#879395',
   noQueue: '#3FAFB5',
   smallQueue: '#E3C153',
   mediumQueue: '#ED902C',

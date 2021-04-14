@@ -1,7 +1,7 @@
 import React from 'react';
 import { Place } from '../../../lib/Place';
 import { placeQueue, placeQueueStatusType } from '../../../utils/constraints';
-import { createQueueUpdate, updatePlace } from '../../../utils/firestore';
+import { createQueueUpdate } from '../../../utils/firestore';
 import PlaceQueueTemplate, { PlaceQueueProps } from './template';
 
 /**
@@ -13,17 +13,11 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
   /**
    * handleUpdatePlaceStatus
    */
-  const handleUpdatePlaceStatus = async (place: Place, newStatus: boolean) => {
+  const handleUpdatePlaceStatus = async (place: Place, isOpen: boolean) => {
     try {
       setLoading(true);
-      await updatePlace(place.id, place.prefectureId, {
-        open: newStatus,
-        queueStatus: newStatus ? placeQueue.noQueue : null,
-        queueUpdatedAt: new Date()
-      });
-      if (newStatus) {
-        createQueueUpdate(place.id, place.prefectureId, placeQueue.noQueue);
-      }
+      const newQueueStatus = isOpen ? placeQueue.noQueue : placeQueue.closed;
+      await createQueueUpdate(place.id, place.prefectureId, isOpen, newQueueStatus);
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -37,13 +31,7 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
   const handleUpdatePlaceQueue = async (placeId: string, prefectureId: string, newStatus: placeQueueStatusType) => {
     try {
       setLoading(true);
-      await updatePlace(placeId, prefectureId, {
-        queueStatus: newStatus,
-        queueUpdatedAt: new Date()
-      });
-      if (newStatus) {
-        await createQueueUpdate(placeId, prefectureId, newStatus);
-      }
+      await createQueueUpdate(placeId, prefectureId, true, newStatus);
       setLoading(false);
     } catch (err) {
       setLoading(false);
