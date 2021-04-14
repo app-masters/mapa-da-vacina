@@ -1,6 +1,7 @@
 {
   "name": "api",
   "version": "1.0.0",
+  "license": "Commons Clause",
   "private": true,
   "scripts": {
     "build": "node ace build --production",

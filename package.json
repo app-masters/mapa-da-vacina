@@ -1,5 +1,6 @@
 {
   "private": true,
+  "license": "Commons Clause",
   "engines": {
     "node": ">=15"
   },
