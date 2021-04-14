@@ -1,4 +1,4 @@
-import { BaseRepository, BaseModel } from 'firestore-storage';
+import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import AgendaRepository, { AgendaType } from './Agenda';
@@ -104,6 +104,18 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     }
     console.log('Via query places');
     return await this.list({ active: true }, prefectureId);
+  }
+
+  /**
+   * Try to get value via snapshot. If it doesn't exist yet, query firestore
+   * @param ids
+   * @returns
+   */
+  public async findById(placeId: string, prefectureId: string): Promise<ReadModel<PlaceType> | null> {
+    if (this._activeObserver) {
+      return this.places.filter((p) => p.id === placeId && p.prefectureId === prefectureId)[0] as ReadModel<PlaceType>;
+    }
+    return await super.findById(prefectureId, placeId);
   }
 
   /**

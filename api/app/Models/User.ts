@@ -1,4 +1,4 @@
-import { BaseRepository, BaseModel } from 'firestore-storage';
+import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 
@@ -17,12 +17,42 @@ export interface UserType extends BaseModel {
 class UserRepository extends BaseRepository<UserType> {
   private static instance: UserRepository;
 
+  private users: UserType[];
+  private _snapshotObserver;
+  private _activeObserver: boolean = false;
   /**
-   * Constructor
+   * Construtor
    */
   constructor() {
-    console.log('INIT USERS');
     super(FirebaseProvider.storage, errorFactory);
+    console.log('INIT USER');
+    this._snapshotObserver = FirebaseProvider.db.collectionGroup('user').onSnapshot(
+      (docSnapshot) => {
+        console.log(`Received doc snapshot user`);
+        this._activeObserver = true;
+        this.users = docSnapshot.docs.map((d) => {
+          return {
+            ...this.getObjectFromData(d.data()),
+            id: d.id,
+            createdAt: d.createTime.toDate(),
+            updatedAt: d.updateTime.toDate()
+          } as UserType;
+        });
+      },
+      (err) => {
+        this._activeObserver = false;
+        console.log(`Encountered error: ${err}`);
+      }
+    );
+  }
+
+  /**
+   * Get Object from Firestore DocumentData
+   * @param data DocumentData
+   * @returns PrefectureType
+   */
+  private getObjectFromData(data: FirebaseFirestore.DocumentData) {
+    return data as UserType;
   }
 
   /**
@@ -33,6 +63,30 @@ class UserRepository extends BaseRepository<UserType> {
       UserRepository.instance = new UserRepository();
     }
     return UserRepository.instance;
+  }
+
+  /**
+   * Try to get value via snapshot. If it doesn't exist yet, query firestore
+   * @param ids
+   * @returns
+   */
+  public async findById(userId: string, prefectureId: string): Promise<ReadModel<UserType> | null> {
+    if (this._activeObserver) {
+      return this.users.filter((u) => u.id === userId && u.prefectureId === prefectureId)[0] as ReadModel<UserType>;
+    }
+    return await super.findById(prefectureId, userId);
+  }
+
+  /**
+   * Try to get value via snapshot. If it doesn't exist yet, query firestore
+   * @param ids
+   * @returns
+   */
+  public async findByPhone(phone: string, prefectureId: string): Promise<ReadModel<UserType> | null> {
+    if (this._activeObserver) {
+      return this.users.filter((u) => u.phone === phone && u.prefectureId === prefectureId)[0] as ReadModel<UserType>;
+    }
+    return await super.find({ phone: phone }, prefectureId);
   }
 
   /**
