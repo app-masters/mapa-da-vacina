@@ -51,16 +51,20 @@ const parseCookiePrefecture = (prefecture: Prefecture | string): Prefecture => {
  */
 export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => {
   try {
+    console.log('Checking login');
     const allCookies = cookies(ctx);
     let user;
     let prefecture;
+    console.log(allCookies);
     if (allCookies && allCookies.user && allCookies.prefecture) {
+      console.log('cookies with user and prefecture');
       user = parseCookieUser(allCookies.user);
       prefecture = parseCookiePrefecture(allCookies.prefecture);
     }
     const { AuthUser } = ctx;
 
-    if (AuthUser && user) {
+    if (AuthUser && user?.id) {
+      console.log('User already defined', AuthUser, user);
       return {
         data: {
           user: user,
@@ -70,6 +74,8 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
         shouldPersist: true
       };
     }
+
+    console.log('Validating the user', AuthUser);
 
     API.defaults.headers['Authorization'] = await AuthUser.getIdToken();
     const response = await API.post('/validate-user', {
@@ -85,7 +91,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
       shouldPersist: true
     };
   } catch (err) {
-    console.log(ctx.AuthUser.id);
+    console.error(err);
     if (err.status !== 401) {
       redirect(ctx, '/logout');
     }
@@ -117,8 +123,8 @@ export const shouldPersistUser = async (data: { user: User; prefecture: Prefectu
  */
 export const clearAuthCookies = () => {
   if (process.browser) {
-    document.cookie = `user=; path=/`;
-    document.cookie = `prefecture=; path=/`;
+    document.cookie = `user=; path=/; expires=${new Date()}`;
+    document.cookie = `prefecture=; path=/; expires=${new Date()}`;
     localStorage.clear();
   }
 };

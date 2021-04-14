@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3002",
     "build": "next build",
     "start": "next start",
     "check-prettier": "prettier-check \"{src,cypress}/**/*.{js,ts,tsx}\"",
@@ -27,6 +27,7 @@
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-firebaseui": "^4.1.0",
+    "rollbar": "^2.21.1",
     "styled-components": "^5.2.3"
   },
   "devDependencies": {
