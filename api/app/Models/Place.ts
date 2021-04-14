@@ -22,14 +22,43 @@ export interface PlaceType extends BaseModel {
 
 export class PlaceRepository extends BaseRepository<PlaceType> {
   private static instance: PlaceRepository;
-  public places: PlaceType[];
 
+  private places: PlaceType[];
+  private _snapshotObserver;
+  private _activeObserver: boolean = false;
   /**
-   * Constructor
+   * Construtor
    */
   constructor() {
-    console.log('INIT PLACES');
     super(FirebaseProvider.storage, errorFactory);
+    console.log('INIT PLACES');
+    this._snapshotObserver = FirebaseProvider.db.collectionGroup('place').onSnapshot(
+      (docSnapshot) => {
+        console.log(`Received doc snapshot place`);
+        this._activeObserver = true;
+        this.places = docSnapshot.docs.map((d) => {
+          return {
+            ...this.getObjectFromData(d.data()),
+            id: d.id,
+            createdAt: d.createTime.toDate(),
+            updatedAt: d.updateTime.toDate()
+          } as PlaceType;
+        });
+      },
+      (err) => {
+        this._activeObserver = false;
+        console.log(`Encountered error: ${err}`);
+      }
+    );
+  }
+
+  /**
+   * Get Object from Firestore DocumentData
+   * @param data DocumentData
+   * @returns PlaceType
+   */
+  private getObjectFromData(data: FirebaseFirestore.DocumentData) {
+    return data as PlaceType;
   }
 
   /**
@@ -48,13 +77,33 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
-    const documents = await this.list({ active: true }, prefId);
+    const documents = await this.listActive(prefId); // list({ active: true }, prefId);
 
     for (const document of documents) {
+      if (!document.id) return [];
       document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);
     }
 
     return documents;
+  }
+
+  /**
+   * List active prefectures
+   * @returns Active prefectures
+   */
+  public async listActive(prefectureId: string) {
+    console.log(this._activeObserver);
+
+    if (this._activeObserver) {
+      console.log('Via observer places');
+      return this.places
+        .filter((place) => place.active && place.prefectureId === prefectureId)
+        .sort((place) => {
+          return place.active ? -1 : 1; // `true` values first
+        });
+    }
+    console.log('Via query places');
+    return await this.list({ active: true }, prefectureId);
   }
 
   /**

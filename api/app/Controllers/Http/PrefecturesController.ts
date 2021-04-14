@@ -1,6 +1,7 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import PrefectureRepository from 'App/Models/Prefecture';
 import { getSlug } from 'App/Helpers';
+import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 
 //import Prefecture from '@ioc:Adonis/Providers/Firebase';
 
@@ -17,9 +18,7 @@ export default class PrefecturesController {
    * List Active prefectures
    */
   public async listActive({ response }: HttpContextContract) {
-    const prefectures = await PrefectureRepository.query((qb) => {
-      return qb.where('active', '==', true).orderBy('city', 'asc');
-    });
+    const prefectures = await PrefectureRepository.listActive();
     response.send(prefectures);
   }
 

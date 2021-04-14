@@ -18,6 +18,7 @@ export const createQueueUpdate = functions.firestore
     return placeRef?.update({
       queueStatus: newValue.queueStatus,
       open: newValue.open,
+      queueUpdatedAt: new Date()
     });
   });
 
