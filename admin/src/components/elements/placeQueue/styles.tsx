@@ -47,6 +47,7 @@ export const PlaceQueueItem = styled(Row)<{ warning?: boolean }>`
 export const PlaceQueueItemAvatar = styled(Col)<{ color: string }>`
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   margin-right: ${(props) => props.theme.spacing.sm};
   color: ${(props) => props.color || props.theme.colors.gray};
   > svg {
@@ -82,8 +83,11 @@ export const QueueButton = styled.div<{ disabled?: boolean; color: string }>`
   color: ${(props) => props.theme.colors[props.disabled ? 'darkGray' : 'white']};
   font-weight: 600;
   text-transform: uppercase;
+  text-align: center;
+  font-size: 16px;
   p {
     margin: 0;
+    font-size: 14px;
     font-weight: 400;
     text-transform: none;
   }

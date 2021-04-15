@@ -4,7 +4,7 @@ import styled from 'styled-components';
 export const HomeWrapper = styled(Layout)`
   min-height: 100vh;
   background: rgb(68, 144, 161);
-  background: linear-gradient(112deg, rgba(68, 144, 161, 1) 0%, rgba(95, 206, 193, 1) 100%);
+  background: linear-gradient(0deg, rgba(95, 206, 193, 1) 0%, rgba(68, 144, 161, 1) 100%);
   .page-body {
     flex: 1;
     display: flex;
@@ -17,12 +17,24 @@ export const HomeHeaderWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
   max-width: 1600px;
   @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     justify-content: center;
+  }
+  .card-logo {
+    background-color: white;
+    padding: ${(props) => props.theme.spacing.default};
+    border-radius: 10px;
+    box-shadow: 0px 6px 12px #00000030;
+    display: grid;
+    align-items: center;
+    @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+      width: 100%;
+    }
   }
 `;
 
@@ -73,6 +85,7 @@ export const HomeFooterWrapper = styled.footer`
     .appmasters-a {
       display: flex;
       flex-direction: column;
+      align-items: center;
       font-weight: 300;
       font-size: 18px;
       :hover {

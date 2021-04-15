@@ -3,7 +3,7 @@ import PlaceListTemplate from './template';
 import Car from '../../ui/Icons/Car';
 import PersonPin from '../../ui/Icons/PersonPin';
 import React from 'react';
-import { ButtonIconWrapper } from './styles';
+import { ButtonIconWrapper, HeaderCard } from './styles';
 import { Place } from '../../../lib/Place';
 import { placeType } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
@@ -22,7 +22,7 @@ type IconButtonProps = {
 const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, title, icon }) => {
   return (
     <ButtonIconWrapper active={activeFilter === id} onClick={() => onPress(activeFilter === id ? undefined : id)}>
-      {icon}
+      <div style={{ width: 20 }}>{icon}</div>
       <div />
       <p>{title}</p>
     </ButtonIconWrapper>
@@ -56,7 +56,27 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
 
   return (
     <PlaceListTemplate
-      title="Locais de vacinação"
+      title={
+        <HeaderCard>
+          <div>Locais de vacinação</div>
+          <Space wrap size={[16, 0]}>
+            <IconButton
+              id={placeType.driveThru}
+              title="Drive thru"
+              activeFilter={filter.placeType}
+              icon={<Car />}
+              onPress={(value) => setFilter({ ...filter, placeType: value })}
+            />
+            <IconButton
+              id={placeType.fixed}
+              title="Ponto fixo"
+              activeFilter={filter.placeType}
+              icon={<PersonPin />}
+              onPress={(value) => setFilter({ ...filter, placeType: value })}
+            />
+          </Space>
+        </HeaderCard>
+      }
       data={data}
       showQueueUpdatedAt={prefecture.showQueueUpdatedAt}
       loading={loading}
@@ -96,24 +116,6 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
       //     </Button>
       //   </Space>
       // }
-      extra={
-        <Space size={[60, 0]}>
-          <IconButton
-            id={placeType.driveThru}
-            title="Drive thru"
-            activeFilter={filter.placeType}
-            icon={<Car />}
-            onPress={(value) => setFilter({ ...filter, placeType: value })}
-          />
-          <IconButton
-            id={placeType.fixed}
-            title="Ponto fixo"
-            activeFilter={filter.placeType}
-            icon={<PersonPin />}
-            onPress={(value) => setFilter({ ...filter, placeType: value })}
-          />
-        </Space>
-      }
     />
   );
 };
