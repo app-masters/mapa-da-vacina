@@ -7,7 +7,6 @@ import {
   placeQueueLabel,
   placeQueueStatusType,
   placeQueueColor,
-  placeQueue,
   placeQueueHelp
 } from '../../../utils/constraints';
 import {
@@ -32,6 +31,7 @@ export type PlaceQueueProps = {
   userRole: userRoleType;
   prefecture: Prefecture;
   loading?: boolean;
+  extra?: React.ReactNode;
   placeQueueUpdate?: (placeId: string, prefectureId: string, status: placeQueueStatusType) => Promise<void>;
   placeStatusUpdate?: (place: Place, status: boolean) => Promise<void>;
   places: Place[];
@@ -46,7 +46,8 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
   places,
   placeStatusUpdate,
   loading,
-  placeQueueUpdate
+  placeQueueUpdate,
+  extra
 }) => {
   const [modalOpen, setModalOpen] = React.useState<{
     open: boolean;
@@ -97,10 +98,15 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
     handleCloseModal();
   };
 
+  const statusToIgnore = ['open', 'closed'];
+
   return (
     <PlaceQueueWrapper>
       <PlaceQueueCard>
-        <h1>{`Prefeitura de ${prefecture?.name}`}</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <h1>{`Prefeitura de ${prefecture?.name}`}</h1>
+          {extra}
+        </div>
         {places.map((place) => {
           const formattedDate = new Date(place.queueUpdatedAt?.seconds * 1000);
           const haveWarning = !place.open ? false : dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
@@ -123,7 +129,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
                     )}
                   </PlaceQueueItemContent>
                   <div className="queue-tags" style={{ paddingTop: 6 }}>
-                    <Tag color={place.open ? 'success' : 'default'}>{place.open ? 'ABERTO' : 'FECHADO'}</Tag>
+                    {!place.open && <Tag color={'default'}>FECHADO</Tag>}
                     {!!(place.open && place.queueUpdatedAt) && (
                       <Tag color={haveWarning ? 'error' : 'default'}>{`Última atualização incluída ${dayjs(
                         formattedDate
@@ -168,7 +174,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
       >
         <ModalQueueContent wrap direction="vertical">
           {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => {
-            if (option === placeQueue.closed) return;
+            if (statusToIgnore.includes(option)) return;
             return (
               <QueueButton
                 disabled={loading && modalOpen.clickedOption === option}

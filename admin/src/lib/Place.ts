@@ -10,6 +10,15 @@ export type Place = {
   googleMapsUrl?: string;
   type?: string;
   open?: boolean;
+  openToday?: boolean;
+  openTomorrow?: boolean;
+  active?: boolean;
+  openAt?: {
+    seconds: number;
+  };
+  closeAt?: {
+    seconds: number;
+  };
   queueStatus?: string;
   queueUpdatedAt?: {
     seconds: number;

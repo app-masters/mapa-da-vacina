@@ -3,7 +3,7 @@ import { TableWrapper, Section } from './styles';
 import { Popconfirm, Typography, Collapse, Spin } from 'antd';
 import Button from '../../components/ui/Button';
 import React from 'react';
-import FormInvitation from '../../components/elements/FormInvitation';
+import FormInvitation from '../../components/elements/formInvitation';
 import { User } from '../../lib/User';
 import { userRoles, userRolesLabel } from '../../utils/constraints';
 import { disableUser } from '../../utils/firestore';

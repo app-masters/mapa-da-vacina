@@ -39,11 +39,24 @@ const viewKeys: MenuProps[] = [
     icon: <UserOutlined />
   },
   {
-    key: 'update',
-    route: '/update',
+    key: 'place',
     title: 'Pontos de Vacinação',
     roles: ['superAdmin', 'prefectureAdmin'],
-    icon: <ProfileOutlined />
+    icon: <ProfileOutlined />,
+    subMenu: [
+      {
+        key: 'update',
+        route: '/place/update',
+        title: 'Atualização',
+        icon: <ProfileOutlined />
+      },
+      {
+        key: 'list',
+        route: '/place/list',
+        title: 'Cadastro',
+        icon: <ProfileOutlined />
+      }
+    ]
   }
 ];
 

@@ -5,6 +5,9 @@ export type Prefecture = {
   name: string;
   slug: string;
   place?: Place[];
+  state: string;
+  city: string;
+  active: boolean;
   logoUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;

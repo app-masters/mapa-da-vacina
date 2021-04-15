@@ -8,7 +8,7 @@ import { User } from '../../lib/User';
 import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
 import { userRoles } from '../../utils/constraints';
 import { returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
-import UpdateView from '../../views/Update';
+import LocalView from '../../views/LocalUpdate';
 
 type UpdateProps = {
   user: User;
@@ -64,7 +64,7 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
   }, [data]);
 
   return (
-    <UpdateView
+    <LocalView
       userRole={data.user.role}
       user={data.user}
       prefectures={prefectures}

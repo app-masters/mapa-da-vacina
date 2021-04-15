@@ -2,11 +2,12 @@ import { placeQueueLabel, placeQueueColor, placeType } from '../../../utils/cons
 import { CardItemContent, CardItemExtra, CardItemLeftContent, CardItemWrapper } from './styles';
 import { Car, PersonPin } from '../Icons';
 import { Place } from '../../../lib/Place';
+import { Tag } from 'antd';
 
 /**
  * CardItem
  */
-const CardItem: React.FC<{ item: Place }> = ({ item }) => {
+const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ item, showQueueUpdatedAt }) => {
   /**
    * Render the icon based on status
    */
@@ -29,9 +30,9 @@ const CardItem: React.FC<{ item: Place }> = ({ item }) => {
         <h1 className="item-place">{item.title}</h1>
         <p>{`${item.addressStreet} - ${item.addressCityState}, ${item.addressCityState} - ${item.addressZip}`}</p>
       </CardItemContent>
-      {item.queueUpdatedAt && item.open ? (
+      {!!(item.queueUpdatedAt && item.open && showQueueUpdatedAt) ? (
         <CardItemExtra lg={5} md={5} xs={24} sm={24}>
-          <p>Atualizado em: {new Date(item.queueUpdatedAt._seconds * 1000).toLocaleDateString('pt-BR')}</p>
+          <Tag>Atualizado em: {new Date(item.queueUpdatedAt._seconds * 1000).toLocaleDateString('pt-BR')}</Tag>
         </CardItemExtra>
       ) : null}
     </CardItemWrapper>

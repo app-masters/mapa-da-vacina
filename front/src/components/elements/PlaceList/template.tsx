@@ -6,14 +6,20 @@ import { PlaceListWrapper, PlaceListTemplateProps, PlaceListSearchWrapper } from
 /**
  * PlaceListTemplate
  */
-const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({ data, header, loading, ...props }) => {
+const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
+  data,
+  showQueueUpdatedAt,
+  header,
+  loading,
+  ...props
+}) => {
   return (
     <React.Fragment>
       <PlaceListSearchWrapper>{header}</PlaceListSearchWrapper>
       <PlaceListWrapper {...props}>
         <Spin spinning={loading} size="large" style={{ padding: 16 }}>
           {data.map((item) => (
-            <CardItem key={item.id} item={item} />
+            <CardItem key={item.id} showQueueUpdatedAt={showQueueUpdatedAt} item={item} />
           ))}
         </Spin>
       </PlaceListWrapper>

@@ -4,7 +4,12 @@ import { CardProps } from 'antd/lib/card';
 import { InputStyled } from '../../ui/Input/styles';
 import { Place } from '../../../lib/Place';
 
-export type PlaceListTemplateProps = CardProps & { data: Place[]; header?: React.ReactNode; loading: boolean };
+export type PlaceListTemplateProps = CardProps & {
+  data: Place[];
+  showQueueUpdatedAt?: boolean;
+  header?: React.ReactNode;
+  loading: boolean;
+};
 
 export const PlaceListWrapper = styled(Card)`
   min-height: 200px;

@@ -5,12 +5,12 @@ import { Space } from 'antd';
 import PlaceList from '../../components/elements/PlaceList';
 import Button from '../../components/ui/Button';
 import Github from '../../components/ui/Icons/Github';
-import { Prefectures } from '../../lib/Prefectures';
+import { Prefecture } from '../../lib/Prefecture';
 
 /**
  * CardItem
  */
-const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading }) => {
+const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading }) => {
   return (
     <HomeWrapper>
       <div className="page-body">
@@ -28,7 +28,7 @@ const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading
           </Space>
         </HomeContentWrapper>
         <HomeContentWrapper>
-          <PlaceList places={data.places || []} loading={loading} />
+          <PlaceList prefecture={data} loading={loading} />
         </HomeContentWrapper>
       </div>
       <HomeFooterWrapper>
