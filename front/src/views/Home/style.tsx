@@ -15,11 +15,27 @@ export const HomeWrapper = styled(Layout)`
 export const HomeHeaderWrapper = styled.div`
   padding: ${(props) => props.theme.spacing.default};
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
+  align-items: center;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
   max-width: 1600px;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    justify-content: center;
+  }
+  .card-logo {
+    background-color: white;
+    padding: ${(props) => props.theme.spacing.default};
+    border-radius: 10px;
+    box-shadow: 0px 6px 12px #00000030;
+    display: grid;
+    align-items: center;
+    @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+      width: 100%;
+    }
+  }
 `;
 
 export const HomeContentWrapper = styled.div`
