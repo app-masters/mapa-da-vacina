@@ -20,6 +20,9 @@ export interface PlaceType extends BaseModel {
   queueStatus: string;
   queueUpdatedAt: Date;
   agendas?: AgendaType[];
+
+  latitude?: number;
+  longitude?: number;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {

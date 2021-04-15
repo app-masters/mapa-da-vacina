@@ -9,9 +9,8 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.role == 'superAdmin';
+      allow write: if request.auth.uid != null && request.auth.token.role == 'superAdmin';
     }
-
     // request.auth.uid verificar em admin
     match /prefecture/{prefId}/{document=**} {
       allow read: if true;
@@ -20,14 +19,15 @@ service cloud.firestore {
     }
 
     match /prefecture/{prefId}/place/{placeId}/{document=**} {
-          allow read: if true;
-          allow write: if
-            request.auth.token.prefectureId == prefId &&  request.auth.token.placeId == placeId && request.auth.token.role == 'placeAdmin';
+      allow read: if true;
+      allow write: if
+        request.auth.token.prefectureId == prefId &&  request.auth.token.placeId == placeId && request.auth.token.role == 'placeAdmin';
     }
     
-    match /prefecture/{prefId}/place/{placeId}/queueStatus/{queueStatusId}
-            allow read: if true;
-            allow write: if
-              request.auth.token.prefectureId == prefId &&  request.auth.token.placeId == placeId && request.auth.token.role == 'queueObserver';
+    match /prefecture/{prefId}/place/{placeId}/queueStatus/{queueStatusId} {
+        allow read: if true;
+        allow write: if
+          request.auth.token.prefectureId == prefId &&  request.auth.token.placeId == placeId && request.auth.token.role == 'queueObserver';
+    }
   }
 }
