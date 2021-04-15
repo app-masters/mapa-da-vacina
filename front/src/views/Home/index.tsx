@@ -17,6 +17,9 @@ const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading
         <HomeHeaderWrapper>
           <Image src={'/images/logo-app-white.png'} width={280} height={40} />
           <Image src={'/images/pjf-logo-horizontal.svg'} width={240} height={80} />
+          <div className="card-logo">
+            <Image src={'/images/logo-programa.svg'} width={240} height={80} />
+          </div>
         </HomeHeaderWrapper>
         <HomeContentWrapper>
           <Space size="large" wrap>
