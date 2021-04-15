@@ -33,5 +33,8 @@ Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 Route.post('/invite', 'UsersController.invite').middleware(['authActive']);
 Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 
+//Contact
+Route.post('/contact', 'ContactsController.sendContact');
+
 //Test
 Route.get('/test/sms', 'TestController.testSms');

@@ -31,6 +31,8 @@ export const nodeEnv: string = Env.get('NODE_ENV');
 
 export const urlFrontAdmin: string = Env.get('URL_FRONT_ADMIN');
 
+export const contactEmail: string = Env.get('CONTACT_EMAIL');
+
 /*
 |--------------------------------------------------------------------------
 | Http server configuration

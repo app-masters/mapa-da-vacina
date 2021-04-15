@@ -46,9 +46,10 @@ const mailConfig: MailConfig = {
       driver: 'smtp',
       host: Env.get('SMTP_HOST'),
       port: Env.get('SMTP_PORT'),
+      secure: false,
       auth: {
-        user: Env.get('SMTP_USERNAME'),
-        pass: Env.get('SMTP_PASSWORD'),
+        user: Env.get('SMTP_USER'),
+        pass: Env.get('SMTP_PASS'),
         type: 'login'
       }
     }

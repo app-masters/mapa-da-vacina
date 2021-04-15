@@ -90,12 +90,14 @@ export default class UsersController {
         const user = userSnapshot.docs[0].data() as UserType;
         user.id = userSnapshot.docs[0].id;
         // first sign in
-        if (user.active === null) {
+        if (user.active === undefined) {
+          console.log('New User Validating');
           user.uid = data.uid;
           user.signedUpAt = new Date();
           user.active = true;
           await UserRepository.save(user, user.prefectureId);
-        } else {
+        } else if (user.active === false) {
+          console.log('User Deactivated');
           return response.status(401).send('Seu usuário foi desativado.');
         }
         const prefecture = await Prefecture.findById(user.prefectureId);

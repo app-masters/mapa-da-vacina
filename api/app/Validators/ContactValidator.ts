@@ -2,6 +2,10 @@ import { schema, rules } from '@ioc:Adonis/Core/Validator';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 export default class ContactValidator {
+  /**
+   * Constructor
+   * @param ctx
+   */
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -26,9 +30,12 @@ export default class ContactValidator {
   public schema = schema.create({
     phone: schema.string({}, [rules.phone()]),
     name: schema.string({}, [rules.nameSurname()]),
+    email: schema.string({}, [rules.email()]),
     city: schema.string(),
     state: schema.string(),
-    prefectureRelation: schema.string()
+    prefectureRelation: schema.string(),
+    subject: schema.string(),
+    content: schema.string()
   });
 
   /* Nome, Seu email, Número de Telefone, Cidade, Estado (select), qual sua ligação com a prefeitura (select?), Checkbox "Confirmo que estou vinculado a prefeitura de {city}, {state}"*/
