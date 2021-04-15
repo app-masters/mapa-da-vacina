@@ -3,9 +3,9 @@ import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import QueueUpdate from 'App/Models/QueueUpdate';
 
-import { DateTime } from 'luxon';
 import Cache from 'memory-cache';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
+import { minutesDiff } from 'App/Helpers';
 
 export interface PlaceType extends BaseModel {
   prefectureId: string;
@@ -158,16 +158,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
-   * Return difference in minutes considering only the time
-   * @param a Date
-   * @param b Date
-   * @returns Difference in minutes
-   */
-  private minutesDiff(a: Date, b: Date) {
-    return a.getMinutes() + a.getHours() * 60 - (b.getMinutes() + b.getHours() * 60);
-  }
-
-  /**
    * Update Open Today with Open Tomorrow field
    */
   public async openOrClosePlaces() {
@@ -175,14 +165,14 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       const now = new Date();
       const placesToOpen = this.places.filter((p) => {
         //console.log(p.openAt ? this.minutesDiff(p.openAt.toDate(), now) : '');
-        const timeDiff = p.openAt ? this.minutesDiff(p.openAt.toDate(), now) : 0;
+        const timeDiff = p.openAt ? minutesDiff(p.openAt.toDate(), now) : 0;
         // Only open if opens today and still not open
         return p.openAt && !p.open && p.openToday && timeDiff <= -1 && timeDiff > -2;
       });
 
       const placesToClose = this.places.filter((p) => {
         //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
-        const timeDiff = p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : 0;
+        const timeDiff = p.closeAt ? minutesDiff(p.closeAt.toDate(), now) : 0;
         // Only closes if not open
         return p.closeAt && p.open && timeDiff <= -1 && timeDiff > -2;
       });
