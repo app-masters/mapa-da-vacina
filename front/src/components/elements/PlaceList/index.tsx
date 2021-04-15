@@ -118,24 +118,6 @@ const PlaceList: React.FC<{ places: Place[]; loading: boolean }> = ({ places, lo
           </Button>
         </Space>
       }
-      // extra={
-      //   <Space wrap size={[16, 0]}>
-      //     <IconButton
-      //       id={placeType.driveThru}
-      //       title="Drive thru"
-      //       activeFilter={filter.placeType}
-      //       icon={<Car />}
-      //       onPress={(value) => setFilter({ ...filter, placeType: value })}
-      //     />
-      //     <IconButton
-      //       id={placeType.fixed}
-      //       title="Ponto fixo"
-      //       activeFilter={filter.placeType}
-      //       icon={<PersonPin />}
-      //       onPress={(value) => setFilter({ ...filter, placeType: value })}
-      //     />
-      //   </Space>
-      // }
     />
   );
 };
