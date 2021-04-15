@@ -40,7 +40,7 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
         userId: 'cronjob',
         placeId: placeId,
         open: open,
-        queueStatus: open ? 'noQueue' : 'closed',
+        queueStatus: open ? 'open' : 'closed',
         queueUpdatedAt: new Date()
       },
       prefectureId,
