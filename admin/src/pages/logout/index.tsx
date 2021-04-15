@@ -2,6 +2,7 @@ import { NextPage } from 'next';
 import { AuthAction, useAuthUser, withAuthUser, withAuthUserSSR } from 'next-firebase-auth';
 import Router from 'next/router';
 import React from 'react';
+import Loader from '../../components/ui/Loader';
 import { clearAuthCookies } from '../../utils/auth';
 import LayoutView from '../../views/Logout';
 
@@ -32,4 +33,6 @@ export const getServerSideProps = withAuthUserSSR({
   };
 });
 
-export default withAuthUser({})(Logout);
+export default withAuthUser({
+  LoaderComponent: Loader
+})(Logout);

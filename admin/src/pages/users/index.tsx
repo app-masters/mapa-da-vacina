@@ -8,6 +8,7 @@ import React from 'react';
 import { Prefecture } from '../../lib/Prefecture';
 import { Place } from '../../lib/Place';
 import { userRoles } from '../../utils/constraints';
+import Loader from '../../components/ui/Loader';
 
 type UsersProps = {
   user: User;
@@ -79,5 +80,7 @@ export const getServerSideProps = withAuthUserTokenSSR({
 });
 
 export default withAuthUser({
-  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADER,
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+  LoaderComponent: Loader
 })(Users);

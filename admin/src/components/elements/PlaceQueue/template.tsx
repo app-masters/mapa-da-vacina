@@ -7,7 +7,8 @@ import {
   placeQueueLabel,
   placeQueueStatusType,
   placeQueueColor,
-  placeQueue
+  placeQueue,
+  placeQueueHelp
 } from '../../../utils/constraints';
 import {
   PlaceQueueItem,
@@ -17,9 +18,10 @@ import {
   PlaceQueueItemContent,
   ModalQueue,
   QueueButton,
-  QueueTag
+  QueueTag,
+  ModalQueueContent
 } from './styles';
-import { Typography, Modal, Tag, Space, Form, Col } from 'antd';
+import { Typography, Modal, Tag, Space, Col } from 'antd';
 import { PersonPin } from '../../ui/Icons';
 import Button from '../../ui/Button';
 import React from 'react';
@@ -164,28 +166,29 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
         footer={null}
         onCancel={handleCloseModal}
       >
-        <Form layout="vertical" size="large" onFinish={onSubmitForm}>
-          <Space style={{ alignItems: 'center', justifyContent: 'center', display: 'flex' }} wrap direction="vertical">
-            {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => {
-              if (option === placeQueue.closed) return;
-              return (
-                <QueueButton
-                  disabled={loading && modalOpen.clickedOption === option}
-                  key={option}
-                  color={placeQueueColor[option]}
-                  onClick={() => {
-                    if (!loading) {
-                      onSubmitForm(option);
-                    }
-                  }}
-                >
+        <ModalQueueContent wrap direction="vertical">
+          {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => {
+            if (option === placeQueue.closed) return;
+            return (
+              <QueueButton
+                disabled={loading && modalOpen.clickedOption === option}
+                key={option}
+                color={placeQueueColor[option]}
+                onClick={() => {
+                  if (!loading) {
+                    onSubmitForm(option);
+                  }
+                }}
+              >
+                <div>
                   {loading && modalOpen.clickedOption === option && <LoadingOutlined spin style={{ marginRight: 8 }} />}
                   {placeQueueLabel[option]}
-                </QueueButton>
-              );
-            })}
-          </Space>
-        </Form>
+                </div>
+                <p>{placeQueueHelp[option]}</p>
+              </QueueButton>
+            );
+          })}
+        </ModalQueueContent>
       </ModalQueue>
     </PlaceQueueWrapper>
   );

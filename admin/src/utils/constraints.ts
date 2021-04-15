@@ -32,6 +32,14 @@ export const placeQueueLabel = {
   longQueue: 'Filas intensas'
 };
 
+export const placeQueueHelp = {
+  closed: undefined,
+  noQueue: 'menos de 5 minutos de espera',
+  smallQueue: 'até 10 minutos de espera',
+  mediumQueue: 'até 20 minutos de espera',
+  longQueue: 'além de 20 minutos de espera'
+};
+
 export const placeQueueColor = {
   closed: '#879395',
   noQueue: '#3FAFB5',
