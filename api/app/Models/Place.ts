@@ -1,9 +1,11 @@
-import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
+import { BaseRepository, BaseModel, ReadModel, Timestamp } from 'firestore-storage';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
-import AgendaRepository, { AgendaType } from './Agenda';
+import QueueUpdate from 'App/Models/QueueUpdate';
 
+import { DateTime } from 'luxon';
 import Cache from 'memory-cache';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export interface PlaceType extends BaseModel {
   prefectureId: string;
@@ -19,14 +21,17 @@ export interface PlaceType extends BaseModel {
   open: boolean;
   queueStatus: string;
   queueUpdatedAt: Date;
-  agendas?: AgendaType[];
+  openToday?: boolean;
+  openTomorrow?: boolean;
+  openAt?: Timestamp;
+  closeAt?: Timestamp;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {
   private static instance: PlaceRepository;
 
   private places: PlaceType[];
-  private _snapshotObserver;
+  private _snapshotObserver: FirebaseFirestore.CollectionGroup;
   private _activeObserver: boolean = false;
   /**
    * Construtor
@@ -34,7 +39,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   constructor() {
     super(FirebaseProvider.storage, errorFactory);
     console.log('INIT PLACES');
-    this._snapshotObserver = FirebaseProvider.db.collectionGroup('place').onSnapshot(
+    this._snapshotObserver = FirebaseProvider.db.collectionGroup('place');
+    this._snapshotObserver.onSnapshot(
       (docSnapshot) => {
         console.log(`Received doc snapshot place`);
         this._activeObserver = true;
@@ -120,6 +126,75 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       return this.places.filter((p) => p.id === placeId && p.prefectureId === prefectureId)[0] as ReadModel<PlaceType>;
     }
     return await super.findById(prefectureId, placeId);
+  }
+
+  /**
+   * Update Open Today with Open Tomorrow field
+   */
+  public async updateOpenTodayField() {
+    if (this._activeObserver) {
+      for (const place of this.places) {
+        if (
+          place.openToday !== undefined &&
+          place.openTomorrow !== undefined &&
+          place.openToday !== place.openTomorrow
+        ) {
+          RollbarProvider.info(`Updating Place ${place.id} openToday from ${place.openToday} to ${place.openTomorrow}`);
+          place.openToday = place.openTomorrow;
+          await this.save(place, place.prefectureId);
+        }
+      }
+    }
+  }
+
+  /**
+   * Return difference in minutes considering only the time
+   * @param a Date
+   * @param b Date
+   * @returns Difference in minutes
+   */
+  private minutesDiff(a: Date, b: Date) {
+    return a.getMinutes() + a.getHours() * 60 - (b.getMinutes() + b.getHours() * 60);
+  }
+
+  /**
+   * Update Open Today with Open Tomorrow field
+   */
+  public async openOrClosePlaces() {
+    if (this._activeObserver) {
+      const now = new Date();
+      const placesToOpen = this.places.filter((p) => {
+        //console.log(p.openAt ? this.minutesDiff(p.openAt.toDate(), now) : '');
+        const timeDiff = p.openAt ? this.minutesDiff(p.openAt.toDate(), now) : 0;
+        // Only open if opens today and still not open
+        return p.openAt && !p.open && p.openToday && timeDiff <= -1 && timeDiff > -2;
+      });
+
+      const placesToClose = this.places.filter((p) => {
+        //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
+        const timeDiff = p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : 0;
+        // Only closes if not open
+        return p.closeAt && p.open && timeDiff <= -1 && timeDiff > -2;
+      });
+
+      for (const place of placesToOpen) {
+        if (!place.id) continue;
+        RollbarProvider.info(`Opening Place ${place.id}`);
+        console.log(`Opening Place ${place.id}`);
+        place.open = true;
+        //await this.save(place);
+        await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, true);
+      }
+
+      for (const place of placesToClose) {
+        if (!place.id) continue;
+        RollbarProvider.info(`Closing Place ${place.id}`);
+        console.log(`Closing Place ${place.id}`);
+        place.open = false;
+        // await this.save(place);
+        await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, false);
+      }
+    }
   }
 
   /**
