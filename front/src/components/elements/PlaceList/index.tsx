@@ -3,7 +3,7 @@ import PlaceListTemplate from './template';
 import Car from '../../ui/Icons/Car';
 import PersonPin from '../../ui/Icons/PersonPin';
 import React from 'react';
-import { ButtonIconWrapper } from './styles';
+import { ButtonIconWrapper, HeaderCard } from './styles';
 import { Place } from '../../../lib/Place';
 import { placeType } from '../../../utils/constraints';
 import { Person, Pin, Search } from '../../ui/Icons';
@@ -24,7 +24,7 @@ type IconButtonProps = {
 const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, title, icon }) => {
   return (
     <ButtonIconWrapper active={activeFilter === id} onClick={() => onPress(activeFilter === id ? undefined : id)}>
-      {icon}
+      <div style={{ width: 20 }}>{icon}</div>
       <div />
       <p>{title}</p>
     </ButtonIconWrapper>
@@ -59,13 +59,33 @@ const PlaceList: React.FC<{ places: Place[]; loading: boolean }> = ({ places, lo
 
   return (
     <PlaceListTemplate
-      title="Locais de vacinação"
+      title={
+        <HeaderCard>
+          <div>Locais de vacinação</div>
+          <Space wrap size={[16, 0]}>
+            <IconButton
+              id={placeType.driveThru}
+              title="Drive thru"
+              activeFilter={filter.placeType}
+              icon={<Car />}
+              onPress={(value) => setFilter({ ...filter, placeType: value })}
+            />
+            <IconButton
+              id={placeType.fixed}
+              title="Ponto fixo"
+              activeFilter={filter.placeType}
+              icon={<PersonPin />}
+              onPress={(value) => setFilter({ ...filter, placeType: value })}
+            />
+          </Space>
+        </HeaderCard>
+      }
       data={data}
       loading={loading}
       header={
         <Space wrap>
           <p>Encontre seu ponto</p>
-          <div>
+          <Space wrap>
             <Input
               style={{ marginRight: 8 }}
               placeholder="Minha idade"
@@ -87,7 +107,7 @@ const PlaceList: React.FC<{ places: Place[]; loading: boolean }> = ({ places, lo
               maxLength={8}
               onChange={(e) => setSearch({ ...search, zip: e.target.value })}
             />
-          </div>
+          </Space>
           <Button
             icon={<Search />}
             type="primary"
@@ -96,24 +116,6 @@ const PlaceList: React.FC<{ places: Place[]; loading: boolean }> = ({ places, lo
           >
             Buscar
           </Button>
-        </Space>
-      }
-      extra={
-        <Space size={[60, 0]}>
-          <IconButton
-            id={placeType.driveThru}
-            title="Drive thru"
-            activeFilter={filter.placeType}
-            icon={<Car />}
-            onPress={(value) => setFilter({ ...filter, placeType: value })}
-          />
-          <IconButton
-            id={placeType.fixed}
-            title="Ponto fixo"
-            activeFilter={filter.placeType}
-            icon={<PersonPin />}
-            onPress={(value) => setFilter({ ...filter, placeType: value })}
-          />
         </Space>
       }
     />

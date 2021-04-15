@@ -5,6 +5,8 @@ export type Prefectures = {
   name: string;
   slug: string;
   places: Place[];
+  numPlaces?: number;
+  numPlacesOpen?: number;
   createdAt: Date;
   updatedAt: Date;
 };
