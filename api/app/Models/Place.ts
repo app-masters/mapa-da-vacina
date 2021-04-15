@@ -89,9 +89,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
-    const documents = await this.query((qb) => {
-      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('type', 'desc').orderBy('title', 'asc');
-    }, prefId);
+    const documents = await this.listActive(prefId);
 
     for (const document of documents) {
       if (!document.id) return [];
@@ -109,10 +107,22 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     if (this._activeObserver) {
       return this.places
         .filter((place) => place.active && place.prefectureId === prefectureId)
-        .sort((a, b) => (a.active === b.active ? a.title.localeCompare(b.title) : a.active ? -1 : 1));
+        .sort((a, b) => {
+          return (
+            +b.open - +a.open ||
+            +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
+            b.type.localeCompare(a.type) ||
+            a.title.localeCompare(b.title)
+          );
+        });
     }
     return await this.query((qb) => {
-      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('title', 'asc');
+      return qb
+        .where('active', '==', true)
+        .orderBy('open', 'desc')
+        .orderBy('openToday', 'desc')
+        .orderBy('type', 'desc')
+        .orderBy('title', 'asc');
     }, prefectureId);
   }
 
