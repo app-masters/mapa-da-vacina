@@ -48,7 +48,6 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
 
   React.useEffect(() => {
     if (prefectures && prefectures.length > 0) {
-      console.log(data.user);
       const prefecturesId = prefectures.map((m) => m.id);
       // Not able to init unsubscribePlaces as let variable...
       if (data.user.role === userRoles.placeAdmin || data.user.role === userRoles.queueObserver) {
