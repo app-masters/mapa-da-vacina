@@ -30,6 +30,24 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
   }
 
   /**
+   * Add an Place Update
+   * @param placeId
+   * @param open
+   */
+  public async openOrClosePlace(prefectureId: string, placeId: string, open: boolean) {
+    await this.save(
+      {
+        userId: 'cronjob',
+        placeId: placeId,
+        open: open,
+        queueStatus: open ? 'noQueue' : 'closed',
+        queueUpdatedAt: new Date()
+      },
+      prefectureId,
+      placeId
+    );
+  }
+  /**
    * Colection path
    * @param documentIds
    * @returns QueueUpdate collection path
@@ -44,7 +62,7 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
       throw new Error('Prefecture id is missing');
     }
 
-    return `prefecture/${idPrefecture}/place/${idPlace}/queue-update`;
+    return `prefecture/${idPrefecture}/place/${idPlace}/queueUpdate`;
   }
 }
 

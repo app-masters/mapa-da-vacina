@@ -70,3 +70,13 @@ export const sanitizeZip = (zip: string) => {
   if (zipCode.length !== 8) return;
   return zipCode;
 };
+
+/**
+ * Return difference in minutes considering only the time
+ * @param a Date
+ * @param b Date
+ * @returns Difference in minutes
+ */
+export const minutesDiff = (a: Date, b: Date) => {
+  return a.getMinutes() + a.getHours() * 60 - (b.getMinutes() + b.getHours() * 60);
+};
