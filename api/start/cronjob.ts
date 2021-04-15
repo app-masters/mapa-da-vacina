@@ -32,7 +32,7 @@ const updateOpensTodayJob = async () => {
     updateOpenTodayJobRunning = false;
   } catch (err) {
     console.log('cronJob - Job update openToday ended with error ❌');
-    RollbarProvider.error('Failed to execute job update openToday', err);
+    RollbarProvider.error('Failed to execute job update openToday', { err });
     updateOpenTodayJobRunning = false;
   }
 };
@@ -41,19 +41,19 @@ const updateOpensTodayJob = async () => {
  * Open and Close Place Job
  */
 const openOrClosePlaceJob = async () => {
-  console.log('cronJob - Open or Close place Job started ✔');
+  // console.log('cronJob - Open or Close place Job started ✔');
   if (openOrClosePlaceJobRunning) return RollbarProvider.error('cronJob already running');
 
   try {
     openOrClosePlaceJobRunning = true;
-    console.log('cronJob - Opening or Closing Places ...');
+    // console.log('cronJob - Opening or Closing Places ...');
     await Place.openOrClosePlaces();
-    console.log('cronJob - Open or Close place Job ended ✔');
+    // console.log('cronJob - Open or Close place Job ended ✔');
     openOrClosePlaceJobRunning = false;
   } catch (err) {
     console.log('cronJob - Open or Close place Job ended with error ❌');
     console.log(err);
-    RollbarProvider.error('Failed to execute Open or Close place Job', err);
+    RollbarProvider.error('Failed to execute Open or Close place Job', { err });
     openOrClosePlaceJobRunning = false;
   }
 };
