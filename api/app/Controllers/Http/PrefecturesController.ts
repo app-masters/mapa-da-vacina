@@ -48,7 +48,7 @@ export default class PrefecturesController {
       }
 
       console.log('Adding cache: ', cacheKey);
-      Cache.put(cacheKey, data);
+      Cache.put(cacheKey, data, 30 * 60 * 1000);
     }
 
     response.send(data);
