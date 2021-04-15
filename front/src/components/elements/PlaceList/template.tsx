@@ -1,7 +1,7 @@
 import { Spin } from 'antd';
 import React from 'react';
 import CardItem from '../../ui/PlaceItem';
-import { PlaceListWrapper, PlaceListTemplateProps, PlaceListSearchWrapper } from './styles';
+import { PlaceListWrapper, PlaceListTemplateProps, PlaceListSearchWrapper, Loading } from './styles';
 
 /**
  * PlaceListTemplate
@@ -11,7 +11,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({ data, header, loa
     <React.Fragment>
       <PlaceListSearchWrapper>{header}</PlaceListSearchWrapper>
       <PlaceListWrapper {...props}>
-        <Spin spinning={loading} size="large" style={{ padding: 16 }}>
+        <Spin spinning={loading} indicator={<Loading spin />} size="large" style={{ marginTop: 28 }}>
           {data.map((item) => (
             <CardItem key={item.id} item={item} />
           ))}
