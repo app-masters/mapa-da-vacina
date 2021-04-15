@@ -16,8 +16,8 @@ const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading
     <HomeWrapper>
       <div className="page-body">
         <HomeHeaderWrapper>
-          <Image src={'/images/logo-white.svg'} width={280} height={40} />
-          <Image src={'/images/logo-jf.png'} width={140} height={80} />
+          <Image src={'/images/logo-white.svg'} width={280} height={40} alt="app-logo" />
+          <Image src={'/images/pjf-logo-horizontal.svg'} width={240} height={80} alt="pjf-logo" />
         </HomeHeaderWrapper>
         <HomeContentWrapper>
           <Space size="large" wrap>
@@ -44,7 +44,7 @@ const Home: React.FC<{ data: Prefectures; loading: boolean }> = ({ data, loading
           </a>
           <a className="appmasters-a" href="http://appmasters.io/pt" target="_blank" rel="noreferrer">
             Desenvolvido pela
-            <Image src={'/images/appmasters-logo.png'} width={170} height={30} />
+            <Image src={'/images/appmasters-logo.png'} width={170} height={30} alt="appmasters-logo" />
           </a>
         </div>
       </HomeFooterWrapper>

@@ -25,11 +25,19 @@ export const placeQueue: { [key: string]: placeQueueStatusType } = {
 };
 
 export const placeQueueLabel = {
-  close: 'Fechado',
+  closed: 'Fechado',
   noQueue: 'Sem fila',
   smallQueue: 'Pouca fila',
   mediumQueue: 'Filas moderadas',
   longQueue: 'Filas intensas'
+};
+
+export const placeQueueHelp = {
+  closed: undefined,
+  noQueue: 'menos de 5 minutos de espera',
+  smallQueue: 'até 10 minutos de espera',
+  mediumQueue: 'até 20 minutos de espera',
+  longQueue: 'além de 20 minutos de espera'
 };
 
 export const placeQueueColor = {

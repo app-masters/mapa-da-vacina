@@ -15,11 +15,15 @@ export const HomeWrapper = styled(Layout)`
 export const HomeHeaderWrapper = styled.div`
   padding: ${(props) => props.theme.spacing.default};
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   width: 100%;
   margin-left: auto;
   margin-right: auto;
   max-width: 1600px;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    justify-content: center;
+  }
 `;
 
 export const HomeContentWrapper = styled.div`
@@ -69,6 +73,7 @@ export const HomeFooterWrapper = styled.footer`
     .appmasters-a {
       display: flex;
       flex-direction: column;
+      align-items: center;
       font-weight: 300;
       font-size: 18px;
       :hover {

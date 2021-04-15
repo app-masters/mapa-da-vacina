@@ -26,7 +26,8 @@
     "./providers/AppProvider",
     "@adonisjs/core",
     "./providers/Firebase/FirebaseProvider",
-    "./providers/Aws/AwsProvider"
+    "./providers/Aws/AwsProvider",
+    "./providers/Rollbar/RollbarProvider"
   ],
   "aceProviders": [
     "@adonisjs/repl"

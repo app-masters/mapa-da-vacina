@@ -118,8 +118,8 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
   }, [users]);
 
   return (
-    <Layout userRole={user.role}>
-      <Spin size="large" spinning={loading}>
+    <Layout userRole={user.role} user={user}>
+      <Spin size="large" spinning={loading} style={{ marginTop: 36 }}>
         <Section>
           {prefectures && prefectures.length > 0 && (
             <Collapse defaultActiveKey={[prefectures[0]?.id]}>

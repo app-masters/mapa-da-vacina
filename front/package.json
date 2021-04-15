@@ -10,7 +10,7 @@
     "check-prettier": "prettier-check \"{src,cypress}/**/*.{js,ts,tsx}\"",
     "check-lint": "eslint \"{src,cypress}/**/*.{js,ts,tsx}\" --max-warnings 0",
     "check-typescript": "tsc --noEmit",
-    "checks": "yarn run check-lint && yarn run check-prettier && yarn run check-typescript && yarn check --integrity"
+    "checks": "yarn check --integrity && yarn run check-lint && yarn run check-prettier && yarn run check-typescript"
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",

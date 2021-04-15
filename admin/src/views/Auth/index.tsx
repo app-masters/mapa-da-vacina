@@ -1,9 +1,7 @@
 import React from 'react';
 import { AuthContent, AuthWrapper } from './styles';
 import Image from 'next/image';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from 'firebase/app';
-import 'firebase/auth';
 
 const firebaseAuthConfig = {
   signInFlow: 'popup',
@@ -34,18 +32,21 @@ const firebaseAuthConfig = {
  * Auth view
  */
 const Auth: React.FC = () => {
-  const [renderAuth, setRenderAuth] = React.useState<boolean>(false);
   // Only renders the firebase on client side
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setRenderAuth(true);
+    if (process.browser && typeof window !== 'undefined') {
+      require('firebaseui/dist/firebaseui.css');
+      const firebaseui = require('../../../firebaseui_pt_br');
+      const element = document.getElementById('#firebase-auth');
+      const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebase.auth());
+      ui.start(element, firebaseAuthConfig);
     }
   }, []);
   return (
     <AuthWrapper>
       <AuthContent>
-        <Image src={'/images/logo-app.png'} width={280} height={50} />
-        {renderAuth ? <StyledFirebaseAuth uiConfig={firebaseAuthConfig} firebaseAuth={firebase.auth()} /> : null}
+        <Image src={'/images/logo-app.png'} width={280} height={60} alt="app-logo" />
+        <div id="#firebase-auth" />
       </AuthContent>
     </AuthWrapper>
   );

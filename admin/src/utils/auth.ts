@@ -5,6 +5,7 @@ import cookies from 'next-cookies';
 import { User } from '../lib/User';
 import { Prefecture } from '../lib/Prefecture';
 import { API } from './api';
+import logging from './logging';
 
 /**
  * Redirect user on server and client side
@@ -61,6 +62,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
     const { AuthUser } = ctx;
 
     if (AuthUser && user?.id) {
+      logging.debug('User already on local cookies, skip validate', { ctx, user, prefecture, AuthUser });
       return {
         data: {
           user: user,
@@ -76,6 +78,7 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
       phone: AuthUser.claims.phone_number,
       uid: AuthUser.id
     });
+    logging.debug('User validated', { ctx, user, prefecture, AuthUser, response });
     return {
       data: {
         user: response.data.user || response.data.admin,
@@ -85,8 +88,9 @@ export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => 
       shouldPersist: true
     };
   } catch (err) {
-    console.error(err);
+    logging.error(err);
     if (err.status !== 401) {
+      logging.debug('User is being redirected to logout', { error: err, ctx });
       redirect(ctx, '/logout');
     }
     redirect(ctx, '/auth');

@@ -1,4 +1,4 @@
-import { Card, Col, Modal, Row, Tag } from 'antd';
+import { Card, Col, Modal, Row, Space, Tag } from 'antd';
 import styled from 'styled-components';
 
 export const ModalQueue = styled(Modal)``;
@@ -23,6 +23,12 @@ export const PlaceQueueWrapper = styled.div`
       }
     }
   }
+`;
+
+export const ModalQueueContent = styled(Space)`
+  align-items: center;
+  justify-content: center;
+  display: flex;
 `;
 
 export const PlaceQueueCard = styled(Card)`
@@ -74,9 +80,12 @@ export const QueueButton = styled.div<{ disabled?: boolean; color: string }>`
   border: 1px solid ${(props) => (props.disabled ? props.theme.colors.disabled : props.color)};
   background-color: ${(props) => (props.disabled ? props.theme.colors.disabled : props.color)};
   color: ${(props) => props.theme.colors[props.disabled ? 'darkGray' : 'white']};
+  font-weight: 600;
+  text-transform: uppercase;
   p {
     margin: 0;
-    font-weight: 600;
+    font-weight: 400;
+    text-transform: none;
   }
 `;
 

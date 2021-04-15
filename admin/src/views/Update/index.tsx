@@ -21,8 +21,8 @@ type UpdateViewProps = {
  */
 const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places, pageLoading }) => {
   return (
-    <Layout userRole={userRole}>
-      <Spin size="large" spinning={pageLoading}>
+    <Layout userRole={userRole} user={user}>
+      <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {(prefectures || []).map((prefecture) => (
           <PlaceQueue
             key={prefecture.id}

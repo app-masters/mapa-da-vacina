@@ -1,5 +1,4 @@
 import { NextPage } from 'next';
-import Router from 'next/router';
 
 /**
  * Home page
@@ -16,15 +15,13 @@ const Home: NextPage = () => {
 /**
  * getServerSideProps
  */
-export const getServerSideProps = (ctx) => {
-  if (ctx.res) {
-    ctx.res.writeHead(301, {
-      Location: '/auth'
-    });
-    return ctx.res.end();
-  } else {
-    return Router.push('/auth');
-  }
+export const getServerSideProps = () => {
+  return {
+    redirect: {
+      destination: '/auth',
+      permanent: false
+    }
+  };
 };
 
 export default Home;

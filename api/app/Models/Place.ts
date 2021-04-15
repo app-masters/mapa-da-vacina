@@ -1,7 +1,9 @@
-import { BaseRepository, BaseModel } from 'firestore-storage';
+import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import AgendaRepository, { AgendaType } from './Agenda';
+
+import Cache from 'memory-cache';
 
 export interface PlaceType extends BaseModel {
   prefectureId: string;
@@ -22,14 +24,47 @@ export interface PlaceType extends BaseModel {
 
 export class PlaceRepository extends BaseRepository<PlaceType> {
   private static instance: PlaceRepository;
-  public places: PlaceType[];
 
+  private places: PlaceType[];
+  private _snapshotObserver;
+  private _activeObserver: boolean = false;
   /**
-   * Constructor
+   * Construtor
    */
   constructor() {
-    console.log('INIT PLACES');
     super(FirebaseProvider.storage, errorFactory);
+    console.log('INIT PLACES');
+    this._snapshotObserver = FirebaseProvider.db.collectionGroup('place').onSnapshot(
+      (docSnapshot) => {
+        console.log(`Received doc snapshot place`);
+        this._activeObserver = true;
+        this.places = docSnapshot.docs.map((d) => {
+          // deletar cache da prefeitura id
+          const cacheKey = `prefecture-${d.data().prefectureId}`;
+          // console.log('Deleting cache: ', cacheKey);
+          Cache.del(cacheKey);
+          return {
+            ...this.getObjectFromData(d.data()),
+            id: d.id,
+            createdAt: d.createTime.toDate(),
+            updatedAt: d.updateTime.toDate()
+          } as PlaceType;
+        });
+      },
+      (err) => {
+        this._activeObserver = false;
+        console.log(`Encountered error: ${err}`);
+      }
+    );
+  }
+
+  /**
+   * Get Object from Firestore DocumentData
+   * @param data DocumentData
+   * @returns PlaceType
+   */
+  private getObjectFromData(data: FirebaseFirestore.DocumentData) {
+    return data as PlaceType;
   }
 
   /**
@@ -43,24 +78,52 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
-   * findByIdWithSubcolletions
+   * findByPrefectureWithCurrentAgenda
    * @param id
    * @returns
    */
   public async findByPrefectureWithCurrentAgenda(prefId: string): Promise<PlaceType[]> {
     const documents = await this.query((qb) => {
-      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('title', 'asc');
+      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('type', 'desc').orderBy('title', 'asc');
     }, prefId);
 
     for (const document of documents) {
-      document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);
+      if (!document.id) return [];
+      //document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);
     }
 
     return documents;
   }
 
   /**
-   * Colection path
+   * List active prefectures
+   * @returns Active prefectures
+   */
+  public async listActive(prefectureId: string) {
+    if (this._activeObserver) {
+      return this.places
+        .filter((place) => place.active && place.prefectureId === prefectureId)
+        .sort((a, b) => (a.active === b.active ? a.title.localeCompare(b.title) : a.active ? -1 : 1));
+    }
+    return await this.query((qb) => {
+      return qb.where('active', '==', true).orderBy('open', 'desc').orderBy('title', 'asc');
+    }, prefectureId);
+  }
+
+  /**
+   * Try to get value via snapshot. If it doesn't exist yet, query firestore
+   * @param ids
+   * @returns
+   */
+  public async findById(prefectureId: string, placeId: string): Promise<ReadModel<PlaceType> | null> {
+    if (this._activeObserver) {
+      return this.places.filter((p) => p.id === placeId && p.prefectureId === prefectureId)[0] as ReadModel<PlaceType>;
+    }
+    return await super.findById(prefectureId, placeId);
+  }
+
+  /**
+   * Collection path
    * @param documentIds
    * @returns Place collection path
    */
