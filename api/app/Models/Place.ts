@@ -20,7 +20,7 @@ export interface PlaceType extends BaseModel {
   active: boolean;
   open: boolean;
   queueStatus: string;
-  queueUpdatedAt: Date;
+  queueUpdatedAt: Timestamp;
   openToday?: boolean;
   openTomorrow?: boolean;
   openAt?: Timestamp;
