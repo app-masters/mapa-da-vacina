@@ -30,7 +30,7 @@ export const PlaceListWrapper = styled(Card)`
 export const WarningBox = styled.div`
   margin-top: ${(props) => props.theme.spacing.default} !important;
   border-radius: 2px;
-  color: #fff;
+  color: ${(props) => props.theme.colors.darkGray};
   text-align: center;
   background-color: ${(props) => props.theme.colors.alert};
   padding: ${(props) => props.theme.spacing.default} !important;
