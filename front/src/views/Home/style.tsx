@@ -43,7 +43,6 @@ export const HomeHeaderWrapper = styled.div`
     }
   }
   .logo {
-    flex: 1;
     @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
       flex: none;
       padding-bottom: ${(props) => props.theme.spacing.default};

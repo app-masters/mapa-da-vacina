@@ -104,7 +104,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
     <PlaceQueueWrapper>
       <PlaceQueueCard>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <h1>{`Prefeitura de ${prefecture?.name}`}</h1>
+          {prefecture?.name && <h1>{`Prefeitura de ${prefecture?.name}`}</h1>}
           {extra}
         </div>
         {places.map((place) => {
