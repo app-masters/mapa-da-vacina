@@ -33,7 +33,7 @@ export type ColorsList = {
 
 export const colors: ColorsList = {
   background: '#f0f2f5',
-  primary: '#32969B',
+  primary: '#55B4C8',
   darkGray: '#747474'
 };
 

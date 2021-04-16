@@ -45,7 +45,7 @@ const Auth: React.FC = () => {
   return (
     <AuthWrapper>
       <AuthContent>
-        <Image src={'/images/logo-app.png'} width={280} height={60} />
+        <Image src={'/images/logo-app.png'} width={280} height={60} alt="app-logo" />
         <div id="#firebase-auth" />
       </AuthContent>
     </AuthWrapper>

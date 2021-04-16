@@ -2,20 +2,19 @@ import React from 'react';
 import Button from '../../components/ui/Button';
 import { LayoutWrapper } from './styles';
 
-type LogoutProps = {
+type ErrorProps = {
   handleLogout: () => void;
+  message: string;
 };
 
 /**
- * Logout page
+ * Error page
  */
-const Logout: React.FC<LogoutProps> = ({ handleLogout }) => {
+const Error: React.FC<ErrorProps> = ({ handleLogout, message }) => {
   return (
     <LayoutWrapper>
       <div>
-        <h1>
-          O número informado não se encontra na base de dados, por favor entre em contato com o administrador da região
-        </h1>
+        <h1>{message}</h1>
         <div>
           <Button type="primary" onClick={handleLogout}>
             Sair
@@ -26,4 +25,4 @@ const Logout: React.FC<LogoutProps> = ({ handleLogout }) => {
   );
 };
 
-export default Logout;
+export default Error;

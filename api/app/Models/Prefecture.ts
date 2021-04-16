@@ -14,6 +14,7 @@ export interface PrefectureType extends BaseModel {
   numPlacesOpen: number;
   active: boolean;
   places?: PlaceType[];
+  showQueueUpdatedAt?: boolean;
 }
 
 class PrefectureRepository extends BaseRepository<PrefectureType> {
@@ -82,7 +83,10 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     const document = await this.findById(id);
     if (!document) throw new Error("Couldn't find Prefecture with id: " + id);
 
-    document.places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
+    const places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
+
+    document.places = places;
+
     return document;
   }
 
