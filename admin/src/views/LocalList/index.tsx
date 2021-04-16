@@ -17,6 +17,7 @@ import { API } from '../../utils/api';
 
 type ListViewProps = {
   user: User;
+  tokenId?: string;
   places: Place[];
   pageLoading: boolean;
   prefectures: Prefecture[];
@@ -26,7 +27,7 @@ type ListViewProps = {
  * List page
  * @params NextPage
  */
-const List: React.FC<ListViewProps> = ({ user, prefectures, places, pageLoading }) => {
+const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({ open: false });
   const [modalUpload, setModalUpload] = React.useState<{ open: boolean; prefecture?: Prefecture }>({ open: false });
@@ -77,7 +78,7 @@ const List: React.FC<ListViewProps> = ({ user, prefectures, places, pageLoading 
 
       const response = await API.post('/import-places', formData, {
         headers: {
-          Accept: 'multipart/form-data',
+          Authorization: tokenId,
           'Content-Type': 'multipart/form-data'
         }
       });

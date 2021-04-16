@@ -46,7 +46,7 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
           await onSubmit(values);
         }}
       >
-        <Form.Item initialValue={place?.active || true} name="active" valuePropName="checked">
+        <Form.Item initialValue={place ? place.active : true} name="active" valuePropName="checked">
           <Checkbox>Posto de vacinação ativo</Checkbox>
         </Form.Item>
         <Form.Item

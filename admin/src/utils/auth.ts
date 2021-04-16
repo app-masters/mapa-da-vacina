@@ -27,20 +27,20 @@ export const shouldBeLoggedIn = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<GetServerSidePropsResult<{ [key: string]: any }>> => {
   try {
+    const { AuthUser } = ctx;
     const allCookies = cookies(ctx);
+    const userTokenId = await AuthUser.getIdToken();
     // Have user on cookie
     if (allCookies && allCookies.user) {
       const user = parseCookieUser(allCookies.user);
       // Return the user and skip validation
       if (user) {
         return {
-          props: { user }
+          props: { user, token: userTokenId }
         };
       }
     }
     // Doesn't have user on cookies then validate it
-    const { AuthUser } = ctx;
-    const userTokenId = await AuthUser.getIdToken();
     API.defaults.headers['Authorization'] = userTokenId;
     const response = await API.post('/validate-user', {
       phone: AuthUser.claims.phone_number,
@@ -52,7 +52,7 @@ export const shouldBeLoggedIn = async (
     ctx.res.setHeader('Set-Cookie', serialize('user', JSON.stringify(user), { path: '/' }));
     // Return the validated user
     return {
-      props: { user }
+      props: { user, token: userTokenId }
     };
   } catch (err) {
     // Error when validating user 401
