@@ -5,26 +5,19 @@ import Loader from '../../components/ui/Loader';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
-import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
+import { shouldBeLoggedIn } from '../../utils/auth';
 import { userRoles } from '../../utils/constraints';
 import { returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
 import LocalView from '../../views/LocalList';
-
-type UpdateProps = {
-  user: User;
-  prefecture: Prefecture;
-  token: string;
-};
 
 /**
  * Update page
  * @params NextPage
  */
-const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
+const Update: NextPage<{ user: User }> = ({ user }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [prefectures, setPrefectures] = React.useState<Prefecture[]>(null);
   const [places, setPlaces] = React.useState<Place[]>([]);
-  shouldPersistUser(data);
 
   // TODO: Replace this functions with a generic
   const handlePrefectures = React.useCallback((snaps) => {
@@ -50,11 +43,11 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
     if (prefectures && prefectures.length > 0) {
       const prefecturesId = prefectures.map((m) => m.id);
       // Not able to init unsubscribePlaces as let variable...
-      if (data.user.role === userRoles.placeAdmin || data.user.role === userRoles.queueObserver) {
+      if (user.role === userRoles.placeAdmin || user.role === userRoles.queueObserver) {
         const unsubscribePlaces = returnCollectionByName('prefecture')
-          .doc(data.user.prefectureId)
+          .doc(user.prefectureId)
           .collection('place')
-          .doc(data.user.placeId)
+          .doc(user.placeId)
           .onSnapshot((snap) => handlePlaces([snap]));
         return () => {
           unsubscribePlaces();
@@ -68,14 +61,14 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
         };
       }
     }
-  }, [data.user, data.user.placeId, data.user.prefectureId, data.user.role, handlePlaces, prefectures]);
+  }, [user, user.placeId, user.prefectureId, user.role, handlePlaces, prefectures]);
 
   React.useEffect(() => {
     setLoading(true);
     // Not able to init unsubscribePrefectures as let variable...
-    if (data.user.role !== userRoles.superAdmin) {
+    if (user.role !== userRoles.superAdmin) {
       const unsubscribePrefectures = returnCollectionByName('prefecture')
-        .doc(data.user.prefectureId)
+        .doc(user.prefectureId)
         .onSnapshot((doc) => handlePrefectures([doc]));
       return () => {
         unsubscribePrefectures();
@@ -88,26 +81,15 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
         unsubscribePrefectures();
       };
     }
-  }, [data, handlePrefectures]);
+  }, [user, handlePrefectures]);
 
-  return (
-    <LocalView
-      userRole={data.user.role}
-      user={data.user}
-      prefectures={prefectures}
-      places={places}
-      pageLoading={loading}
-    />
-  );
+  return <LocalView user={user} prefectures={prefectures} places={places} pageLoading={loading} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN
 })(async (ctx) => {
-  const response = await shouldBeLoggedIn(ctx);
-  return {
-    props: response
-  };
+  return await shouldBeLoggedIn(ctx);
 });
 
 export default withAuthUser({

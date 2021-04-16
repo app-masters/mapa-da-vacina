@@ -1,6 +1,5 @@
 import firebase from 'firebase';
 import { Place } from '../lib/Place';
-import { User } from '../lib/User';
 import { userRoles, placeQueueStatusType } from './constraints';
 import slugify from 'slugify';
 
@@ -21,8 +20,7 @@ export const returnCollectionGroupByName = (collection: string) => {
 /**
  * listUsersByPrefecture
  */
-export const listUsersByPrefecture = () => {
-  const user = JSON.parse(localStorage.getItem('@auth-user')) as User;
+export const listUsersByPrefecture = (user) => {
   if (user.role === userRoles.superAdmin) {
     return firebase.firestore().collectionGroup('user');
   }
@@ -77,9 +75,9 @@ export const createQueueUpdate = async (
   placeId: string,
   prefectureId: string,
   open: boolean,
-  status: placeQueueStatusType
+  status: placeQueueStatusType,
+  userId: string
 ) => {
-  const user = JSON.parse(localStorage.getItem('@auth-user'));
   return await firebase
     .firestore()
     .collection('prefecture')
@@ -92,6 +90,6 @@ export const createQueueUpdate = async (
       placeId,
       open,
       queueStatus: status,
-      userId: user.id
+      userId
     });
 };

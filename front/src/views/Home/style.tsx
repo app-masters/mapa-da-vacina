@@ -32,23 +32,46 @@ export const HomeHeaderWrapper = styled.div`
     box-shadow: 0px 6px 12px #00000030;
     display: grid;
     align-items: center;
-    @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+  }
+  .logo {
+    @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+      padding-bottom: ${(props) => props.theme.spacing.default};
+      display: flex;
+      justify-content: center;
+      align-items: center;
       width: 100%;
     }
   }
 `;
 
-export const HomeContentWrapper = styled.div`
+export const HomeContainerWrapper = styled.div`
   margin-top: ${(props) => props.theme.spacing.md};
   width: 100%;
   margin-left: auto;
   margin-right: auto;
   max-width: 1600px;
   padding: ${(props) => props.theme.spacing.default};
-  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
-    margin-top: ${(props) => props.theme.spacing.default};
+  @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+    margin-top: ${(props) => props.theme.spacing.sm};
+  }
+`;
+
+export const HomeContentWrapper = styled(HomeContainerWrapper)`
+  @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+    .ant-space {
+      width: 100%;
+      justify-content: center;
+    }
     .ant-space-item {
-      margin-right: 0px !important;
+      width: 48% !important;
+    }
+  }
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    .ant-space {
+      justify-content: flex-start;
+    }
+    .ant-space-item {
+      margin-right: 0 !important;
       width: 100% !important;
     }
   }
@@ -94,7 +117,6 @@ export const HomeFooterWrapper = styled.footer`
     }
     @media (max-width: ${(props) => props.theme.breakpoints.md}) {
       flex-direction: column;
-
       .github-a,
       .appmasters-a {
         margin-top: ${(props) => props.theme.spacing.default};

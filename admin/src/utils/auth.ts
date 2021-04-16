@@ -1,28 +1,11 @@
 import { SSRPropsContext } from 'next-firebase-auth';
-import Router from 'next/router';
 import { ParsedUrlQuery } from 'node:querystring';
 import cookies from 'next-cookies';
 import { User } from '../lib/User';
-import { Prefecture } from '../lib/Prefecture';
 import { API } from './api';
 import logging from './logging';
-
-/**
- * Redirect user on server and client side
- * @param path redirect destination
- */
-export const redirect = (ctx: SSRPropsContext<ParsedUrlQuery>, path: string) => {
-  if (ctx.res) {
-    // Server side
-    ctx.res.writeHead(301, {
-      Location: path
-    });
-    return ctx.res.end();
-  } else {
-    // Client side
-    return Router.push(path);
-  }
-};
+import { GetServerSidePropsResult } from 'next';
+import { serialize } from 'cookie';
 
 /**
  * Get the user and return the correct format
@@ -36,83 +19,63 @@ const parseCookieUser = (user: User | string): User => {
 };
 
 /**
- * Get the prefecture and return the correct format
- * @param prefecture data saved on user cookie
- */
-const parseCookiePrefecture = (prefecture: Prefecture | string): Prefecture => {
-  if (typeof prefecture === 'string') {
-    return JSON.parse(prefecture) as Prefecture;
-  }
-  return prefecture;
-};
-
-/**
  * Check if user is logged and redirect it if it's not
  * @param ctx Next page context
  */
-export const shouldBeLoggedIn = async (ctx: SSRPropsContext<ParsedUrlQuery>) => {
+export const shouldBeLoggedIn = async (
+  ctx: SSRPropsContext<ParsedUrlQuery>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<GetServerSidePropsResult<{ [key: string]: any }>> => {
   try {
     const allCookies = cookies(ctx);
-    let user;
-    let prefecture;
-    if (allCookies && allCookies.user && allCookies.prefecture) {
-      user = parseCookieUser(allCookies.user);
-      prefecture = parseCookiePrefecture(allCookies.prefecture);
+    // Have user on cookie
+    if (allCookies && allCookies.user) {
+      const user = parseCookieUser(allCookies.user);
+      // Return the user and skip validation
+      if (user) {
+        return {
+          props: { user }
+        };
+      }
     }
+    // Doesn't have user on cookies then validate it
     const { AuthUser } = ctx;
-
-    if (AuthUser && user?.id) {
-      logging.debug('User already on local cookies, skip validate', { ctx, user, prefecture, AuthUser });
-      return {
-        data: {
-          user: user,
-          prefecture: prefecture,
-          token: await AuthUser.getIdToken()
-        },
-        shouldPersist: true
-      };
-    }
-
-    API.defaults.headers['Authorization'] = await AuthUser.getIdToken();
+    const userTokenId = await AuthUser.getIdToken();
+    API.defaults.headers['Authorization'] = userTokenId;
     const response = await API.post('/validate-user', {
       phone: AuthUser.claims.phone_number,
       uid: AuthUser.id
     });
-    logging.debug('User validated', { ctx, user, prefecture, AuthUser, response });
+    // Recover user
+    const user = (response.data.user || response.data.admin) as User;
+    // Set response user to cookies
+    ctx.res.setHeader('Set-Cookie', serialize('user', JSON.stringify(user), { path: '/' }));
+    // Return the validated user
     return {
-      data: {
-        user: response.data.user || response.data.admin,
-        prefecture: response.data?.prefecture || null,
-        token: await AuthUser.getIdToken()
-      },
-      shouldPersist: true
+      props: { user }
     };
   } catch (err) {
-    logging.error(err);
-    if (err.status !== 401) {
-      logging.debug('User is being redirected to logout', { error: err, ctx });
-      redirect(ctx, '/logout');
-    }
-    redirect(ctx, '/auth');
-  }
-};
+    // Error when validating user 401
+    logging.error('Error auth: ', { user: ctx.AuthUser, err });
 
-/**
- * Check if the users must be persisted
- */
-export const shouldPersistUser = (data: { user: User; prefecture: Prefecture; token: string }) => {
-  if (process.browser && data) {
-    const localUser = localStorage.getItem('@auth-user');
-    const localPrefecture = localStorage.getItem('@auth-prefecture');
-    API.defaults.headers.common['Authorization'] = data.token;
-    if (!localUser) {
-      localStorage.setItem('@auth-user', JSON.stringify(data.user));
-      document.cookie = `user=${JSON.stringify(data.user)}; path=/`;
-    }
-    if (!localPrefecture) {
-      localStorage.setItem('@auth-prefecture', JSON.stringify(data.prefecture));
-      document.cookie = `prefecture=${JSON.stringify(data.prefecture)}; path=/`;
-    }
+    // Set error on cookies
+    ctx.res.setHeader(
+      'Set-Cookie',
+      serialize(
+        'Filometro.AuthError',
+        err.response.data || 'Erro ao autenticar. Entre em contato com o administrador',
+        {
+          path: '/'
+        }
+      )
+    );
+
+    return {
+      redirect: {
+        permanent: false,
+        destination: err.response.status === 401 ? '/error' : 'auth'
+      }
+    };
   }
 };
 
@@ -122,7 +85,17 @@ export const shouldPersistUser = (data: { user: User; prefecture: Prefecture; to
 export const clearAuthCookies = () => {
   if (process.browser) {
     document.cookie = `user=; path=/; expires=${new Date()}`;
-    document.cookie = `prefecture=; path=/; expires=${new Date()}`;
+    document.cookie = `Filometro.AuthError=; path=/; expires=${new Date()}`;
     localStorage.clear();
+  }
+};
+
+/**
+ * Recover error messages from cookies
+ */
+export const recoverErrorMessage = (ctx) => {
+  const allCookies = cookies(ctx);
+  if (allCookies && allCookies['Filometro.AuthError']) {
+    return allCookies['Filometro.AuthError'];
   }
 };
