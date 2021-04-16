@@ -4,6 +4,7 @@ import Config from '@ioc:Adonis/Core/Config';
 
 // Validators
 import ContactValidator from 'App/Validators/ContactValidator';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export default class ContactsController {
   /**
@@ -11,11 +12,12 @@ export default class ContactsController {
    * @param param0
    * @returns
    */
-  public async sendContact({ request, response, params }: HttpContextContract) {
+  public async sendContact({ request, response }: HttpContextContract) {
     const data = await request.validate(ContactValidator);
-    console.log(data);
+    console.log('Contact data', data);
     const contactEmail = Config.get('app.contactEmail');
 
+    RollbarProvider.info('Sending email: ', { email: data });
     await Mail.send((message) => {
       message.from(data.email).to(contactEmail).subject('Nova Prefeitura - Mapa da Vacina').html(
         `
@@ -24,7 +26,7 @@ export default class ContactsController {
           <li><b>Nome:</b> ${data.name}</li>
           <li><b>Cidade:</b> ${data.city}</li>
           <li><b>Estado:</b> ${data.state}</li>
-          <li><b>Relação com a prefeitura:</b> ${data.prefectureRelation}</li>
+          <li><b>Relação com a prefeitura:</b> ${data.prefectureRole}</li>
           <li><b>Email:</b> ${data.email}</li>
           <li><b>Telefone:</b> ${data.phone}
             <span> &bull; <span>
@@ -32,6 +34,7 @@ export default class ContactsController {
             <span> &bull; <span>
             <a href="https://api.whatsapp.com/send/?phone=${data.phone}"><b>Whatsapp</b></a>
           </li>
+          <li><b>Aceito em:</b> ${data.acceptedAt}</li>
         </ul>
         `
       );
