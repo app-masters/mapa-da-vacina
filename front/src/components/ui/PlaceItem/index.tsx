@@ -33,7 +33,11 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
       <CardItemContent lg={22} md={20} xs={24} sm={24}>
         <div>
           <h1 className="item-place">{item.title}</h1>
-          <p>{`${item.addressStreet}, ${item.addressDistrict} - ${item.addressCityState}, ${item.addressZip}`}</p>
+          <p>{`${item.addressStreet ? item.addressStreet : ''} ${
+            item.addressDistrict ? ', ' + item.addressDistrict : ''
+          }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
+            item.addressZip ? ', ' + item.addressZip : ''
+          }`}</p>
         </div>
         {!!(item.queueUpdatedAt && item.open && showQueueUpdatedAt) ? (
           <CardItemExtra>

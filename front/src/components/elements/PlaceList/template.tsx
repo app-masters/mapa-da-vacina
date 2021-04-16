@@ -33,7 +33,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
           ))}
         </Spin>
       </PlaceListWrapper>
-      {!sampleMode && (
+      {sampleMode && (
         <WarningBox>
           <p>
             Estamos aguardando o contato da prefeitura de <strong>{city}</strong> para apresentarmos também o tamanho da
