@@ -5,7 +5,7 @@ import * as React from 'react';
  */
 function SvgPersonPin(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg width={14.005} height={20.008} viewBox="0 0 14.005 20.008" {...props}>
+    <svg width={18.005} height={24.008} viewBox="0 0 14.005 20.008" {...props}>
       <g data-name="Grupo 21">
         <path
           data-name="Caminho 12"

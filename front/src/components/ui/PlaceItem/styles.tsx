@@ -6,7 +6,7 @@ export const CardItemWrapper = styled(Row)`
   position: relative;
   display: flex;
   border: 1px solid #00000012;
-  min-height: 100px;
+  min-height: 80px;
   width: 100%;
   margin-bottom: ${(props) => props.theme.spacing.default};
   border-radius: 5px;
@@ -34,8 +34,15 @@ export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
 export const CardItemContent = styled(Col)<ColProps>`
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   padding: ${(props) => props.theme.spacing.sm};
+  padding-left: ${(props) => props.theme.spacing.default};
+  > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
   h1,
   p {
     color: ${(props) => props.theme.colors.darkGray};
@@ -52,7 +59,10 @@ export const CardItemContent = styled(Col)<ColProps>`
   }
 `;
 
-export const CardItemExtra = styled(Col)<ColProps>`
-  padding: ${(props) => props.theme.spacing.sm};
-  text-align: right;
+export const CardItemExtra = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  padding: ${(props) => props.theme.spacing.sm} 0px;
 `;

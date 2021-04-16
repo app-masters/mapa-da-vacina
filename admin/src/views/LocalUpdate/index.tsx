@@ -1,5 +1,5 @@
 import React from 'react';
-import PlaceQueue from '../../components/elements/PlaceQueue';
+import PlaceQueue from '../../components/elements/placeQueue';
 import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
@@ -21,8 +21,8 @@ type UpdateViewProps = {
  */
 const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places, pageLoading }) => {
   return (
-    <Layout userRole={userRole}>
-      <Spin size="large" spinning={pageLoading}>
+    <Layout userRole={userRole} user={user}>
+      <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {(prefectures || []).map((prefecture) => (
           <PlaceQueue
             key={prefecture.id}

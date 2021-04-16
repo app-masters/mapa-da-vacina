@@ -21,6 +21,12 @@
       "environment": [
         "web"
       ]
+    },
+    {
+      "file": "./start/cronjob",
+      "environment": [
+        "web"
+      ]
     }
   ],
   "providers": [

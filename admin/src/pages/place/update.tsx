@@ -1,13 +1,14 @@
 import { NextPage } from 'next';
 import { AuthAction, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
 import React from 'react';
+import Loader from '../../components/ui/Loader';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
 import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
 import { userRoles } from '../../utils/constraints';
 import { returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
-import UpdateView from '../../views/Update';
+import LocalView from '../../views/LocalUpdate';
 
 type UpdateProps = {
   user: User;
@@ -63,7 +64,7 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
   }, [data]);
 
   return (
-    <UpdateView
+    <LocalView
       userRole={data.user.role}
       user={data.user}
       prefectures={prefectures}
@@ -83,5 +84,7 @@ export const getServerSideProps = withAuthUserTokenSSR({
 });
 
 export default withAuthUser({
-  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADER,
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+  LoaderComponent: Loader
 })(Update);

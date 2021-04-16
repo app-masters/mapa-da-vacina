@@ -1,5 +1,5 @@
 import React from 'react';
-import PlaceQueue from '../../components/elements/PlaceQueue';
+import PlaceQueue from '../../components/elements/placeQueue';
 import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
@@ -21,8 +21,8 @@ type DashboardViewProps = {
  */
 const Dashboard: React.FC<DashboardViewProps> = ({ userRole, user, prefecture, places, pageLoading }) => {
   return (
-    <Layout userRole={userRole}>
-      <Spin size="large" spinning={pageLoading}>
+    <Layout userRole={userRole} user={user}>
+      <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {!!(userRole === userRoles.queueObserver || userRole === userRoles.placeAdmin) && (
           <PlaceQueue userRole={userRole} prefecture={prefecture} user={user} places={places} />
         )}

@@ -1,6 +1,8 @@
 import firebase from 'firebase';
+import { Place } from '../lib/Place';
 import { User } from '../lib/User';
 import { userRoles, placeQueueStatusType } from './constraints';
+import slugify from 'slugify';
 
 /**
  * returnCollectionByName
@@ -56,7 +58,20 @@ export const updatePlace = async (id: string, prefectureId: string, place) => {
 };
 
 /**
- * updatePlace
+ * createPlace
+ */
+export const createPlace = async (prefectureId: string, place: Place) => {
+  return await firebase
+    .firestore()
+    .collection('prefecture')
+    .doc(prefectureId)
+    .collection('place')
+    .doc(slugify(place.title.toLowerCase()))
+    .set(place);
+};
+
+/**
+ * createQueueUpdate
  */
 export const createQueueUpdate = async (
   placeId: string,

@@ -1,6 +1,7 @@
 import { NextPage } from 'next';
 import { AuthAction, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
 import React from 'react';
+import Loader from '../../components/ui/Loader';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
@@ -79,5 +80,7 @@ export const getServerSideProps = withAuthUserTokenSSR({
 });
 
 export default withAuthUser({
-  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADER,
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+  LoaderComponent: Loader
 })(Dashboard);

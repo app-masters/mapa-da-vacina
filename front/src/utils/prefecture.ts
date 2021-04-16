@@ -1,10 +1,10 @@
-import { Prefectures } from '../lib/Prefectures';
+import { Prefecture } from '../lib/Prefecture';
 import logging from './logging';
 
 /**
  * Get prefecture ID
  */
-export const getPrefectureData = async (): Promise<Prefectures> => {
+export const getPrefectureData = async (): Promise<Prefecture> => {
   try {
     // Defining NEXT_PUBLIC_PREFECTURE_ID as prefecture ID
     let prefectureId = process.env.NEXT_PUBLIC_PREFECTURE_ID;
@@ -28,6 +28,6 @@ export const getPrefectureData = async (): Promise<Prefectures> => {
     return data;
   } catch (error) {
     logging.error(error);
-    return {} as Prefectures;
+    return {} as Prefecture;
   }
 };

@@ -1,7 +1,7 @@
 import { CardWrapper, CardValue } from './styles';
 
 export type CardProps = {
-  value: string | number;
+  value: string | number | React.ReactNode;
   description: string;
   onPress?: () => void;
 };

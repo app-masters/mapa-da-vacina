@@ -17,7 +17,7 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
   const handleUpdatePlaceStatus = async (place: Place, isOpen: boolean) => {
     try {
       setLoading(true);
-      const newQueueStatus = isOpen ? placeQueue.noQueue : placeQueue.closed;
+      const newQueueStatus = isOpen ? placeQueue.open : placeQueue.closed;
       await createQueueUpdate(place.id, place.prefectureId, isOpen, newQueueStatus);
       setLoading(false);
     } catch (err) {
