@@ -313,6 +313,24 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
+   * Update queue status for demonstration city
+   */
+  public async updateQueueStatusForDemonstration(prefectureId: string) {
+    if (this._activeObserver) {
+      const placesDemonstracao = this.places.filter((p) => {
+        return p.prefectureId === prefectureId && p.active;
+      });
+      for (const place of placesDemonstracao) {
+        const prob = Math.random();
+        // random update to 25%
+        if (place.id && prob <= 0.25) {
+          await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
+        }
+      }
+    }
+  }
+
+  /**
    * Collection path
    * @param documentIds
    * @returns Place collection path
