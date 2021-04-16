@@ -28,7 +28,7 @@ export default class ImportPlaceValidator {
    *    ```
    */
   public schema = schema.create({
-    file: schema.file({ extnames: ['csv'] }),
+    file: schema.file(),
     prefectureId: schema.string(),
     deactivateMissing: schema.boolean()
   });
