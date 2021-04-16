@@ -44,6 +44,7 @@ export const placeQueueHelp = {
 };
 
 export const placeQueueColor = {
+  open: '#16a085',
   closed: '#879395',
   noQueue: '#16a085',
   smallQueue: '#E3C153',
