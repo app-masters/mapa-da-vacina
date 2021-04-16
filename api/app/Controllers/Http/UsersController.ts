@@ -14,59 +14,54 @@ import ValidateValidator from 'App/Validators/ValidateValidator';
 
 // Resources
 import SmsMessages from 'App/Models/Messages/SmsMessages';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export default class UsersController {
   /**
    * Invite a new user
    */
   public async invite({ request, response }: HttpContextContract) {
-    try {
-      const data = await request.validate(UserValidator);
-      if (!request.decodedIdToken || !request.decodedIdToken.phone_number)
-        throw new Error('Usuário deve estar autenticado.');
+    const data = await request.validate(UserValidator);
+    if (!request.decodedIdToken || !request.decodedIdToken.phone_number)
+      throw new Error('Usuário deve estar autenticado.');
 
-      let admin: UserType | AdminType;
-      const user = await UserRepository.findByPhone(request.decodedIdToken.phone_number, data.prefectureId);
+    let admin: UserType | AdminType;
+    const user = await UserRepository.findByPhone(request.decodedIdToken.phone_number, data.prefectureId);
 
-      if (user) {
-        admin = user;
+    if (user) {
+      admin = user;
+    } else {
+      const userAdmin = await Admin.findByPhone(request.decodedIdToken.phone_number);
+      if (userAdmin) {
+        admin = userAdmin;
       } else {
-        const userAdmin = await Admin.findByPhone(request.decodedIdToken.phone_number);
-        if (userAdmin) {
-          admin = userAdmin;
-        } else {
-          throw new Error('Usuário não encontrado.');
-        }
+        throw new Error('Usuário não encontrado.');
       }
-
-      // const admin = await Admin.get({ phone: request.decodedIdToken.phone_number });
-
-      if (
-        (admin.role === 'superAdmin' && data.role !== 'prefectureAdmin') ||
-        (admin.role === 'prefectureAdmin' && data.role === 'superAdmin') ||
-        (admin.role === 'placeAdmin' && data.role !== 'queueObserver')
-      ) {
-        return response.status(401).send(`Usuário ${admin.role} não pode convidar ${data.role}.`);
-      }
-      const existUser = await UserRepository.findByPhone(data.phone, data.prefectureId);
-      if (existUser) return response.status(401).send(`Número de telefone já convidado para esta prefeitura.`);
-
-      const newUser = await UserRepository.save({ ...data, active: false, invitedAt: new Date() }, data.prefectureId);
-      // Todo: get data from listener instead of querying again
-      const prefecture = await Prefecture.findById(data.prefectureId);
-      let placeTitle: string | undefined = '';
-      if (newUser.role === 'placeAdmin' && data.placeId) {
-        const place = await Place.findById(data.prefectureId, data.placeId);
-        console.log(place);
-        placeTitle = place?.title;
-      }
-      await SmsMessages.sendInviteSms(newUser, prefecture?.name, placeTitle);
-
-      return response.status(200).send(newUser);
-    } catch (error) {
-      console.log(error);
-      return response.status(500).send({ error });
     }
+
+    // const admin = await Admin.get({ phone: request.decodedIdToken.phone_number });
+
+    if (
+      (admin.role === 'superAdmin' && data.role !== 'prefectureAdmin') ||
+      (admin.role === 'prefectureAdmin' && data.role === 'superAdmin') ||
+      (admin.role === 'placeAdmin' && data.role !== 'queueObserver')
+    ) {
+      return response.status(401).send(`Usuário ${admin.role} não pode convidar ${data.role}.`);
+    }
+    const existUser = await UserRepository.findByPhone(data.phone, data.prefectureId);
+    if (existUser) return response.status(401).send(`Número de telefone já convidado para esta prefeitura.`);
+
+    const newUser = await UserRepository.save({ ...data, active: false, invitedAt: new Date() }, data.prefectureId);
+    // Todo: get data from listener instead of querying again
+    const prefecture = await Prefecture.findById(data.prefectureId);
+    let placeTitle: string | undefined = '';
+    if (newUser.role === 'placeAdmin' && data.placeId) {
+      const place = await Place.findById(data.prefectureId, data.placeId);
+      console.log(place);
+      placeTitle = place?.title;
+    }
+    await SmsMessages.sendInviteSms(newUser, prefecture?.name, placeTitle);
+    return response.status(200).send(newUser);
   }
 
   /**
