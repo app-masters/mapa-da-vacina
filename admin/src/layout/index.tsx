@@ -1,6 +1,6 @@
 import React from 'react';
 import { LayoutContentWrapper, LayoutHeader, LayoutWrapper } from './styles';
-import { Layout as ALayout, Menu, Tooltip, Typography } from 'antd';
+import { Layout as ALayout, Menu, Typography } from 'antd';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import Router, { useRouter } from 'next/router';
@@ -105,9 +105,7 @@ const Layout: React.FC<{ userRole: userRoleType; user: User }> = ({ children, us
       >
         <div className="logo">
           {collapsed ? (
-            <Tooltip placement="right" title={'Prefeitura de Juiz de Fora'}>
-              <Image width={100} height={60} src="/images/logo-mapa-mini.svg" alt="logo" />
-            </Tooltip>
+            <Image width={100} height={60} src="/images/logo-mapa-mini.svg" alt="logo" />
           ) : (
             <Image width={150} height={60} src="/images/logo-mapa.svg" alt="logo" />
           )}
