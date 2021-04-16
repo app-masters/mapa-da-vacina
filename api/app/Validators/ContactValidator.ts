@@ -37,7 +37,7 @@ export default class ContactValidator {
     acceptedAt: schema.date({
       format: 'iso'
     }),
-    comment: schema.string()
+    comment: schema.string.optional()
   });
 
   /* Nome, Seu email, Número de Telefone, Cidade, Estado (select), qual sua ligação com a prefeitura (select?), Checkbox "Confirmo que estou vinculado a prefeitura de {city}, {state}"*/
