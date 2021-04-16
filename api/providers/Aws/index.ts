@@ -59,6 +59,7 @@ export default class Aws {
 
     try {
       console.log('Sending real SMS - to: ' + SNSParams.PhoneNumber + ' - message: ' + SNSParams.Message);
+
       await this._sns.send(new PublishCommand(SNSParams));
       return true;
     } catch (err) {
