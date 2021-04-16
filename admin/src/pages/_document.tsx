@@ -43,7 +43,6 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <title>Mapa da Vacina</title>
           <link rel="preload" href="/fonts/Roboto-Light.ttf" as="font" crossOrigin="" />
           <link rel="preload" href="/fonts/Roboto-Regular.ttf" as="font" crossOrigin="" />
           <link rel="preload" href="/fonts/Roboto-Medium.ttf" as="font" crossOrigin="" />

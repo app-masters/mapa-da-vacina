@@ -35,7 +35,7 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
           <h1 className="item-place">{item.title}</h1>
           <p>{`${item.addressStreet}, ${item.addressDistrict} - ${item.addressCityState}, ${item.addressZip}`}</p>
         </div>
-        {item.queueUpdatedAt && item.open ? (
+        {!!(item.queueUpdatedAt && item.open && showQueueUpdatedAt) ? (
           <CardItemExtra>
             <Tag color={haveWarning ? 'error' : 'default'}>Atualizado {dayjs(formattedDate).fromNow()}</Tag>
           </CardItemExtra>

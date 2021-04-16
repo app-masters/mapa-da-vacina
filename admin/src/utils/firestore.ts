@@ -1,6 +1,5 @@
 import firebase from 'firebase';
 import { Place } from '../lib/Place';
-import { User } from '../lib/User';
 import { userRoles, placeQueueStatusType } from './constraints';
 import slugify from 'slugify';
 

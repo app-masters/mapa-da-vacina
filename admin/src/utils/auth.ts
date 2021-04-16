@@ -1,9 +1,7 @@
 import { SSRPropsContext } from 'next-firebase-auth';
-import Router from 'next/router';
 import { ParsedUrlQuery } from 'node:querystring';
 import cookies from 'next-cookies';
 import { User } from '../lib/User';
-import { Prefecture } from '../lib/Prefecture';
 import { API } from './api';
 import logging from './logging';
 import { GetServerSidePropsResult } from 'next';
@@ -52,14 +50,13 @@ export const shouldBeLoggedIn = async (
     const user = (response.data.user || response.data.admin) as User;
     // Set response user to cookies
     ctx.res.setHeader('Set-Cookie', serialize('user', JSON.stringify(user), { path: '/' }));
-    ctx.res.setHeader('Set-Cookie', serialize('Filometro.AuthError', null, { path: '/', expires: new Date() }));
     // Return the validated user
     return {
       props: { user }
     };
   } catch (err) {
     // Error when validating user 401
-    console.log('Error auth: ', { err });
+    logging.error('Error auth: ', { user: ctx.AuthUser, err });
 
     // Set error on cookies
     ctx.res.setHeader(
