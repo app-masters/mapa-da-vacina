@@ -47,6 +47,27 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
       placeId
     );
   }
+
+  /**
+   * Add random update to queue
+   * @param prefectureId
+   * @param placeId
+   */
+  public async addRandomUpdate(prefectureId: string, placeId: string) {
+    const status = ['noQueue', 'smallQueue', 'mediumQueue', 'longQueue', 'open'];
+    await this.save(
+      {
+        userId: 'cronjob',
+        placeId: placeId,
+        open: true,
+        queueStatus: status[Math.floor(Math.random() * status.length)],
+        queueUpdatedAt: new Date()
+      },
+      prefectureId,
+      placeId
+    );
+  }
+
   /**
    * Colection path
    * @param documentIds

@@ -11,6 +11,9 @@ const nextBaseConfig = {
    */
   webpack: (config) => {
     return config;
+  },
+  images: {
+    domains: ['firebasestorage.googleapis.com']
   }
 };
 

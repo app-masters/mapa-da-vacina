@@ -10,6 +10,7 @@ import {
   IsNowBetweenTimes,
   minutesDiff,
   parseBoolFromString,
+  sanitizeAddress,
   sanitizePlaceTitle,
   sanitizeString,
   sanitizeSurname,
@@ -225,9 +226,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         console.log("Place type isn't fixed or driveThru... Defaulting to fixed");
         type = 'fixed';
       }
-      const addressStreet = sanitizeString(json.addressStreet);
-      const addressDistrict = sanitizeString(json.addressDistrict);
-      const addressCityState = sanitizeString(json.addressCityState);
+      const addressStreet = sanitizeAddress(json.addressStreet);
+      const addressDistrict = sanitizeAddress(json.addressDistrict);
+      const addressCityState = sanitizeAddress(json.addressCityState);
 
       const openAt = DateTime.fromISO(json.openAt).toJSDate();
       const closeAt = DateTime.fromISO(json.closeAt).toJSDate();
@@ -259,6 +260,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
       if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
 
+      if (json.openToday !== undefined) result.openToday = json.openToday;
+      if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
+
       place.push(result);
     }
     return place;
@@ -275,16 +279,16 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       console.log('Erro ao encontrar prefeitura informada.');
       throw new Error('Não foi possível encontrar a prefeitura informada.');
     }
-    /*
+
     if (deactivateMissing) {
       // First deactivate every place, then defaults to true when present in file
       this._snapshotObserver.get().then((docs) => {
         docs.forEach((place) => {
-          place.ref.set({ active: false });
+          place.ref.update({ active: false });
         });
       });
     }
-    */
+
     const places = await this.sanitizeJson(placesJson);
     console.log('Places from file ', places);
 
@@ -306,6 +310,24 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         );
     }
     console.log('Done importing places');
+  }
+
+  /**
+   * Update queue status for demonstration city
+   */
+  public async updateQueueStatusForDemonstration(prefectureId: string) {
+    if (this._activeObserver) {
+      const placesDemonstracao = this.places.filter((p) => {
+        return p.prefectureId === prefectureId && p.active;
+      });
+      for (const place of placesDemonstracao) {
+        const prob = Math.random();
+        // random update to 25%
+        if (place.id && prob <= 0.25) {
+          await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
+        }
+      }
+    }
   }
 
   /**

@@ -70,7 +70,17 @@ const List: React.FC<ListViewProps> = ({ user, prefectures, places, pageLoading 
   const onSubmitUpload = async (data) => {
     setLoading(true);
     try {
-      const response = await API.post('/import-places', { ...data, prefectureId: modalUpload.prefecture.id });
+      const formData = new FormData();
+      formData.append('file', data.file[0]);
+      formData.append('deactivateMissing', data.disableNotInFile);
+      formData.append('prefectureId', modalUpload.prefecture.id);
+
+      const response = await API.post('/import-places', formData, {
+        headers: {
+          Accept: 'multipart/form-data',
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       if (response.status === 200) {
         message.success('Arquivo enviado com sucesso!');
         setModalUpload({ open: false });
@@ -196,7 +206,11 @@ const List: React.FC<ListViewProps> = ({ user, prefectures, places, pageLoading 
                 </Button>
               </Space>
             </PrefectureItemHeader>
-            <Table pagination={false} columns={columns} dataSource={places} />
+            <Table
+              pagination={false}
+              columns={columns}
+              dataSource={places.filter((f) => f.prefectureId === prefecture.id)}
+            />
           </PrefectureItem>
         ))}
       </Spin>

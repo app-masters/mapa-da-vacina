@@ -24,10 +24,12 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
               <Image className="logo" src={data.primaryLogo} width={240} height={80} />
             ) : (
               <div className="logo-text">
-                <div>
-                  <Typography.Title level={2}>{`Prefeitura de`}</Typography.Title>
-                  <Typography.Title level={2}>{`${data.city}`}</Typography.Title>
-                </div>
+                {data.city && (
+                  <div>
+                    <Typography.Title level={2}>{`Prefeitura de`}</Typography.Title>
+                    <Typography.Title level={2}>{`${data.city}`}</Typography.Title>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -41,10 +43,15 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
         </HomeHeaderWrapper>
         <HomeContentWrapper>
           <Space size="large" wrap>
-            <Card value={!data?.numPlaces ? null : data?.numPlaces} description="Pontos de vacinação na cidade" />
+            <Card
+              value={!data?.numPlaces ? null : data?.numPlaces}
+              description={!data?.numPlaces ? `Nenhum ponto de vacinação na cidade` : `Pontos de vacinação na cidade`}
+            />
             <Card
               value={!data?.numPlacesOpen ? null : data?.numPlacesOpen}
-              description="Pontos de vacinação abertos agora"
+              description={
+                !data?.numPlacesOpen ? `Nenhum ponto de vacinação aberto agora` : `Pontos de vacinação abertos agora`
+              }
             />
           </Space>
         </HomeContentWrapper>
