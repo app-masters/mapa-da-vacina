@@ -4,11 +4,9 @@ import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
-import { userRoleType } from '../../utils/constraints';
 import { Spin } from 'antd';
 
 type UpdateViewProps = {
-  userRole: userRoleType;
   user: User;
   places: Place[];
   pageLoading: boolean;
@@ -19,14 +17,14 @@ type UpdateViewProps = {
  * Update page
  * @params NextPage
  */
-const Update: React.FC<UpdateViewProps> = ({ userRole, user, prefectures, places, pageLoading }) => {
+const Update: React.FC<UpdateViewProps> = ({ user, prefectures, places, pageLoading }) => {
   return (
-    <Layout userRole={userRole} user={user}>
+    <Layout userRole={user.role} user={user}>
       <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {(prefectures || []).map((prefecture) => (
           <PlaceQueue
             key={prefecture.id}
-            userRole={userRole}
+            userRole={user.role}
             prefecture={prefecture}
             user={user}
             places={places.filter((f) => f.prefectureId === prefecture.id)}

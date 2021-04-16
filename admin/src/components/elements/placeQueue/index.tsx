@@ -18,7 +18,7 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
     try {
       setLoading(true);
       const newQueueStatus = isOpen ? placeQueue.open : placeQueue.closed;
-      await createQueueUpdate(place.id, place.prefectureId, isOpen, newQueueStatus);
+      await createQueueUpdate(place.id, place.prefectureId, isOpen, newQueueStatus, props.user.id);
       setLoading(false);
     } catch (err) {
       setLoading(false);
@@ -32,7 +32,7 @@ const PlaceQueue: React.FC<PlaceQueueProps> = (props) => {
   const handleUpdatePlaceQueue = async (placeId: string, prefectureId: string, newStatus: placeQueueStatusType) => {
     try {
       setLoading(true);
-      await createQueueUpdate(placeId, prefectureId, true, newStatus);
+      await createQueueUpdate(placeId, prefectureId, true, newStatus, props.user.id);
       setLoading(false);
     } catch (err) {
       setLoading(false);

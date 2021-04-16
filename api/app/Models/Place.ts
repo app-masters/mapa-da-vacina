@@ -5,8 +5,19 @@ import QueueUpdate from 'App/Models/QueueUpdate';
 
 import Cache from 'memory-cache';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
-import { minutesDiff } from 'App/Helpers';
+import {
+  getSlug,
+  IsNowBetweenTimes,
+  minutesDiff,
+  parseBoolFromString,
+  sanitizePlaceTitle,
+  sanitizeString,
+  sanitizeSurname,
+  sanitizeZip
+} from 'App/Helpers';
 
+import { DateTime } from 'luxon';
+import slugify from 'slugify';
 export interface PlaceType extends BaseModel {
   prefectureId: string;
   title: string;
@@ -14,8 +25,8 @@ export interface PlaceType extends BaseModel {
   addressStreet: string;
   addressDistrict: string;
   addressCityState: string;
-  addressZip: string;
-  googleMapsUrl: string;
+  addressZip?: string;
+  googleMapsUrl?: string;
   type: string;
   active: boolean;
   open: boolean;
@@ -195,6 +206,106 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, false);
       }
     }
+  }
+
+  /**
+   * Sanitize places json
+   * @param placeJson
+   * @returns
+   */
+  private async sanitizeJson(placeJson) {
+    const place: any[] = [];
+    for (const json of placeJson) {
+      let result: { [k: string]: any } = {};
+      const title = sanitizePlaceTitle(json.title);
+      const internalTitle = json.internalTitle ? sanitizePlaceTitle(json.internalTitle) : getSlug(title);
+
+      let type = json.type;
+      if (!type || !['fixed', 'driveThru'].includes(json.type)) {
+        console.log("Place type isn't fixed or driveThru... Defaulting to fixed");
+        type = 'fixed';
+      }
+      const addressStreet = sanitizeString(json.addressStreet);
+      const addressDistrict = sanitizeString(json.addressDistrict);
+      const addressCityState = sanitizeString(json.addressCityState);
+
+      const openAt = DateTime.fromISO(json.openAt).toJSDate();
+      const closeAt = DateTime.fromISO(json.closeAt).toJSDate();
+
+      const addressZip = sanitizeZip(json.addressZip);
+      const googleMapsUrl = sanitizeString(json.googleMapsUrl);
+
+      const active = json.active !== undefined ? parseBoolFromString(json.active) : true;
+
+      const open = IsNowBetweenTimes(openAt, closeAt);
+      const queueStatus = open ? 'open' : 'closed';
+      const queueUpdatedAt = new Date();
+      result = {
+        title,
+        internalTitle,
+        type,
+        openAt,
+        closeAt,
+        open,
+        queueStatus,
+        queueUpdatedAt,
+        active
+      };
+
+      if (addressStreet && addressStreet.length > 0) result.addressStreet = addressStreet;
+      if (addressDistrict && addressDistrict.length > 0) result.addressDistrict = addressDistrict;
+      if (addressCityState && addressCityState.length > 0) result.addressCityState = addressCityState;
+
+      if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
+      if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
+
+      place.push(result);
+    }
+    return place;
+  }
+
+  /**
+   * Receives Jsondata and insert in places
+   * @param placesJson
+   */
+  public async importJsonData(placesJson: any[], prefectureId: string, deactivateMissing: boolean) {
+    const prefectureDoc = await FirebaseProvider.db.collection('prefecture').doc(prefectureId).get();
+
+    if (!prefectureDoc.exists) {
+      console.log('Erro ao encontrar prefeitura informada.');
+      throw new Error('Não foi possível encontrar a prefeitura informada.');
+    }
+    /*
+    if (deactivateMissing) {
+      // First deactivate every place, then defaults to true when present in file
+      this._snapshotObserver.get().then((docs) => {
+        docs.forEach((place) => {
+          place.ref.set({ active: false });
+        });
+      });
+    }
+    */
+    const places = await this.sanitizeJson(placesJson);
+    console.log('Places from file ', places);
+
+    // For each place...
+    for (const place of places) {
+      const slug = getSlug(place.title);
+      // Ignore agenda for now
+      delete place.agenda;
+
+      await prefectureDoc.ref
+        .collection('place')
+        .doc(slug)
+        .set(
+          {
+            ...place,
+            prefectureId: prefectureId
+          },
+          { merge: true }
+        );
+    }
+    console.log('Done importing places');
   }
 
   /**
