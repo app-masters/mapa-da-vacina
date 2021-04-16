@@ -37,7 +37,7 @@ export const sanitizePlaceTitle = (value: string) => {
   const array = removeBreaks.split(' ');
   const result: Array<string> = [];
   const values = ['de', 'da', 'das', 'do', 'dos', 'del', 'e', 'DE', 'DA', 'DAS', 'DO', 'DOS', 'DEL', 'E'];
-  const keys = ['ubs', 'ama', 'ubs/ama'];
+  const keys = ['ubs', 'ama', 'ubs/ama', 'ama/ubs'];
   for (const word of array) {
     if (values.includes(word)) {
       result.push(word.toLowerCase());
