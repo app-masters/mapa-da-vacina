@@ -275,7 +275,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       console.log('Erro ao encontrar prefeitura informada.');
       throw new Error('Não foi possível encontrar a prefeitura informada.');
     }
-    /*
+
     if (deactivateMissing) {
       // First deactivate every place, then defaults to true when present in file
       this._snapshotObserver.get().then((docs) => {
@@ -284,7 +284,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         });
       });
     }
-    */
+
     const places = await this.sanitizeJson(placesJson);
     console.log('Places from file ', places);
 
