@@ -2,13 +2,42 @@
 
 @font-face {
   font-family: 'Roboto';
+  font-weight: 300;
+  font-style: light;
+  font-display: swap;
+  src: local('Roboto'), url('/fonts/Roboto-Light.ttf');
+}
+
+@font-face {
+  font-family: 'Roboto';
   font-weight: 400;
+  font-style: regular;
+  font-display: swap;
+  src: local('Roboto'), url('/fonts/Roboto-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 500;
   font-style: normal;
   font-display: swap;
-  unicode-range: U+000-5FF;
-  src: local('Roboto'),
-    url('https://fonts.googleapis.com/css2?family=Roboto:wght@200;300;400;500;600;700;800;900&display=swap')
-      format('roboto');
+  src: local('Roboto'), url('/fonts/Roboto-Medium.ttf');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 700;
+  font-style: bold;
+  font-display: swap;
+  src: local('Roboto'), url('/fonts/Roboto-Bold.ttf');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 900;
+  font-style: black;
+  font-display: swap;
+  src: local('Roboto'), url('/fonts/Roboto-Black.ttf');
 }
 
 html,
@@ -29,4 +58,8 @@ a {
 
 .mdl-dialog {
   max-height: 120px !important;
+}
+
+.ant-table-content {
+  overflow-x: scroll;
 }

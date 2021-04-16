@@ -3,7 +3,7 @@ import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
-import { placeQueue, placeTypeLabel, userRoleType } from '../../utils/constraints';
+import { placeQueue, placeTypeLabel } from '../../utils/constraints';
 import { message, Spin, Table, Typography } from 'antd';
 import FormPlace from '../../components/elements/formPlace';
 import dayjs from 'dayjs';
@@ -14,7 +14,6 @@ import logging from '../../utils/logging';
 import { createPlace, updatePlace } from '../../utils/firestore';
 
 type ListViewProps = {
-  userRole: userRoleType;
   user: User;
   places: Place[];
   pageLoading: boolean;
@@ -25,7 +24,7 @@ type ListViewProps = {
  * List page
  * @params NextPage
  */
-const List: React.FC<ListViewProps> = ({ userRole, user, prefectures, places, pageLoading }) => {
+const List: React.FC<ListViewProps> = ({ user, prefectures, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({ open: false });
 
@@ -138,7 +137,7 @@ const List: React.FC<ListViewProps> = ({ userRole, user, prefectures, places, pa
   ];
 
   return (
-    <Layout userRole={userRole} user={user}>
+    <Layout userRole={user.role} user={user}>
       <FormPlace
         open={modal.open}
         setOpen={setModal}
