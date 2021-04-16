@@ -36,7 +36,7 @@ Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 Route.post('/contact', 'ContactsController.sendContact');
 
 // Places
-Route.post('/import-places', 'PlacesController.importPlacesFromCSV'); //.middleware(['authActive']);
+Route.post('/import-places', 'PlacesController.importPlacesFromCSV').middleware(['authActive']);
 
 //Test
 // Route.get('/test/sms', 'TestController.testSms');
