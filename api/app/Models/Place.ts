@@ -244,9 +244,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         title,
         internalTitle,
         type,
-        addressStreet,
-        addressDistrict,
-        addressCityState,
         openAt,
         closeAt,
         open,
@@ -254,8 +251,13 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         queueUpdatedAt,
         active
       };
-      if (addressZip) result.addressZip = addressZip;
-      if (googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
+
+      if (addressStreet && addressStreet.length > 0) result.addressStreet = addressStreet;
+      if (addressDistrict && addressDistrict.length > 0) result.addressDistrict = addressDistrict;
+      if (addressCityState && addressCityState.length > 0) result.addressCityState = addressCityState;
+
+      if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
+      if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
 
       place.push(result);
     }
@@ -270,11 +272,21 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     const prefectureDoc = await FirebaseProvider.db.collection('prefecture').doc(prefectureId).get();
 
     if (!prefectureDoc.exists) {
+      console.log('Erro ao encontrar prefeitura informada.');
       throw new Error('Não foi possível encontrar a prefeitura informada.');
     }
-
+    /*
+    if (deactivateMissing) {
+      // First deactivate every place, then defaults to true when present in file
+      this._snapshotObserver.get().then((docs) => {
+        docs.forEach((place) => {
+          place.ref.set({ active: false });
+        });
+      });
+    }
+    */
     const places = await this.sanitizeJson(placesJson);
-    console.log(places);
+    console.log('Places from file ', places);
 
     // For each place...
     for (const place of places) {
@@ -293,6 +305,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
           { merge: true }
         );
     }
+    console.log('Done importing places');
   }
 
   /**

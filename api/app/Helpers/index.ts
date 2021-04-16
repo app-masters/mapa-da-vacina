@@ -41,7 +41,7 @@ export const sanitizePlaceTitle = (value: string) => {
   for (const word of array) {
     if (values.includes(word)) {
       result.push(word.toLowerCase());
-    } else if (keys.includes(word)) {
+    } else if (keys.includes(word.toLowerCase())) {
       result.push(word.toUpperCase());
     } else {
       result.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
@@ -54,6 +54,7 @@ export const sanitizePlaceTitle = (value: string) => {
  * Return the sanitized string
  */
 export const sanitizeString = (value: string) => {
+  if (!value) return;
   const removeBreaks = value.trim().replace(/\n|\r/g, '');
   return removeBreaks;
 };
