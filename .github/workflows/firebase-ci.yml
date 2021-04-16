@@ -24,12 +24,12 @@ jobs:
 
       - name: Deploy Rules
         run: firebase --token "1//0hs-4ZEBFbqJCCgYIARAAGBESNwF-L9IryNR8KAh2DNAy8PmeDix9r-SZ3JNPZZRty7HZONPbsriWlfrXqYfs2JkhZ5KdkzBWC0g" --project "filometro-dev-3d" deploy --only firestore:rules
-        working-directory: filometro/firebase
+        working-directory: ./firebase
 
       - name: Deploy Functions
         run: firebase --token "1//0hs-4ZEBFbqJCCgYIARAAGBESNwF-L9IryNR8KAh2DNAy8PmeDix9r-SZ3JNPZZRty7HZONPbsriWlfrXqYfs2JkhZ5KdkzBWC0g" --project "filometro-dev-3d" deploy --only functions
-        working-directory: filometro/firebase
+        working-directory: /firebase
 
       - name: Deploy Indexes
         run: firebase --token "1//0hs-4ZEBFbqJCCgYIARAAGBESNwF-L9IryNR8KAh2DNAy8PmeDix9r-SZ3JNPZZRty7HZONPbsriWlfrXqYfs2JkhZ5KdkzBWC0g" --project "filometro-dev-3d" deploy --only firestore:indexes
-        working-directory: filometro/firebase
+        working-directory: ./firebase
