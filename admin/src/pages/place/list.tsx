@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { AuthAction, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
+import { AuthAction, useAuthUser, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
 import React from 'react';
 import Loader from '../../components/ui/Loader';
 import { Place } from '../../lib/Place';
@@ -14,7 +14,7 @@ import LocalView from '../../views/LocalList';
  * Update page
  * @params NextPage
  */
-const Update: NextPage<{ user: User }> = ({ user }) => {
+const Update: NextPage<{ user: User; token: string }> = ({ user, token }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [prefectures, setPrefectures] = React.useState<Prefecture[]>(null);
   const [places, setPlaces] = React.useState<Place[]>([]);
@@ -83,7 +83,7 @@ const Update: NextPage<{ user: User }> = ({ user }) => {
     }
   }, [user, handlePrefectures]);
 
-  return <LocalView user={user} prefectures={prefectures} places={places} pageLoading={loading} />;
+  return <LocalView user={user} tokenId={token} prefectures={prefectures} places={places} pageLoading={loading} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({
