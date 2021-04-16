@@ -75,6 +75,7 @@ export default class UsersController {
   public async validate({ request, response }: HttpContextContract) {
     try {
       const data = await request.validate(ValidateValidator);
+      console.log('Received data: ', data);
       if (!request.decodedIdToken) throw new Error('Usuário deve estar autenticado.');
 
       const userToken = request.decodedIdToken;
@@ -87,10 +88,13 @@ export default class UsersController {
         .get();
 
       if (userSnapshot.docs.length > 0) {
+        console.log('Found user snapshot: ', userSnapshot.docs[0].data());
+
         const user = userSnapshot.docs[0].data() as UserType;
         user.id = userSnapshot.docs[0].id;
         // first sign in
         if (!user.uid && !user.signedUpAt) {
+          console.log('Fisrt login, activating user');
           user.uid = data.uid;
           user.signedUpAt = new Date();
           user.active = true;
@@ -111,6 +115,7 @@ export default class UsersController {
 
       // if it wasn't a user, try and admin
       const admin = await Admin.find({ phone: data.phone });
+      console.log('Found admin? ', admin);
       if (admin) {
         // Set custom claims in firebase auth
         await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
@@ -118,6 +123,7 @@ export default class UsersController {
         });
         return response.status(200).send({ admin });
       }
+      console.log('No user found');
 
       // if coudn't find any user
       return response
@@ -126,6 +132,7 @@ export default class UsersController {
           'Seu telefone não está na lista de convites para utilizar o Mapa da Vacina, fale com o responsável pelo ponto de vacinação ou da prefeitura'
         );
     } catch (error) {
+      console.log(error);
       return response.status(500).send(error);
     }
   }
