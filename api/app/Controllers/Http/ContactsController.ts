@@ -15,10 +15,11 @@ export default class ContactsController {
   public async sendContact({ request, response }: HttpContextContract) {
     const data = await request.validate(ContactValidator);
     console.log('Contact data', data);
+
     const contactEmail = Config.get('app.contactEmail');
     const mailFrom = Config.get('app.mailFrom');
-    console.log(Config.get('mail'));
     RollbarProvider.info('Sending email: ', { email: data });
+
     await Mail.send((message) => {
       message
         .from(mailFrom)
@@ -40,6 +41,7 @@ export default class ContactsController {
             <a href="https://api.whatsapp.com/send/?phone=${data.phone}"><b>Whatsapp</b></a>
           </li>
           <li><b>Aceito em:</b> ${data.acceptedAt.toFormat('yyyy-MM-dd hh:mm')}</li>
+          <li><b>Comentários:</b> ${data.comment}</li>
         </ul>
         `
         );

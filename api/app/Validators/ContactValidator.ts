@@ -36,7 +36,8 @@ export default class ContactValidator {
     prefectureRole: schema.string(),
     acceptedAt: schema.date({
       format: 'iso'
-    })
+    }),
+    comment: schema.string()
   });
 
   /* Nome, Seu email, Número de Telefone, Cidade, Estado (select), qual sua ligação com a prefeitura (select?), Checkbox "Confirmo que estou vinculado a prefeitura de {city}, {state}"*/
