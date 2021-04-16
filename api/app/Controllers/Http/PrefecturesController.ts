@@ -41,9 +41,16 @@ export default class PrefecturesController {
     // Se não tiver, salva no cache
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
+
+      for (const place of data.places) {
+        if (place.open && Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 30 * 60 * 1000)
+          place.queueStatus = 'open';
+      }
+
       console.log('Adding cache: ', cacheKey);
-      Cache.put(cacheKey, data);
+      Cache.put(cacheKey, data, 30 * 60 * 1000);
     }
+
     response.send(data);
   }
 }

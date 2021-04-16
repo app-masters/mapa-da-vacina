@@ -55,6 +55,7 @@ export default class ImportPlaces extends BaseCommand {
             active: true,
             open: false,
             queueStatus: 'closed',
+            queueUpdatedAt: new Date(),
             prefectureId: this.prefectureId
           })
           .then(() => console.log('Created ' + slug))
