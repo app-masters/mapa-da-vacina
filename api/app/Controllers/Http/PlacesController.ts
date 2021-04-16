@@ -8,7 +8,8 @@ export default class PlacesController {
    * Import CSV
    * @param param0
    */
-  public async importPlacesFromCSV({ request, response, params }: HttpContextContract) {
+  public async importPlacesFromCSV({ request, response }: HttpContextContract) {
+    console.log('importPlacesFromCSV');
     const data = await request.validate(ImportPlaceValidator);
     console.log('Received import data', data);
 
