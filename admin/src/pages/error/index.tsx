@@ -3,14 +3,14 @@ import { AuthAction, useAuthUser, withAuthUser, withAuthUserSSR } from 'next-fir
 import Router from 'next/router';
 import React from 'react';
 import Loader from '../../components/ui/Loader';
-import { clearAuthCookies } from '../../utils/auth';
-import LayoutView from '../../views/Logout';
+import { clearAuthCookies, recoverErrorMessage } from '../../utils/auth';
+import ErrorView from '../../views/Error';
 
 /**
  * Dashboard page
  * @params NextPage
  */
-const Logout: NextPage = () => {
+const Error: NextPage<{ message?: string }> = ({ message }) => {
   const AuthUser = useAuthUser();
 
   /**
@@ -21,18 +21,19 @@ const Logout: NextPage = () => {
     clearAuthCookies();
     Router.push('/auth');
   };
-  return <LayoutView handleLogout={handleLogout} />;
+  return <ErrorView handleLogout={handleLogout} message={message} />;
 };
 
 export const getServerSideProps = withAuthUserSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN
   // eslint-disable-next-line require-await
-})(async () => {
+})(async (ctx) => {
+  const message = await recoverErrorMessage(ctx);
   return {
-    props: {}
+    props: { message }
   };
 });
 
 export default withAuthUser({
   LoaderComponent: Loader
-})(Logout);
+})(Error);

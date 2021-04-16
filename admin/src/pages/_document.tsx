@@ -43,23 +43,11 @@ class MyDocument extends Document {
     return (
       <Html>
         <Head>
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-          <link
-            rel="preload"
-            as="style"
-            href="https://fonts.googleapis.com/css2?family=Roboto:wght@200;300;400;500;600;700;800;900&display=swap"
-          />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Roboto:wght@200;300;400;500;600;700;800;900&display=swap"
-            media="print"
-          />
-          <noscript>
-            <link
-              rel="stylesheet"
-              href="https://fonts.googleapis.com/css2?family=Roboto:wght@200;300;400;500;600;700;800;900&display=swap"
-            />
-          </noscript>
+          <link rel="preload" href="/fonts/Roboto-Light.ttf" as="font" crossOrigin="" />
+          <link rel="preload" href="/fonts/Roboto-Regular.ttf" as="font" crossOrigin="" />
+          <link rel="preload" href="/fonts/Roboto-Medium.ttf" as="font" crossOrigin="" />
+          <link rel="preload" href="/fonts/Roboto-Bold.ttf" as="font" crossOrigin="" />
+          <link rel="preload" href="/fonts/Roboto-Black.ttf" as="font" crossOrigin="" />
         </Head>
         <body>
           <Main />

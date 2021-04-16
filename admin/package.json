@@ -11,7 +11,8 @@
     "check-lint": "eslint \"src/**/*.{js,ts,tsx}\" --max-warnings 0",
     "check-typescript": "tsc --noEmit",
     "checks": "yarn check --integrity && yarn run check-lint && yarn run check-prettier && yarn run check-typescript",
-    "debug": "node --inspect-brk ./node_modules/next/dist/bin/next"
+    "debug": "node --inspect-brk ./node_modules/next/dist/bin/next",
+    "analyze": "ANALYZE=true yarn build"
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
