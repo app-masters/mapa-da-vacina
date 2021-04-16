@@ -33,8 +33,18 @@ export const HomeHeaderWrapper = styled.div`
     display: grid;
     align-items: center;
   }
+  .logo-text {
+    text-align: center;
+    h2 {
+      margin: 0;
+      color: #ffffff !important;
+      font-weight: 400;
+      text-shadow: 2px 2px 6px #00000030;
+    }
+  }
   .logo {
     @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+      flex: none;
       padding-bottom: ${(props) => props.theme.spacing.default};
       display: flex;
       justify-content: center;
