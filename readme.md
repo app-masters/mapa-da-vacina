@@ -1,4 +1,8 @@
-# Filômetro
+# Mapa da Vacina
+
+Este projeto foi desenvolvido pela [App Masters](https://appmasters.io) e está disponível sob a licença [Attribution-NonCommercial 2.0 Generic (CC BY-NC 2.0)](https://creativecommons.org/licenses/by-nc/2.0/).
+
+
 
 Este projeto é divido em dois serviços:
 
@@ -28,7 +32,7 @@ O frontend está dividido em outros dois projetos, **_admin_** que será usado t
 ## Executando o projeto
 
 1. Clone o repositório.
-2. Navegue até a pasta do projeto (`/filometro/admin` e ou `/filometro/front`)
+2. Navegue até a pasta do projeto (`/admin` e ou `/front`)
 3. Execute `yarn` para instalar as dependências.
 4. Após finalizar a instalação das dependências execute `yarn dev` para iniciar o projeto.
 

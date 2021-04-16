@@ -2,7 +2,7 @@
   "name": "front",
   "version": "0.1.0",
   "private": true,
-  "license": "Commons Clause",
+  "license": "CC BY-NC 2.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
