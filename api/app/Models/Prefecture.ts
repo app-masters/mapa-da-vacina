@@ -4,6 +4,7 @@ import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import PlaceRepository, { PlaceType } from './Place';
 
 import Cache from 'memory-cache';
+import Place from './Place';
 
 export interface PrefectureType extends BaseModel {
   name: string;
@@ -124,6 +125,20 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     return await this.query((qb) => {
       return qb.where('active', '==', true).orderBy('city', 'asc');
     });
+  }
+
+  /**
+   * Update queue status for demonstration city
+   */
+  public async updatePlacesForDemonstration() {
+    if (this._activeObserver) {
+      const prefDemonstration = this.prefectures.filter((p) => p.name.includes('Demonstração'));
+      if (!(prefDemonstration.length > 0) || !prefDemonstration[0].id) {
+        console.log("Couldn't find prefecture for Demonstração");
+        return;
+      }
+      await Place.updateQueueStatusForDemonstration(prefDemonstration[0].id);
+    }
   }
 
   /**
