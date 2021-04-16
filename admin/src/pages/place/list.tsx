@@ -1,5 +1,5 @@
 import { NextPage } from 'next';
-import { AuthAction, useAuthUser, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
+import { AuthAction, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
 import React from 'react';
 import Loader from '../../components/ui/Loader';
 import { Place } from '../../lib/Place';
