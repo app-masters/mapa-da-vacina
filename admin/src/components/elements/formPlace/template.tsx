@@ -156,13 +156,13 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
         </Form.Item>
         <Form.Item
           label="Bairro"
-          initialValue={place?.addressDistrict}
+          initialValue={place?.addressDistrict || ''}
           name="addressDistrict"
           rules={[{ required: false, message: 'Por favor informe o bairro' }]}
         >
           <Input disabled={loading} />
         </Form.Item>
-        <Form.Item label="CEP" initialValue={place?.addressZip} name="addressZip">
+        <Form.Item label="CEP" initialValue={place?.addressZip || ''} name="addressZip">
           <Input disabled={loading} />
         </Form.Item>
         <Input.Group compact>
