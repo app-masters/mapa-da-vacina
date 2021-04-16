@@ -2,15 +2,15 @@ name: Deploy Firebase Functions Rules and Indexes to Dev
 on:
   push:
     branches:
-      - master
+      - 77-ci-deploy-firebase
   pull_request:
     types: [closed]
     branches:
-      - master
+      - dev
 
 jobs:
-  deploy_functions_rules_indexes_dev:
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/77-ci-deploy-firebase'
+  deploy_functions_rules_indexes:
+    if: github.event.pull_request.merged == true || github.ref == 'refs/heads/77-ci-deploy-firebase'
     environment: mapadavacina-api-dev
     runs-on: ubuntu-latest
     timeout-minutes: 20
