@@ -19,8 +19,12 @@ export default class ContactsController {
 
     RollbarProvider.info('Sending email: ', { email: data });
     await Mail.send((message) => {
-      message.from(data.email).to(contactEmail).subject('Nova Prefeitura - Mapa da Vacina').html(
-        `
+      message
+        .from(data.email)
+        .to(contactEmail)
+        .subject('Nova Prefeitura - Mapa da Vacina')
+        .html(
+          `
         <h2>Novo pedido de inclusão de prefeitura</h2>
         <ul>
           <li><b>Nome:</b> ${data.name}</li>
@@ -34,10 +38,10 @@ export default class ContactsController {
             <span> &bull; <span>
             <a href="https://api.whatsapp.com/send/?phone=${data.phone}"><b>Whatsapp</b></a>
           </li>
-          <li><b>Aceito em:</b> ${data.acceptedAt}</li>
+          <li><b>Aceito em:</b> ${data.acceptedAt.toFormat('yyyy-MM-dd hh:mm')}</li>
         </ul>
         `
-      );
+        );
     });
 
     return response.status(200).send({ status: 200 });
