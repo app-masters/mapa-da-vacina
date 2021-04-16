@@ -6,7 +6,7 @@ export interface UserType extends BaseModel {
   phone: string;
   role: string;
   name: string;
-  active: boolean;
+  active?: boolean;
   prefectureId: string;
   invitedAt?: Date;
   signedUpAt?: Date;

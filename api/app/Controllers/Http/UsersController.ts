@@ -88,11 +88,14 @@ export default class UsersController {
         user.id = userSnapshot.docs[0].id;
         // first sign in
         if (!user.uid && !user.signedUpAt) {
-          console.log('Fisrt login, activating user');
+          console.log('First login, activating user');
           user.uid = data.uid;
           user.signedUpAt = new Date();
           user.active = true;
           await UserRepository.save(user, user.prefectureId);
+        } else if (user.active === false) {
+          console.log('User Deactivated');
+          return response.status(401).send('Seu usuário foi desativado.');
         }
         const prefecture = await Prefecture.findById(user.prefectureId);
         const place = user.placeId ? await Place.findById(user.prefectureId, user.placeId) : undefined;
@@ -111,6 +114,7 @@ export default class UsersController {
       const admin = await Admin.find({ phone: data.phone });
       console.log('Found admin? ', admin);
       if (admin) {
+        if (!admin.active) return response.status(401).send('Seu usuário foi desativado.');
         // Set custom claims in firebase auth
         await FirebaseProvider.app.auth().setCustomUserClaims(userToken.uid, {
           role: admin.role
