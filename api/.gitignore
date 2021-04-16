@@ -4,5 +4,7 @@ coverage
 .vscode
 .DS_STORE
 .env
+.env.dev
+.env.prod
 tmp
 filometro.json
