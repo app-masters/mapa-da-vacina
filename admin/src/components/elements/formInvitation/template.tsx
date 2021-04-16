@@ -141,7 +141,7 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
               <Button disabled={loading} type="ghost" onClick={closeModal}>
                 Cancelar
               </Button>
-              <Button loading={loading} type="primary" htmlType="submit">
+              <Button loading={loading} type="primary" htmlType="submit" disabled={loading}>
                 Salvar
               </Button>
             </FormActionWrapper>

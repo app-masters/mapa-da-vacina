@@ -5,7 +5,12 @@ import { InputStyled } from '../../ui/Input/styles';
 import { Place } from '../../../lib/Place';
 import { LoadingOutlined } from '@ant-design/icons';
 
-export type PlaceListTemplateProps = CardProps & { data: Place[]; header?: React.ReactNode; loading: boolean };
+export type PlaceListTemplateProps = CardProps & {
+  data: Place[];
+  showQueueUpdatedAt?: boolean;
+  header?: React.ReactNode;
+  loading: boolean;
+};
 
 export const PlaceListWrapper = styled(Card)`
   .ant-card-head-title {

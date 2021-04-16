@@ -8,7 +8,7 @@ import { Tag } from 'antd';
 /**
  * CardItem
  */
-const CardItem: React.FC<{ item: Place }> = ({ item }) => {
+const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ item, showQueueUpdatedAt }) => {
   /**
    * Render the icon based on status
    */
@@ -35,7 +35,7 @@ const CardItem: React.FC<{ item: Place }> = ({ item }) => {
           <h1 className="item-place">{item.title}</h1>
           <p>{`${item.addressStreet}, ${item.addressDistrict} - ${item.addressCityState}, ${item.addressZip}`}</p>
         </div>
-        {item.queueUpdatedAt && item.open ? (
+        {!!(item.queueUpdatedAt && item.open && showQueueUpdatedAt) ? (
           <CardItemExtra>
             <Tag color={haveWarning ? 'error' : 'default'}>Atualizado {dayjs(formattedDate).fromNow()}</Tag>
           </CardItemExtra>

@@ -1,5 +1,5 @@
 import React from 'react';
-import PlaceQueue from '../../components/elements/PlaceQueue';
+import PlaceQueue from '../../components/elements/placeQueue';
 import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';

@@ -1,6 +1,6 @@
 import { Place } from './Place';
 
-export type Prefectures = {
+export type Prefecture = {
   id: string;
   name: string;
   slug: string;
@@ -9,4 +9,5 @@ export type Prefectures = {
   numPlacesOpen?: number;
   createdAt: Date;
   updatedAt: Date;
+  showQueueUpdatedAt?: boolean;
 };
