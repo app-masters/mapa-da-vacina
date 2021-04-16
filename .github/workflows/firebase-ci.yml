@@ -7,11 +7,15 @@ on:
     types: [closed]
     branches:
       - dev
+      - master
 
 jobs:
-  deploy_functions_rules_indexes:
+  deploy_functions_rules_indexes_dev:
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/77-ci-deploy-firebase'
+    environment: mapadavacina-api-dev
     runs-on: ubuntu-latest
     timeout-minutes: 20
+
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -23,11 +27,11 @@ jobs:
         run: npm install -g firebase-tools
 
       - name: Deploy Rules
-        run: firebase --token "1//0hs-4ZEBFbqJCCgYIARAAGBESNwF-L9IryNR8KAh2DNAy8PmeDix9r-SZ3JNPZZRty7HZONPbsriWlfrXqYfs2JkhZ5KdkzBWC0g" --project "filometro-dev-3d" deploy --only firestore:rules
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only firestore:rules
         working-directory: ./firebase
 
       - name: Deploy Indexes
-        run: firebase --token "1//0hs-4ZEBFbqJCCgYIARAAGBESNwF-L9IryNR8KAh2DNAy8PmeDix9r-SZ3JNPZZRty7HZONPbsriWlfrXqYfs2JkhZ5KdkzBWC0g" --project "filometro-dev-3d" deploy --only firestore:indexes
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only firestore:indexes
         working-directory: ./firebase
 
       - name: Install Functions Dependencies
@@ -35,5 +39,37 @@ jobs:
         working-directory: ./firebase/functions
 
       - name: Deploy Functions
-        run: firebase --token "1//0hs-4ZEBFbqJCCgYIARAAGBESNwF-L9IryNR8KAh2DNAy8PmeDix9r-SZ3JNPZZRty7HZONPbsriWlfrXqYfs2JkhZ5KdkzBWC0g" --project "filometro-dev-3d" deploy --only functions
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only functions
+        working-directory: ./firebase
+
+  deploy_functions_rules_indexes_prod:
+    if: github.ref == 'refs/heads/master'
+    environment: mapadavacina-api-master
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install Firebase Tools
+        id: firebase-cache
+        run: npm install -g firebase-tools
+
+      - name: Deploy Rules
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only firestore:rules
+        working-directory: ./firebase
+
+      - name: Deploy Indexes
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only firestore:indexes
+        working-directory: ./firebase
+
+      - name: Install Functions Dependencies
+        run: npm install
+        working-directory: ./firebase/functions
+
+      - name: Deploy Functions
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only functions
         working-directory: ./firebase

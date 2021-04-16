@@ -14,7 +14,6 @@ import ValidateValidator from 'App/Validators/ValidateValidator';
 
 // Resources
 import SmsMessages from 'App/Models/Messages/SmsMessages';
-import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export default class UsersController {
   /**
