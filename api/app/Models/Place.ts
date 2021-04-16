@@ -10,6 +10,7 @@ import {
   IsNowBetweenTimes,
   minutesDiff,
   parseBoolFromString,
+  sanitizeAddress,
   sanitizePlaceTitle,
   sanitizeString,
   sanitizeSurname,
@@ -225,9 +226,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         console.log("Place type isn't fixed or driveThru... Defaulting to fixed");
         type = 'fixed';
       }
-      const addressStreet = sanitizeString(json.addressStreet);
-      const addressDistrict = sanitizeString(json.addressDistrict);
-      const addressCityState = sanitizeString(json.addressCityState);
+      const addressStreet = sanitizeAddress(json.addressStreet);
+      const addressDistrict = sanitizeAddress(json.addressDistrict);
+      const addressCityState = sanitizeAddress(json.addressCityState);
 
       const openAt = DateTime.fromISO(json.openAt).toJSDate();
       const closeAt = DateTime.fromISO(json.closeAt).toJSDate();
@@ -258,6 +259,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
       if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
       if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
+
+      if (json.openToday !== undefined) result.openToday = json.openToday;
+      if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
 
       place.push(result);
     }
