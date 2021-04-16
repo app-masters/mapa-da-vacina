@@ -29,11 +29,13 @@ export type ColorsList = {
   background: string;
   primary: string;
   darkGray: string;
+  alert: string;
 };
 
 export const colors: ColorsList = {
   background: '#f0f2f5',
   primary: '#55B4C8',
+  alert: '#ff7675',
   darkGray: '#747474'
 };
 

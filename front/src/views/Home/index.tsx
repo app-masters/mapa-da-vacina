@@ -1,4 +1,4 @@
-import { HomeWrapper, HomeHeaderWrapper, HomeContentWrapper, HomeFooterWrapper } from './style';
+import { HomeWrapper, HomeHeaderWrapper, HomeContentWrapper, HomeFooterWrapper, HomeContainerWrapper } from './style';
 import Image from 'next/image';
 import Card from '../../components/ui/Card';
 import { Space } from 'antd';
@@ -16,10 +16,16 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
     <HomeWrapper>
       <div className="page-body">
         <HomeHeaderWrapper>
-          <Image src={'/images/logo-white.svg'} width={280} height={40} alt="app-logo" />
-          <Image src={'/images/pjf-logo-horizontal.svg'} width={240} height={80} />
-          <div className="card-logo">
-            <Image src={'/images/logo-programa.svg'} width={240} height={80} />
+          <div className="logo">
+            <Image src={'/images/logo-mapa.svg'} width={280} height={80} alt="app-logo" />
+          </div>
+          <div className="logo">
+            <Image className="logo" src={'/images/pjf-logo-horizontal.svg'} width={240} height={80} />
+          </div>
+          <div className="logo">
+            <div className="card-logo">
+              <Image src={'/images/logo-programa.svg'} width={240} height={80} />
+            </div>
           </div>
         </HomeHeaderWrapper>
         <HomeContentWrapper>
@@ -34,9 +40,9 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
             />
           </Space>
         </HomeContentWrapper>
-        <HomeContentWrapper>
+        <HomeContainerWrapper>
           <PlaceList prefecture={data} loading={loading} />
-        </HomeContentWrapper>
+        </HomeContainerWrapper>
       </div>
       <HomeFooterWrapper>
         <div>

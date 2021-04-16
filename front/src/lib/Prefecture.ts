@@ -10,4 +10,7 @@ export type Prefecture = {
   createdAt: Date;
   updatedAt: Date;
   showQueueUpdatedAt?: boolean;
+  sampleMode?: boolean;
+  state?: string;
+  city?: string;
 };

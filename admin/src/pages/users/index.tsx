@@ -1,7 +1,7 @@
 import { NextPage } from 'next';
 import { AuthAction, withAuthUser, withAuthUserTokenSSR } from 'next-firebase-auth';
 import UsersView from '../../views/Users';
-import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
+import { shouldBeLoggedIn } from '../../utils/auth';
 import { listUsersByPrefecture, returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
 import { User } from '../../lib/User';
 import React from 'react';
@@ -10,33 +10,22 @@ import { Place } from '../../lib/Place';
 import { userRoles } from '../../utils/constraints';
 import Loader from '../../components/ui/Loader';
 
-type UsersProps = {
-  user: User;
-  prefecture: Prefecture;
-  token: string;
-};
-
 /**
  * Users page
  * @params NextPage
  */
-const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
+const Users: NextPage<{ user: User }> = ({ user }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [users, setUsers] = React.useState<User[]>([]);
   const [prefectures, setPrefectures] = React.useState<Prefecture[]>([]);
   const [places, setPlaces] = React.useState<Place[]>([]);
 
-  shouldPersistUser(data);
-
   React.useEffect(() => {
     setLoading(true);
-    /**
-     * unsubscribe
-     */
-    const unsubscribeUsers = listUsersByPrefecture().onSnapshot((snap) => {
+    const unsubscribeUsers = listUsersByPrefecture(user).onSnapshot((snap) => {
       let list = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() } as User));
-      if (data.user.role === userRoles.placeAdmin) {
-        list = list.filter((f) => f.placeId === data.user.placeId && f.role !== userRoles.prefectureAdmin);
+      if (user.role === userRoles.placeAdmin) {
+        list = list.filter((f) => f.placeId === user.placeId && f.role !== userRoles.prefectureAdmin);
       }
       setUsers(list);
       setLoading(false);
@@ -44,8 +33,8 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
 
     const unsubscribePrefectures = returnCollectionByName('prefecture').onSnapshot((doc) => {
       let list = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Prefecture));
-      if (data.user.role !== userRoles.superAdmin) {
-        list = list.filter((f) => f.id === data.user.prefectureId);
+      if (user.role !== userRoles.superAdmin) {
+        list = list.filter((f) => f.id === user.prefectureId);
       }
       setPrefectures(list);
       setLoading(false);
@@ -53,8 +42,8 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
 
     const unsubscribePlaces = returnCollectionGroupByName('place').onSnapshot((doc) => {
       let list = doc.docs.map((snap) => ({ id: snap.id, ...snap.data() } as Place));
-      if (data.user.role === userRoles.placeAdmin) {
-        list = list.filter((f) => f.id === data.user.placeId);
+      if (user.role === userRoles.placeAdmin) {
+        list = list.filter((f) => f.id === user.placeId);
       }
       setPlaces(list);
       setLoading(false);
@@ -65,18 +54,15 @@ const Users: NextPage<{ data: UsersProps }> = ({ data }) => {
       unsubscribePrefectures();
       unsubscribePlaces();
     };
-  }, [data.user.placeId, data.user.prefectureId, data.user.role]);
+  }, [user]);
 
-  return <UsersView loading={loading} users={users} prefectures={prefectures} places={places} user={data.user} />;
+  return <UsersView loading={loading} users={users} prefectures={prefectures} places={places} user={user} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN
 })(async (ctx) => {
-  const response = await shouldBeLoggedIn(ctx);
-  return {
-    props: response
-  };
+  return await shouldBeLoggedIn(ctx);
 });
 
 export default withAuthUser({
