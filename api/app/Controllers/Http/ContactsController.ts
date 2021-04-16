@@ -16,11 +16,12 @@ export default class ContactsController {
     const data = await request.validate(ContactValidator);
     console.log('Contact data', data);
     const contactEmail = Config.get('app.contactEmail');
-
+    const mailFrom = Config.get('app.mailFrom');
+    console.log(Config.get('mail'));
     RollbarProvider.info('Sending email: ', { email: data });
     await Mail.send((message) => {
       message
-        .from(data.email)
+        .from(mailFrom)
         .to(contactEmail)
         .subject('Nova Prefeitura - Mapa da Vacina')
         .html(

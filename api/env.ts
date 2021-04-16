@@ -31,5 +31,8 @@ export default Env.rules({
   SMTP_PORT: Env.schema.number(),
   SMTP_USER: Env.schema.string(),
   SMTP_PASS: Env.schema.string(),
+  MAIL_FROM: Env.schema.string(),
+  MAIL_SSLV3: Env.schema.boolean(),
+  MAIL_FROM_NAME: Env.schema.string(),
   CONTACT_EMAIL: Env.schema.string()
 });

@@ -8,6 +8,35 @@
 import Env from '@ioc:Adonis/Core/Env';
 import { MailConfig } from '@ioc:Adonis/Addons/Mail';
 
+let objectConfig;
+if (Env.get('MAIL_SSLV3')) {
+  objectConfig = {
+    driver: 'smtp',
+    host: Env.get('SMTP_HOST'),
+    port: Env.get('SMTP_PORT'),
+    auth: {
+      user: Env.get('SMTP_USER'),
+      pass: Env.get('SMTP_PASS'),
+      type: 'login'
+    },
+    tls: {
+      ciphers: 'SSLv3'
+    }
+  };
+} else {
+  objectConfig = {
+    driver: 'smtp',
+    host: Env.get('SMTP_HOST'),
+    port: Env.get('SMTP_PORT'),
+    secure: true,
+    auth: {
+      user: Env.get('SMTP_USER'),
+      pass: Env.get('SMTP_PASS'),
+      type: 'login'
+    }
+  };
+}
+
 const mailConfig: MailConfig = {
   /*
   |--------------------------------------------------------------------------
@@ -42,17 +71,8 @@ const mailConfig: MailConfig = {
     | Uses SMTP protocol for sending email
     |
     */
-    smtp: {
-      driver: 'smtp',
-      host: Env.get('SMTP_HOST'),
-      port: Env.get('SMTP_PORT'),
-      secure: false,
-      auth: {
-        user: Env.get('SMTP_USER'),
-        pass: Env.get('SMTP_PASS'),
-        type: 'login'
-      }
-    }
+
+    smtp: objectConfig
   }
 };
 
