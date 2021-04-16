@@ -132,7 +132,9 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    */
   public async updatePlacesForDemonstration() {
     if (this._activeObserver) {
-      const prefDemonstration = this.prefectures.filter((p) => p.name.includes('Demonstração'));
+      const prefDemonstration = this.prefectures.filter(
+        (p) => p.name.includes('Demonstração') || p.city.includes('Demonstração')
+      );
       if (!(prefDemonstration.length > 0) || !prefDemonstration[0].id) {
         console.log("Couldn't find prefecture for Demonstração");
         return;
