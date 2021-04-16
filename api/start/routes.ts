@@ -19,7 +19,6 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route';
-
 Route.get('/', async () => {
   return { hello: 'world' };
 });
@@ -32,6 +31,9 @@ Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 // User
 Route.post('/invite', 'UsersController.invite').middleware(['authActive']);
 Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
+
+// Places
+Route.post('/import-places', 'PlacesController.importPlacesFromCSV');
 
 //Test
 Route.get('/test/sms', 'TestController.testSms');
