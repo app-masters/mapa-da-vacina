@@ -18,6 +18,7 @@ export default class SmsMessages {
     const message = `Você foi convidado para ${userFunction[user.role]} - Comece agora acessando ${Config.get(
       'app.urlFrontAdmin'
     )}`;
+    RollbarProvider.info('Sending SMS', { sms: { phone: user.phone, message: message } });
     const result = await AwsProvider.dispatchSMS(user.phone, message);
     if (!result) {
       RollbarProvider.info('Finished sending SMS', { sent: result, error: AwsProvider.lastError() });

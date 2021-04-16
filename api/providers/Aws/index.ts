@@ -1,7 +1,6 @@
 import { ConfigContract } from '@ioc:Adonis/Core/Config';
 import { SNSClient, PublishCommand, PublishCommandInput } from '@aws-sdk/client-sns';
 import { formatPhoneToE164, validatePhone } from 'App/Helpers';
-import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export default class Aws {
   private _sns: SNSClient;
@@ -60,7 +59,7 @@ export default class Aws {
 
     try {
       console.log('Sending real SMS - to: ' + SNSParams.PhoneNumber + ' - message: ' + SNSParams.Message);
-      RollbarProvider.info('Sending SMS', { sms: SNSParams });
+
       await this._sns.send(new PublishCommand(SNSParams));
       return true;
     } catch (err) {
