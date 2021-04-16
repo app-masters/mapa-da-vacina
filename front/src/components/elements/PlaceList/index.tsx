@@ -79,6 +79,8 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
       }
       data={data}
       showQueueUpdatedAt={prefecture.showQueueUpdatedAt}
+      sampleMode={prefecture.sampleMode}
+      city={prefecture.city}
       loading={loading}
       // header={
       //   <Space wrap>

@@ -32,8 +32,11 @@ Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 Route.post('/invite', 'UsersController.invite').middleware(['authActive']);
 Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 
+//Contact
+Route.post('/contact', 'ContactsController.sendContact');
+
 // Places
-Route.post('/import-places', 'PlacesController.importPlacesFromCSV');
+Route.post('/import-places', 'PlacesController.importPlacesFromCSV').middleware(['authActive']);
 
 //Test
-Route.get('/test/sms', 'TestController.testSms');
+// Route.get('/test/sms', 'TestController.testSms');
