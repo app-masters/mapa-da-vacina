@@ -280,7 +280,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       // First deactivate every place, then defaults to true when present in file
       this._snapshotObserver.get().then((docs) => {
         docs.forEach((place) => {
-          place.ref.set({ active: false });
+          place.ref.update({ active: false });
         });
       });
     }
