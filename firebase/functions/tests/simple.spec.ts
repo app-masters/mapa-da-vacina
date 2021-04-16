@@ -7,6 +7,7 @@ const authSuperAdmin = {
   uid: "super_uid",
   role: "superAdmin",
 };
+/*
 const authPrefectureAdmin = {
   uid: "super_uid",
   role: "superAdmin",
@@ -20,7 +21,7 @@ const authQueueObserver = {
   uid: "super_uid",
   role: "superAdmin",
 };
-
+*/
 const getFirestore = (auth: Record<string, unknown>) => {
   return firebase
     .initializeTestApp({ projectId: PROJECT_ID, auth: auth })

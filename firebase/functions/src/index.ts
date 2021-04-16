@@ -35,6 +35,27 @@ export const totalizeOpenPlacesCount = functions.firestore
 
     const afterValue = change.after.data();
     const beforeValue = change.before.data();
+    //If was created OR zip changed
+    if (
+      (!change.before.exists && change.after.exists) ||
+      (afterValue && beforeValue && afterValue.zip !== beforeValue.zip)
+    ) {
+      returnCoordinates(afterValue?.zip)
+        .then((data) => {
+          db.collection("prefecture")
+            .doc(context.params.prefectureId)
+            .collection("place")
+            .doc(context.params.placeId)
+            .update({
+              latitude: data?.latitude,
+              longitude: data?.longitude,
+              zip: data?.zip,
+            });
+        })
+        .catch((err) => {
+          console.log("Error setting coordinates ", err);
+        });
+    }
 
     if (
       (change.after.exists && !change.before.exists) ||
@@ -70,31 +91,19 @@ export const totalizeOpenPlacesCount = functions.firestore
     }
   });
 
-/*
+/**
+ * Sanitize a zip, return it with only numbers, or null
+ */
+function sanitizeZip(zip: string): string {
+  if (!zip) return "";
+  const match = zip.match(/\d+/g);
+  if (!match) return "";
+  const zipCode = match.join("");
+  if (zipCode.length !== 8) return "";
+  return zipCode;
+}
 
-const extractGeo = (type, geometry) => {
-  if (geometry && geometry.location) {
-    const value = geometry.location[type];
-    return Number.parseFloat(value).toFixed(6);
-  }
-};
-*/
-
-export const getCoordinates = functions.https.onCall(async (data) => {
-  /**
-   * Sanitize a zip, return it with only numbers, or null
-   */
-  const sanitizeZip = (zip: string): string => {
-    if (!zip) return "";
-    const match = zip.match(/\d+/g);
-    if (!match) return "";
-    const zipCode = match.join("");
-    if (zipCode.length !== 8) return "";
-    return zipCode;
-  };
-
-  console.log(data);
-  const zip = sanitizeZip(data.zip);
+async function returnCoordinates(zip: string) {
   // Checks database first
   const dbResult = await db.collection("zipCoordinate").doc(zip).get();
   if (dbResult.exists) return dbResult.data();
@@ -104,7 +113,7 @@ export const getCoordinates = functions.https.onCall(async (data) => {
   // console.log(googleApiKey);
   if (!googleApiKey) {
     console.log("    👉  No GOOGLE_API_KEY, will not fetch coordinates");
-    return;
+    throw new Error("No GOOGLE_API_KEY credentials.");
   }
 
   const queryData = await client.geocode({
@@ -114,23 +123,33 @@ export const getCoordinates = functions.https.onCall(async (data) => {
     },
   });
   console.log(queryData);
+
   if (queryData && queryData.statusText === "OK") {
-    const geometry = data.results[0].geometry;
+    const geometry = queryData.data.results[0].geometry;
+
     console.log("geometry", geometry);
 
     const returnData = {
       zip: zip,
-      latitude: Number.parseFloat(geometry.location.latitude).toFixed(6),
-      longitude: Number.parseFloat(geometry.location.longitude).toFixed(6),
+      latitude: geometry.location.lat,
+      longitude: geometry.location.lng,
     };
     await dbResult.ref.create(returnData);
 
     return returnData;
-  } else if (data) {
+  } else if (queryData.data) {
     // Show some log if we don't know how to handle this result
-    if (!["ZERO_RESULTS"].includes(data.statusText)) {
-      console.log("  ‼️ unexpected result from Google Maps", data);
+    if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
+      console.log("  ‼️ unexpected result from Google Maps", queryData);
     }
   }
-  return;
+  throw new Error("No results found.");
+}
+
+export const getCoordinates = functions.https.onRequest(async (req, res) => {
+  const { data } = req.body;
+  console.log(data);
+  const zip = sanitizeZip(data.zip);
+  const coordinates = await returnCoordinates(zip);
+  res.json(coordinates);
 });
