@@ -11,7 +11,7 @@ on:
 
 jobs:
   deploy_functions_rules_indexes_dev:
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/77-ci-deploy-firebase'
+    if: (github.event.pull_request.merged == true && github.ref == 'refs/heads/dev') || github.ref == 'refs/heads/77-ci-deploy-firebase'
     environment: mapadavacina-api-dev
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -43,7 +43,7 @@ jobs:
         working-directory: ./firebase
 
   deploy_functions_rules_indexes_prod:
-    if: github.ref == 'refs/heads/master'
+    if: github.event.pull_request.merged == true && github.ref == 'refs/heads/master'
     environment: mapadavacina-api-master
     runs-on: ubuntu-latest
     timeout-minutes: 20
