@@ -3,7 +3,7 @@ import Layout from '../../layout';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
-import { placeQueue, placeTypeLabel, userRoles, userRoleType } from '../../utils/constraints';
+import { placeQueue, placeTypeLabel, userRoles } from '../../utils/constraints';
 import { message, Space, Spin, Table, Typography } from 'antd';
 import FormPlace from '../../components/elements/formPlace';
 import dayjs from 'dayjs';
@@ -16,7 +16,6 @@ import ModalUpload from '../../components/elements/modalUpload';
 import { API } from '../../utils/api';
 
 type ListViewProps = {
-  userRole: userRoleType;
   user: User;
   places: Place[];
   pageLoading: boolean;
@@ -27,7 +26,7 @@ type ListViewProps = {
  * List page
  * @params NextPage
  */
-const List: React.FC<ListViewProps> = ({ userRole, user, prefectures, places, pageLoading }) => {
+const List: React.FC<ListViewProps> = ({ user, prefectures, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({ open: false });
   const [modalUpload, setModalUpload] = React.useState<{ open: boolean; prefecture?: Prefecture }>({ open: false });
@@ -163,7 +162,7 @@ const List: React.FC<ListViewProps> = ({ userRole, user, prefectures, places, pa
   ];
 
   return (
-    <Layout userRole={userRole} user={user}>
+    <Layout userRole={user.role} user={user}>
       <FormPlace
         open={modal.open}
         setOpen={setModal}

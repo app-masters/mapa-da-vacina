@@ -5,26 +5,19 @@ import Loader from '../../components/ui/Loader';
 import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
-import { shouldBeLoggedIn, shouldPersistUser } from '../../utils/auth';
+import { shouldBeLoggedIn } from '../../utils/auth';
 import { userRoles } from '../../utils/constraints';
 import { returnCollectionByName, returnCollectionGroupByName } from '../../utils/firestore';
 import LocalView from '../../views/LocalUpdate';
-
-type UpdateProps = {
-  user: User;
-  prefecture: Prefecture;
-  token: string;
-};
 
 /**
  * Update page
  * @params NextPage
  */
-const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
+const Update: NextPage<{ user: User }> = ({ user }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [prefectures, setPrefectures] = React.useState<Prefecture[]>(null);
   const [places, setPlaces] = React.useState<Place[]>([]);
-  shouldPersistUser(data);
 
   React.useEffect(() => {
     setLoading(true);
@@ -35,8 +28,8 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
         listOfPrefectures.push(data);
       });
 
-      if (data.user.role === userRoles.prefectureAdmin) {
-        listOfPrefectures = listOfPrefectures.filter((f) => f.id === data.user.prefectureId);
+      if (user.role === userRoles.prefectureAdmin) {
+        listOfPrefectures = listOfPrefectures.filter((f) => f.id === user.prefectureId);
       }
 
       setPrefectures(listOfPrefectures);
@@ -61,26 +54,15 @@ const Update: NextPage<{ data: UpdateProps }> = ({ data }) => {
       unsubscribePrefectures();
       unsubscribePlaces();
     };
-  }, [data]);
+  }, [user]);
 
-  return (
-    <LocalView
-      userRole={data.user.role}
-      user={data.user}
-      prefectures={prefectures}
-      places={places}
-      pageLoading={loading}
-    />
-  );
+  return <LocalView user={user} prefectures={prefectures} places={places} pageLoading={loading} />;
 };
 
 export const getServerSideProps = withAuthUserTokenSSR({
   whenUnauthed: AuthAction.REDIRECT_TO_LOGIN
 })(async (ctx) => {
-  const response = await shouldBeLoggedIn(ctx);
-  return {
-    props: response
-  };
+  return await shouldBeLoggedIn(ctx);
 });
 
 export default withAuthUser({

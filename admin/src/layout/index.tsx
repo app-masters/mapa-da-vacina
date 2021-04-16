@@ -64,7 +64,7 @@ const viewKeys: MenuProps[] = [
  * Layout
  */
 const Layout: React.FC<{ userRole: userRoleType; user: User }> = ({ children, userRole, user }) => {
-  const [collapsed, setCollapsed] = React.useState<boolean>(false);
+  const [collapsed, setCollapsed] = React.useState<boolean>(true);
   const authUser = useAuthUser();
 
   const router = useRouter();
@@ -106,10 +106,10 @@ const Layout: React.FC<{ userRole: userRoleType; user: User }> = ({ children, us
         <div className="logo">
           {collapsed ? (
             <Tooltip placement="right" title={'Prefeitura de Juiz de Fora'}>
-              <Image width={100} height={60} src="/images/pjf-logo-mini.svg" alt="logo" />
+              <Image width={100} height={60} src="/images/logo-mapa-mini.svg" alt="logo" />
             </Tooltip>
           ) : (
-            <Image width={170} height={50} src="/images/pjf-logo-horizontal.svg" alt="logo" />
+            <Image width={150} height={60} src="/images/logo-mapa.svg" alt="logo" />
           )}
         </div>
         <Menu theme="light" defaultSelectedKeys={selectedPlace ? [selectedPlace.key] : null} mode="inline">
@@ -141,7 +141,7 @@ const Layout: React.FC<{ userRole: userRoleType; user: User }> = ({ children, us
       </Sider>
       <LayoutContentWrapper>
         <LayoutHeader>
-          <Typography.Title level={4}>{`${user.name} (${userRolesLabel[userRole]})`}</Typography.Title>
+          <Typography.Title level={4}>{`${user?.name} (${userRolesLabel[userRole]})`}</Typography.Title>
           <Typography.Title>{selectedPlace?.title}</Typography.Title>
         </LayoutHeader>
         {children}
