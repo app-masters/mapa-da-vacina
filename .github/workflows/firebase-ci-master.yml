@@ -1,0 +1,39 @@
+name: Deploy Firebase Functions Rules and Indexes to Master
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+
+jobs:
+  deploy_functions_rules_indexes:
+    if: github.event.pull_request.merged == true
+    environment: mapadavacina-api-master
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "12"
+
+      - name: Install Firebase Tools
+        id: firebase-cache
+        run: npm install -g firebase-tools
+
+      - name: Deploy Rules
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only firestore:rules
+        working-directory: ./firebase
+
+      - name: Deploy Indexes
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only firestore:indexes
+        working-directory: ./firebase
+
+      - name: Install Functions Dependencies
+        run: npm install
+        working-directory: ./firebase/functions
+
+      - name: Deploy Functions
+        run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only functions
+        working-directory: ./firebase

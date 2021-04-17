@@ -25,5 +25,14 @@ export default Env.rules({
   AWS_ACCESS_KEY: Env.schema.string(),
   AWS_SECRET_ACCESS_KEY: Env.schema.string(),
   AWS_REGION: Env.schema.string(),
-  AWS_DEV_PHONE: Env.schema.string()
+  AWS_DEV_PHONE: Env.schema.string(),
+  ROLLBAR_SERVER_TOKEN: Env.schema.string(),
+  SMTP_HOST: Env.schema.string({ format: 'host' }),
+  SMTP_PORT: Env.schema.number(),
+  SMTP_USER: Env.schema.string(),
+  SMTP_PASS: Env.schema.string(),
+  MAIL_FROM: Env.schema.string(),
+  MAIL_SSLV3: Env.schema.boolean(),
+  MAIL_FROM_NAME: Env.schema.string(),
+  CONTACT_EMAIL: Env.schema.string()
 });

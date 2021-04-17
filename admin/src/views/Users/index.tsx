@@ -3,7 +3,7 @@ import { TableWrapper, Section } from './styles';
 import { Popconfirm, Typography, Collapse, Spin } from 'antd';
 import Button from '../../components/ui/Button';
 import React from 'react';
-import FormInvitation from '../../components/elements/FormInvitation';
+import FormInvitation from '../../components/elements/formInvitation';
 import { User } from '../../lib/User';
 import { userRoles, userRolesLabel } from '../../utils/constraints';
 import { disableUser } from '../../utils/firestore';
@@ -118,8 +118,8 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
   }, [users]);
 
   return (
-    <Layout userRole={user.role}>
-      <Spin size="large" spinning={loading}>
+    <Layout userRole={user.role} user={user}>
+      <Spin size="large" spinning={loading} style={{ marginTop: 36 }}>
         <Section>
           {prefectures && prefectures.length > 0 && (
             <Collapse defaultActiveKey={[prefectures[0]?.id]}>

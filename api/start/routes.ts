@@ -19,21 +19,24 @@
 */
 
 import Route from '@ioc:Adonis/Core/Route';
-
 Route.get('/', async () => {
   return { hello: 'world' };
 });
 
 // Prefecture
 Route.get('/prefecture', 'PrefecturesController.index');
-Route.post('/prefecture', 'PrefecturesController.store');
 Route.get('/prefecture/:id', 'PrefecturesController.show');
-Route.delete('/prefecture/:id', 'PrefecturesController.destroy');
 Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 
 // User
-Route.post('/invite', 'UsersController.invite').middleware(['auth']);
+Route.post('/invite', 'UsersController.invite').middleware(['authActive']);
 Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 
+//Contact
+Route.post('/contact', 'ContactsController.sendContact');
+
+// Places
+Route.post('/import-places', 'PlacesController.importPlacesFromCSV').middleware(['authActive']);
+
 //Test
-Route.get('/test/sms', 'TestController.testSms');
+// Route.get('/test/sms', 'TestController.testSms');

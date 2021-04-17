@@ -9,11 +9,16 @@ export const CardWrapper = styled(Card)`
     align-items: center;
   }
   p {
-    font-size: 26px;
+    font-size: 22px;
     max-width: 250px;
     margin: 0;
     line-height: 1.2em;
     font-weight: 300;
+  }
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    p {
+      font-size: 18px;
+    }
   }
 `;
 
@@ -22,5 +27,9 @@ export const CardValue = styled(Typography.Title)`
   color: ${(props) => props.theme.colors.primary} !important;
   margin: 0 !important;
   padding-right: ${(props) => props.theme.spacing.default};
-  font-size: 52px !important;
+  font-size: 48px !important;
+
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    font-size: 36px !important;
+  }
 `;

@@ -2,12 +2,14 @@ import React from 'react';
 import { LayoutContentWrapper, LayoutHeader, LayoutWrapper } from './styles';
 import { Layout as ALayout, Menu, Typography } from 'antd';
 import NextLink from 'next/link';
+import Image from 'next/image';
 import Router, { useRouter } from 'next/router';
-import { userRoleType } from '../utils/constraints';
+import { userRolesLabel, userRoleType } from '../utils/constraints';
 import { useAuthUser } from 'next-firebase-auth';
 import { clearAuthCookies } from '../utils/auth';
 import { DesktopOutlined, UserOutlined, ProfileOutlined, LogoutOutlined } from '@ant-design/icons';
 import { useResponsiveContext } from '../providers/ResponsiveProvider';
+import { User } from '../lib/User';
 
 const { Sider } = ALayout;
 const { SubMenu } = Menu;
@@ -37,19 +39,32 @@ const viewKeys: MenuProps[] = [
     icon: <UserOutlined />
   },
   {
-    key: 'update',
-    route: '/update',
+    key: 'place',
     title: 'Pontos de Vacinação',
     roles: ['superAdmin', 'prefectureAdmin'],
-    icon: <ProfileOutlined />
+    icon: <ProfileOutlined />,
+    subMenu: [
+      {
+        key: 'update',
+        route: '/place/update',
+        title: 'Atualização',
+        icon: <ProfileOutlined />
+      },
+      {
+        key: 'list',
+        route: '/place/list',
+        title: 'Cadastro',
+        icon: <ProfileOutlined />
+      }
+    ]
   }
 ];
 
 /**
  * Layout
  */
-const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) => {
-  const [collapsed, setCollapsed] = React.useState<boolean>(false);
+const Layout: React.FC<{ userRole: userRoleType; user: User }> = ({ children, userRole, user }) => {
+  const [collapsed, setCollapsed] = React.useState<boolean>(true);
   const authUser = useAuthUser();
 
   const router = useRouter();
@@ -88,7 +103,13 @@ const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) =>
         collapsed={collapsed}
         onCollapse={(collapse) => setCollapsed(isMobile ? true : collapse)}
       >
-        <div className="logo" />
+        <div className="logo">
+          {collapsed ? (
+            <Image width={100} height={60} src="/images/logo-mapa-mini.svg" alt="logo" />
+          ) : (
+            <Image width={150} height={60} src="/images/logo-mapa.svg" alt="logo" />
+          )}
+        </div>
         <Menu theme="light" defaultSelectedKeys={selectedPlace ? [selectedPlace.key] : null} mode="inline">
           {viewKeys
             .filter((f) => !f.hidden)
@@ -118,6 +139,7 @@ const Layout: React.FC<{ userRole: userRoleType }> = ({ children, userRole }) =>
       </Sider>
       <LayoutContentWrapper>
         <LayoutHeader>
+          <Typography.Title level={4}>{`${user?.name} (${userRolesLabel[userRole]})`}</Typography.Title>
           <Typography.Title>{selectedPlace?.title}</Typography.Title>
         </LayoutHeader>
         {children}

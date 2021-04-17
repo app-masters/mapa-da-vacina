@@ -1,6 +1,7 @@
 import AwsProvider from '@ioc:Adonis/Providers/Aws';
 import { UserType } from 'App/Models/User';
 import Config from '@ioc:Adonis/Core/Config';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export default class SmsMessages {
   /**
@@ -17,6 +18,12 @@ export default class SmsMessages {
     const message = `Você foi convidado para ${userFunction[user.role]} - Comece agora acessando ${Config.get(
       'app.urlFrontAdmin'
     )}`;
-    await AwsProvider.dispatchSMS(user.phone, message);
+    RollbarProvider.info('Sending SMS', { sms: { phone: user.phone, message: message } });
+    const result = await AwsProvider.dispatchSMS(user.phone, message);
+    if (!result) {
+      RollbarProvider.info('Finished sending SMS', { sent: result, error: AwsProvider.lastError() });
+    } else {
+      RollbarProvider.info('Finished sending SMS', { sent: result });
+    }
   }
 }

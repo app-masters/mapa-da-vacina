@@ -1,7 +1,6 @@
 import { BaseCommand, args } from '@adonisjs/core/build/standalone';
-import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import csvtojson from 'csvtojson';
-import { getSlug, sanitizeZip } from 'App/Helpers';
+import Place from 'App/Models/Place';
 
 export default class ImportPlaces extends BaseCommand {
   /**
@@ -20,6 +19,9 @@ export default class ImportPlaces extends BaseCommand {
   @args.string({ description: 'Firebase Prefecture Id' })
   public prefectureId: string;
 
+  @args.string({ description: 'Deactivate places missing from file' })
+  public deactivateMissing: boolean;
+
   public static settings = {
     loadApp: true
   };
@@ -29,56 +31,11 @@ export default class ImportPlaces extends BaseCommand {
    */
   public async run() {
     this.logger.info('Running command...');
-    console.log(this.path, this.prefectureId);
+    console.log(this.path, this.prefectureId, this.deactivateMissing);
 
-    try {
-      // Read CSV file...
-      const places = await csvtojson().fromFile(this.path);
-      // console.log("CSV file", places);
-
-      const prefectureDoc = await FirebaseProvider.db.collection('prefecture').doc(this.prefectureId).get();
-
-      if (!prefectureDoc.exists) {
-        throw new Error('Não foi possível encontrar a prefeitura informada.');
-      }
-      // For each place...
-      for (const place of places) {
-        const slug = getSlug(place.title);
-        // Ignore agenda for now
-        delete place.agenda;
-        await prefectureDoc.ref
-          .collection('place')
-          .doc(slug)
-          .create({
-            ...place,
-            addressZip: sanitizeZip(place.addressZip),
-            active: true,
-            open: false,
-            prefectureId: this.prefectureId
-          })
-          .then(() => console.log('Created ' + slug))
-          .catch((error) => {
-            // ALREADY_EXISTS => update
-            if (error.code === 6) {
-              prefectureDoc.ref
-                .collection('place')
-                .doc(slug)
-                .update({
-                  ...place,
-                  addressZip: sanitizeZip(place.addressZip),
-                  prefectureId: this.prefectureId
-                })
-                .then(() => console.log('Updated ' + slug))
-                .catch((error) => {
-                  throw new Error('Erro ao atualizar place ' + error);
-                });
-            } else {
-              throw new Error('Erro ao criar place ' + error);
-            }
-          });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    // Read CSV file...
+    const places = await csvtojson().fromFile(this.path);
+    // console.log("CSV file", places);
+    await Place.importJsonData(places, this.prefectureId, this.deactivateMissing);
   }
 }

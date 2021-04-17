@@ -1,6 +1,9 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 
+/**
+ * Auth middleware checks only if google credentials exist
+ */
 export default class Auth {
   /**
    * Middleware handles

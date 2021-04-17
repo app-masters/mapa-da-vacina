@@ -1,6 +1,7 @@
 import firebase from 'firebase';
-import { User } from '../lib/User';
+import { Place } from '../lib/Place';
 import { userRoles, placeQueueStatusType } from './constraints';
+import slugify from 'slugify';
 
 /**
  * returnCollectionByName
@@ -19,8 +20,7 @@ export const returnCollectionGroupByName = (collection: string) => {
 /**
  * listUsersByPrefecture
  */
-export const listUsersByPrefecture = () => {
-  const user = JSON.parse(localStorage.getItem('@auth-user')) as User;
+export const listUsersByPrefecture = (user) => {
   if (user.role === userRoles.superAdmin) {
     return firebase.firestore().collectionGroup('user');
   }
@@ -56,10 +56,28 @@ export const updatePlace = async (id: string, prefectureId: string, place) => {
 };
 
 /**
- * updatePlace
+ * createPlace
  */
-export const createQueueUpdate = async (placeId: string, prefectureId: string, status: placeQueueStatusType) => {
-  const user = JSON.parse(localStorage.getItem('@auth-user'));
+export const createPlace = async (prefectureId: string, place: Place) => {
+  return await firebase
+    .firestore()
+    .collection('prefecture')
+    .doc(prefectureId)
+    .collection('place')
+    .doc(slugify(place.title.toLowerCase()))
+    .set(place);
+};
+
+/**
+ * createQueueUpdate
+ */
+export const createQueueUpdate = async (
+  placeId: string,
+  prefectureId: string,
+  open: boolean,
+  status: placeQueueStatusType,
+  userId: string
+) => {
   return await firebase
     .firestore()
     .collection('prefecture')
@@ -70,7 +88,8 @@ export const createQueueUpdate = async (placeId: string, prefectureId: string, s
     .add({
       createdAt: new Date(),
       placeId,
+      open,
       queueStatus: status,
-      userId: user.id
+      userId
     });
 };
