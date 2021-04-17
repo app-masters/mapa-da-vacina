@@ -43,7 +43,12 @@ export default class PrefecturesController {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
 
       for (const place of data.places) {
-        if (place.open && Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 30 * 60 * 1000)
+        if (
+          place.open &&
+          place.queueStatus !== 'open' &&
+          place.queueUpdatedAt &&
+          Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 30 * 60 * 1000
+        )
           place.queueStatus = 'open';
       }
 
