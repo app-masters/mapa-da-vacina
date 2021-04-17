@@ -4,10 +4,16 @@ import styled from 'styled-components';
 export const CardWrapper = styled(Card)`
   user-select: none;
   width: 100%;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   .ant-card-body {
     padding: ${(props) => props.theme.spacing.default};
     display: flex !important;
     align-items: center;
+    justify-content: center;
   }
   p {
     font-size: 22px;
@@ -19,6 +25,7 @@ export const CardWrapper = styled(Card)`
     p {
       font-size: 18px;
     }
+    min-height: initial;
   }
 `;
 
