@@ -3,6 +3,7 @@ import { Col, Row } from 'antd';
 import { ColProps } from 'antd/lib/col';
 
 export const CardItemWrapper = styled(Row)`
+  display: flex;
   position: relative;
   display: flex;
   border: 1px solid #00000012;
@@ -11,9 +12,12 @@ export const CardItemWrapper = styled(Row)`
   margin-bottom: ${(props) => props.theme.spacing.default};
   border-radius: 5px;
   overflow: hidden;
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    flex-direction: column;
+  }
 `;
 
-export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
+export const CardItemIconContent = styled(Col)<ColProps & { bgcolor: string }>`
   display: flex;
   flex-direction: column;
   text-align: center;
@@ -29,6 +33,10 @@ export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
   text-transform: uppercase;
   @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     max-width: 100%;
+    flex-direction: row;
+    svg {
+      margin-right: ${(props) => props.theme.spacing.sm};
+    }
   }
 `;
 
@@ -64,6 +72,6 @@ export const CardItemExtra = styled.div`
   flex: 1;
   display: flex;
   justify-content: flex-start;
-  align-items: flex-end;
+  align-items: center;
   padding: ${(props) => props.theme.spacing.sm} 0px;
 `;
