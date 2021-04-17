@@ -33,6 +33,9 @@ export const ModalQueueContent = styled(Space)`
 
 export const PlaceQueueCard = styled(Card)`
   margin-bottom: ${(props) => props.theme.spacing.default};
+  h1 {
+    font-size: 50px;
+  }
 `;
 
 export const PlaceQueueItem = styled(Row)<{ warning?: boolean }>`
