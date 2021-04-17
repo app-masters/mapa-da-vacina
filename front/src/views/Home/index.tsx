@@ -1,7 +1,7 @@
 import { HomeWrapper, HomeHeaderWrapper, HomeContentWrapper, HomeFooterWrapper, HomeContainerWrapper } from './style';
 import Image from 'next/image';
 import Card from '../../components/ui/Card';
-import { Space, Typography } from 'antd';
+import { Row, Col, Typography, Space } from 'antd';
 import PlaceList from '../../components/elements/PlaceList';
 import Button from '../../components/ui/Button';
 import Github from '../../components/ui/Icons/Github';
@@ -19,41 +19,44 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
           <div className="logo">
             <Image src={'/images/logo-mapa.svg'} width={280} height={80} alt="app-logo" />
           </div>
-          <div className="logo">
-            {data.primaryLogo ? (
+          {data.primaryLogo ? (
+            <div className="logo">
               <Image className="logo" src={data.primaryLogo} width={240} height={80} />
-            ) : (
-              <div className="logo-text">
-                {data.city && (
-                  <div>
-                    <Typography.Title level={2}>{`Prefeitura de`}</Typography.Title>
-                    <Typography.Title level={2}>{`${data.city}`}</Typography.Title>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="logo">
-            {data.secondaryLogo && (
+            </div>
+          ) : (
+            <div className="logo-text">
+              {data.city && (
+                <div>
+                  <Typography.Title level={1}>{`Pontos de vacinação em ${data.city}`}</Typography.Title>
+                </div>
+              )}
+            </div>
+          )}
+          {data.secondaryLogo ? (
+            <div className="logo">
               <div className="card-logo">
                 <Image src={data.secondaryLogo} width={240} height={80} />
               </div>
-            )}
-          </div>
+            </div>
+          ) : null}
         </HomeHeaderWrapper>
         <HomeContentWrapper>
-          <Space size="large" wrap>
-            <Card
-              value={!data?.numPlaces ? null : data?.numPlaces}
-              description={!data?.numPlaces ? `Nenhum ponto de vacinação na cidade` : `Pontos de vacinação na cidade`}
-            />
-            <Card
-              value={!data?.numPlacesOpen ? null : data?.numPlacesOpen}
-              description={
-                !data?.numPlacesOpen ? `Nenhum ponto de vacinação aberto agora` : `Pontos de vacinação abertos agora`
-              }
-            />
-          </Space>
+          <Row gutter={[16, 16]}>
+            <Col span={24} md={12}>
+              <Card
+                value={!data?.numPlaces ? null : data?.numPlaces}
+                description={!data?.numPlaces ? `Nenhum ponto de vacinação na cidade` : `Pontos de vacinação na cidade`}
+              />
+            </Col>
+            <Col span={24} md={12}>
+              <Card
+                value={!data?.numPlacesOpen ? null : data?.numPlacesOpen}
+                description={
+                  !data?.numPlacesOpen ? `Nenhum ponto de vacinação aberto agora` : `Pontos de vacinação abertos agora`
+                }
+              />
+            </Col>
+          </Row>
         </HomeContentWrapper>
         <HomeContainerWrapper>
           <PlaceList prefecture={data} loading={loading} />

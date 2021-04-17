@@ -34,12 +34,20 @@ export const HomeHeaderWrapper = styled.div`
     align-items: center;
   }
   .logo-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    h2 {
+    h1 {
       margin: 0;
+      font-size: 48px;
       color: #ffffff !important;
       font-weight: 400;
       text-shadow: 2px 2px 6px #00000030;
+      @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+        font-size: 36px;
+      }
     }
   }
   .logo {

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 export const CardWrapper = styled(Card)`
   user-select: none;
+  width: 100%;
   .ant-card-body {
     padding: ${(props) => props.theme.spacing.default};
     display: flex !important;
@@ -10,7 +11,6 @@ export const CardWrapper = styled(Card)`
   }
   p {
     font-size: 22px;
-    max-width: 250px;
     margin: 0;
     line-height: 1.2em;
     font-weight: 300;
