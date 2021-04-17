@@ -47,7 +47,7 @@ export default class PrefecturesController {
           place.open &&
           place.queueStatus !== 'open' &&
           place.queueUpdatedAt &&
-          Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 30 * 60 * 1000
+          Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 50 * 60 * 1000
         )
           place.queueStatus = 'open';
       }
