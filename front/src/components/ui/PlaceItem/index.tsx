@@ -1,5 +1,5 @@
 import { placeQueueLabel, placeQueueColor, placeType, placeQueue } from '../../../utils/constraints';
-import { CardItemContent, CardItemExtra, CardItemLeftContent, CardItemWrapper } from './styles';
+import { CardItemContent, CardItemExtra, CardItemIconContent, CardItemWrapper } from './styles';
 import { Car, PersonPin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
@@ -26,11 +26,7 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
 
   return (
     <CardItemWrapper>
-      <CardItemLeftContent lg={2} md={4} xs={24} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
-        {renderIcon()}
-        {placeQueueLabel[item.queueStatus]}
-      </CardItemLeftContent>
-      <CardItemContent lg={22} md={20} xs={24} sm={24}>
+      <CardItemContent lg={12} sm={24}>
         <div>
           <h1 className="item-place">{item.title}</h1>
           <p>{`${item.addressStreet ? item.addressStreet : ''} ${
@@ -39,6 +35,8 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
             item.addressZip ? ', ' + item.addressZip : ''
           }`}</p>
         </div>
+      </CardItemContent>
+      <CardItemContent md={10} sm={24}>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&
@@ -49,6 +47,10 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
           </CardItemExtra>
         ) : null}
       </CardItemContent>
+      <CardItemIconContent lg={2} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
+        {renderIcon()}
+        {placeQueueLabel[item.queueStatus]}
+      </CardItemIconContent>
     </CardItemWrapper>
   );
 };
