@@ -40,24 +40,31 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
             </div>
           ) : null}
         </HomeHeaderWrapper>
-        <HomeContentWrapper>
-          <Row gutter={[16, 16]}>
-            <Col span={24} md={12}>
-              <Card
-                value={!data?.numPlaces ? null : data?.numPlaces}
-                description={!data?.numPlaces ? `Nenhum ponto de vacinação na cidade` : `Pontos de vacinação na cidade`}
-              />
-            </Col>
-            <Col span={24} md={12}>
-              <Card
-                value={!data?.numPlacesOpen ? null : data?.numPlacesOpen}
-                description={
-                  !data?.numPlacesOpen ? `Nenhum ponto de vacinação aberto agora` : `Pontos de vacinação abertos agora`
-                }
-              />
-            </Col>
-          </Row>
-        </HomeContentWrapper>
+        {!loading ? (
+          <HomeContentWrapper>
+            <Row gutter={[16, 16]}>
+              <Col span={24} md={12}>
+                <Card
+                  value={!data?.numPlaces ? null : data?.numPlaces}
+                  description={
+                    !data?.numPlaces ? `Nenhum ponto de vacinação na cidade` : `Pontos de vacinação na cidade`
+                  }
+                />
+              </Col>
+              <Col span={24} md={12}>
+                <Card
+                  value={!data?.numPlacesOpen ? null : data?.numPlacesOpen}
+                  description={
+                    !data?.numPlacesOpen
+                      ? `Nenhum ponto de vacinação aberto agora`
+                      : `Pontos de vacinação abertos agora`
+                  }
+                />
+              </Col>
+            </Row>
+          </HomeContentWrapper>
+        ) : null}
+
         <HomeContainerWrapper>
           <PlaceList prefecture={data} loading={loading} />
         </HomeContainerWrapper>

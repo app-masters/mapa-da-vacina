@@ -5,7 +5,7 @@ import PersonPin from '../../ui/Icons/PersonPin';
 import React from 'react';
 import { ButtonIconWrapper, HeaderCard } from './styles';
 import { Place } from '../../../lib/Place';
-import { placeType } from '../../../utils/constraints';
+import { placeQueue, placeType } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
 
 type IconButtonProps = {
@@ -54,6 +54,16 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
     return listPlaces;
   }, [prefecture.places, filter]);
 
+  const shouldShowFeaturesBanner = React.useMemo(() => {
+    const hasLogo = !!prefecture?.primaryLogo;
+    const isUsingQueue = prefecture?.places?.some(
+      (place) => place.queueStatus !== placeQueue.open && place.queueStatus !== placeQueue.closed
+    );
+
+    // Probably, the prefecture has not paid for the system
+    return !loading && !hasLogo && !isUsingQueue;
+  }, [loading, prefecture.primaryLogo, prefecture.places]);
+
   return (
     <PlaceListTemplate
       title={
@@ -82,6 +92,8 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
       sampleMode={prefecture.sampleMode}
       city={prefecture.city}
       loading={loading}
+      shouldShowFeaturesBanner={shouldShowFeaturesBanner}
+
       // header={
       //   <Space wrap>
       //     <p>Encontre seu ponto</p>

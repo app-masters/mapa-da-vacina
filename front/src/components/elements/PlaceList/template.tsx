@@ -13,6 +13,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
   loading,
   sampleMode,
   city,
+  shouldShowFeaturesBanner,
   ...props
 }) => {
   const isDemonstration = city && city.includes('Demonstração');
@@ -39,6 +40,31 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
             Estamos aguardando o contato da prefeitura de <strong>{city}</strong> para apresentarmos também o tamanho da
             fila em cada ponto de vacinação.
           </p>
+          <p>
+            Se você é da prefeitura de <strong>{city}</strong>{' '}
+            <a
+              href={`https://api.whatsapp.com/send?phone=5532988735683&text=Sou da prefeitura de ${city} e gostaria de saber como utilizar o Mapa da Vacina.`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              entre em contato conosco
+            </a>
+          </p>
+        </WarningBox>
+      )}
+      {shouldShowFeaturesBanner && (
+        <WarningBox>
+          <p>
+            Assim que a prefeitura de <strong>{city}</strong> entrar em contato conosco, será apresentado também:
+          </p>
+          <div>
+            <ul>
+              <li>O tamanho da fila em cada ponto de vacinação</li>
+              <li> Datas de vacinação por idade</li>
+              <li>Os pontos de vacinação mais próximos para vacinar</li>
+              <li>Os melhores horários para em cada ponto</li>
+            </ul>
+          </div>
           <p>
             Se você é da prefeitura de <strong>{city}</strong>{' '}
             <a
