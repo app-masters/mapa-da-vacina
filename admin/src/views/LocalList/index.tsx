@@ -72,7 +72,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append('file', data.file[0]);
+      formData.append('file', data.file[0].originFileObj);
       formData.append('deactivateMissing', data.disableNotInFile);
       formData.append('prefectureId', modalUpload.prefecture.id);
 
