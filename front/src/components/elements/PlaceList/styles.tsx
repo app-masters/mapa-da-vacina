@@ -12,6 +12,7 @@ export type PlaceListTemplateProps = CardProps & {
   city?: string;
   header?: React.ReactNode;
   loading: boolean;
+  shouldShowFeaturesBanner?: boolean;
 };
 
 export const PlaceListWrapper = styled(Card)`
@@ -40,6 +41,16 @@ export const WarningBox = styled.div`
     > a {
       text-decoration: underline;
     }
+  }
+  div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: ${(props) => props.theme.spacing.sm};
+  }
+  ul {
+    text-align: left;
   }
 `;
 
