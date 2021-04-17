@@ -320,13 +320,22 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    */
   public async updateQueueStatusForDemonstration(prefectureId: string) {
     if (this._activeObserver) {
-      const placesDemonstracao = this.places.filter((p) => {
-        return p.prefectureId === prefectureId && p.active;
+      const placesDemo = this.places.filter((p) => {
+        return p.prefectureId === prefectureId && p.active && p.open;
       });
-      for (const place of placesDemonstracao) {
+      const randomness = placesDemo.length === 1 ? 0.5 : 0.2;
+      console.log('randomness', randomness);
+      for (const place of placesDemo) {
         const prob = Math.random();
+        console.log('prob', prob);
+        const minutesSinceLastUpdate = Math.abs(
+          (place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) / 60 / 1000
+        );
+        console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
+        // 50 * 60 * 1000
+
         // random update to 25%
-        if (place.id && prob <= 0.25) {
+        if ((place.id && prob <= randomness) || minutesSinceLastUpdate >= 45) {
           await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
         }
       }
