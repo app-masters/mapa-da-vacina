@@ -78,7 +78,7 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
         </HeaderCard>
       }
       data={data}
-      showQueueUpdatedAt={prefecture.showQueueUpdatedAt}
+      showQueueUpdatedAt={prefecture.showQueueUpdatedAt !== false}
       sampleMode={prefecture.sampleMode}
       city={prefecture.city}
       loading={loading}

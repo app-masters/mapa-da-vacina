@@ -18,7 +18,8 @@ export const CardItemLeftContent = styled(Col)<ColProps & { bgcolor: string }>`
   flex-direction: column;
   text-align: center;
   padding: ${(props) => props.theme.spacing.sm};
-  max-width: 120px;
+  width: 100%;
+  min-width: 120px;
   background-color: ${(props) => props.bgcolor || props.theme.colors.primary};
   justify-content: center;
   align-items: center;

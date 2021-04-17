@@ -1,4 +1,4 @@
-import { placeQueueLabel, placeQueueColor, placeType } from '../../../utils/constraints';
+import { placeQueueLabel, placeQueueColor, placeType, placeQueue } from '../../../utils/constraints';
 import { CardItemContent, CardItemExtra, CardItemLeftContent, CardItemWrapper } from './styles';
 import { Car, PersonPin } from '../Icons';
 import { Place } from '../../../lib/Place';
@@ -39,7 +39,11 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
             item.addressZip ? ', ' + item.addressZip : ''
           }`}</p>
         </div>
-        {!!(item.queueUpdatedAt && item.open && showQueueUpdatedAt) ? (
+        {item.queueUpdatedAt &&
+        item.open &&
+        showQueueUpdatedAt &&
+        item.queueStatus !== placeQueue.open &&
+        item.queueStatus !== placeQueue.closed ? (
           <CardItemExtra>
             <Tag color={haveWarning ? 'error' : 'default'}>Atualizado {dayjs(formattedDate).fromNow()}</Tag>
           </CardItemExtra>
