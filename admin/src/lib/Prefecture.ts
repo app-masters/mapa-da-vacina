@@ -8,6 +8,7 @@ export type Prefecture = {
   state: string;
   city: string;
   active: boolean;
+  showQueueUpdatedAt: boolean;
   logoUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
