@@ -41,6 +41,21 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
     return <h1 className="item-place">{item.title}</h1>;
   }, [item]);
 
+  const timeInfoText = React.useMemo(() => {
+    if (item.open) {
+      if (item.closeAt) {
+        return `Fecha às ${dayjs(item.closeAt._seconds * 1000).format('HH:mm')}`;
+      }
+    } else if (item.openTomorrow) {
+      if (item.openAt) {
+        return `Abre amanhã às ${dayjs(item.openAt._seconds * 1000).format('HH:mm')}`;
+      }
+    } else {
+      return `Não abrirá amanhã`;
+    }
+    return '';
+  }, [item]);
+
   return (
     <CardItemWrapper>
       <CardItemContent lg={12} sm={24}>
@@ -63,19 +78,7 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
         </div>
       </CardItemContent>
       <CardItemContent md={10} sm={24}>
-        {item.open && item.closeAt ? (
-          <CardItemExtra>
-            <Tag color="default"> Fecha às {dayjs(item.closeAt._seconds * 1000).format('HH:mm')}</Tag>
-          </CardItemExtra>
-        ) : (
-          <CardItemExtra>
-            <Tag color="default">
-              {item.openTomorrow && item.openAt
-                ? `Abre amanhã às ${dayjs(item.closeAt._seconds * 1000).format('HH:mm')}`
-                : `Não abrirá amanhã`}
-            </Tag>
-          </CardItemExtra>
-        )}
+        <CardItemExtra>{timeInfoText ? <Tag color="default">{timeInfoText}</Tag> : null}</CardItemExtra>
       </CardItemContent>
       <CardItemContent md={10} sm={24}>
         {item.queueUpdatedAt &&
