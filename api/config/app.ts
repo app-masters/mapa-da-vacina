@@ -35,6 +35,8 @@ export const contactEmail: string = Env.get('CONTACT_EMAIL');
 
 export const mailFrom: string = Env.get('MAIL_FROM');
 
+export const getCoordinatesUrl: string = Env.get('GET_COORDINATES_URL');
+
 /*
 |--------------------------------------------------------------------------
 | Http server configuration

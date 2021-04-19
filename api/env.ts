@@ -34,5 +34,6 @@ export default Env.rules({
   MAIL_FROM: Env.schema.string(),
   MAIL_SSLV3: Env.schema.boolean(),
   MAIL_FROM_NAME: Env.schema.string(),
-  CONTACT_EMAIL: Env.schema.string()
+  CONTACT_EMAIL: Env.schema.string(),
+  GET_COORDINATES_URL: Env.schema.string()
 });

@@ -114,8 +114,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
-   * List active prefectures
-   * @returns Active prefectures
+   * List active places
+   * @returns Active places
    */
   public async listActive(prefectureId: string) {
     if (this._activeObserver) {

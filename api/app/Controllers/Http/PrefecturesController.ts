@@ -1,7 +1,9 @@
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
+import Config from '@ioc:Adonis/Core/Config';
 import PrefectureRepository from 'App/Models/Prefecture';
 import Cache from 'memory-cache';
-
+import fetch from 'node-fetch';
+import { calculateDistance } from 'App/Helpers';
 export default class PrefecturesController {
   /**
    * Index
@@ -33,14 +35,34 @@ export default class PrefecturesController {
    * Find a prefecture by id
    */
   public async show({ response, params }: HttpContextContract) {
-    const cacheKey = `prefecture-${params.id}`;
+    //const cacheKey = `prefecture-${params.id}`;
     // Tentar obter do cache
-    let data = Cache.get(cacheKey);
+    const cacheKey = `prefecture-${params.id}-zip:${params.zip}`;
     console.log('Reading cache: ', cacheKey);
 
+    let data = Cache.get(cacheKey);
+
+    const cacheKeys = Cache.keys();
     // Se não tiver, salva no cache
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
+
+      console.log(params.zip);
+      let coordinates;
+      if (params.zip) {
+        const resp = await fetch(Config.get('app.getCoordinatesUrl'), {
+          method: 'post',
+          body: JSON.stringify({ addressZip: params.zip }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (resp.status === 200) {
+          coordinates = await resp.json();
+        } else {
+          coordinates = undefined;
+          console.log('Error fetching coordinates... Check cloud functions log for more information');
+        }
+      }
+      console.log(coordinates);
 
       for (const place of data.places) {
         if (
@@ -48,9 +70,23 @@ export default class PrefecturesController {
           place.queueStatus !== 'open' &&
           place.queueUpdatedAt &&
           Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 50 * 60 * 1000
-        )
+        ) {
           place.queueStatus = 'open';
+        }
+
+        if (coordinates && place.latitude && place.longitude) {
+          place.distance = calculateDistance(
+            coordinates.latitude,
+            coordinates.longitude,
+            place.latitude,
+            place.longitude
+          );
+        }
       }
+      // sort by distance
+      data.places.sort((a, b) => {
+        return +b.open - +a.open || a.distance - b.distance;
+      });
 
       console.log('Adding cache: ', cacheKey);
       Cache.put(cacheKey, data, 30 * 60 * 1000);

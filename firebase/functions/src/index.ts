@@ -26,11 +26,11 @@ async function returnCoordinates(zip: string) {
 
   //If non-existent, check google API
   const googleApiKey = functions.config().googlemaps.key;
-  // console.log(googleApiKey);
+
   if (!googleApiKey) {
     console.log("    👉  No GOOGLE_API_KEY, will not fetch coordinates");
-    return undefined;
-    //throw new Error("No GOOGLE_API_KEY credentials.");
+    //return undefined;
+    throw new Error("No GOOGLE_API_KEY credentials.");
   }
 
   const queryData = await client.geocode({
@@ -39,7 +39,6 @@ async function returnCoordinates(zip: string) {
       key: googleApiKey,
     },
   });
-  console.log(queryData);
 
   if (queryData && queryData.statusText === "OK") {
     const geometry = queryData.data.results[0].geometry;
@@ -60,8 +59,8 @@ async function returnCoordinates(zip: string) {
       console.log("  ‼️ unexpected result from Google Maps", queryData);
     }
   }
-  return undefined;
-  //throw new Error("No results found.");
+  //return undefined;
+  throw new Error("No results found.");
 }
 
 export const createQueueUpdate = functions.firestore
@@ -151,9 +150,17 @@ export const totalizeOpenPlacesCount = functions.firestore
   });
 
 export const getCoordinates = functions.https.onRequest(async (req, res) => {
-  const { data } = req.body;
-  console.log(data);
-  const zip = sanitizeZip(data.zip);
-  const coordinates = await returnCoordinates(zip);
-  res.json(coordinates);
+  try {
+    console.log(req.body);
+    const { addressZip } = req.body;
+    console.log(addressZip);
+    const zip = sanitizeZip(addressZip);
+    console.log(zip);
+    const coordinates = await returnCoordinates(zip);
+    console.log(coordinates);
+    res.json(coordinates);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
 });
