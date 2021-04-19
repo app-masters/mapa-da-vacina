@@ -33,9 +33,9 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     this._snapshotObserver = FirebaseProvider.db.collection('prefecture').onSnapshot(
       (docSnapshot) => {
         console.log(`Received doc snapshot user`);
-        this._activeObserver = true;
         console.log('Deleting cache: ', 'prefectures-list');
         Cache.del('prefectures-list');
+        console.log('aa');
         this.prefectures = docSnapshot.docs.map((d) => {
           const cacheKey = `prefecture-${d.id}`;
           console.log('Deleting cache: ', cacheKey);
@@ -47,10 +47,12 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
             updatedAt: d.updateTime.toDate()
           } as PrefectureType;
         });
+        console.log('leng', this.prefectures.length);
+        this._activeObserver = true;
       },
       (err) => {
         this._activeObserver = false;
-        console.log(`Encountered error: ${err}`);
+        console.error(`Encountered error: ${err}`);
       }
     );
   }
@@ -112,7 +114,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     if (this._activeObserver) {
       return this.prefectures as ReadModel<PrefectureType>[];
     }
-    return await this.list();
+    return await super.list();
   }
 
   /**
@@ -151,6 +153,13 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    */
   public getCollectionPath(): string {
     return 'prefecture';
+  }
+
+  /**
+   * Tell if we have _activeObserver (local data)
+   */
+  public hasActiveObserver(): boolean {
+    return this._activeObserver;
   }
 }
 
