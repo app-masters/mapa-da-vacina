@@ -4,7 +4,7 @@ import logging from './logging';
 /**
  * Get prefecture ID
  */
-export const getPrefectureData = async (): Promise<Prefecture> => {
+export const getPrefectureData = async (filter?: { latitude: number; longitude: number }): Promise<Prefecture> => {
   try {
     // Defining NEXT_PUBLIC_PREFECTURE_ID as prefecture ID
     let prefectureId = process.env.NEXT_PUBLIC_PREFECTURE_ID;
