@@ -38,6 +38,10 @@ export interface PlaceType extends BaseModel {
   openTomorrow?: boolean;
   openAt?: Timestamp;
   closeAt?: Timestamp;
+
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {
