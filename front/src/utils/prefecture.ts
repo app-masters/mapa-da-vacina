@@ -8,6 +8,7 @@ export const getPrefectureData = async (): Promise<Prefecture> => {
   try {
     // Defining NEXT_PUBLIC_PREFECTURE_ID as prefecture ID
     let prefectureId = process.env.NEXT_PUBLIC_PREFECTURE_ID;
+    console.log(prefectureId);
     if (!prefectureId) {
       // No prefecture id defined, getting from online variable
       const possibleId = window.location.host.split('.')[0];

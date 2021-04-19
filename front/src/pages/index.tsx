@@ -16,8 +16,9 @@ const Home: NextPage<{ data: Prefecture }> = () => {
   // Dealing with the fetch and re-fetch of the data
   const getAndSetPrefectureData = useCallback(async () => {
     const prefectureData = await getPrefectureData();
-    setData(prefectureData);
     if (prefectureData && prefectureData.id) {
+      // only set if successful, keeping old values if couldn't fetch
+      setData(prefectureData);
       // If the data is defined, update it after some time
       setTimeout(getAndSetPrefectureData, 60000);
     }

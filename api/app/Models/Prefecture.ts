@@ -14,7 +14,6 @@ export interface PrefectureType extends BaseModel {
   numPlaces: number;
   numPlacesOpen: number;
   active: boolean;
-  places?: PlaceType[];
   showQueueUpdatedAt?: boolean;
 }
 
@@ -81,14 +80,15 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * @returns
    */
   public async findByIdWithPlaces(id: string) {
-    const document = await this.findById(id);
-    if (!document) throw new Error("Couldn't find Prefecture with id: " + id);
+    interface ExtendedPrefecture extends PrefectureType {
+      places?: PlaceType[];
+    }
+    const prefecture: ExtendedPrefecture | null = await this.findById(id);
+    if (!prefecture) throw new Error("Couldn't find Prefecture with id: " + id);
 
     const places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
 
-    document.places = places;
-
-    return document;
+    return { ...prefecture, places: places };
   }
 
   /**
@@ -100,6 +100,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     if (this._activeObserver) {
       return this.prefectures.filter((pref) => pref.id === prefectureId)[0] as ReadModel<PrefectureType>;
     }
+
     return await super.findById(prefectureId);
   }
 
