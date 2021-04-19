@@ -26,19 +26,6 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
     }, 10000);
   }, [filter]);
 
-  // // Dealing with the fetch and re-fetch of the data
-  // const getAndSetPrefectureData = useCallback(async () => {
-  //   console.log(filter);
-  //   const prefectureData = await getPrefectureData();
-
-  //   if (prefectureData && prefectureData.id) {
-  //     // only set if successful, keeping old values if couldn't fetch
-  //     setData(prefectureData);
-  //     // If the data is defined, update it after some time
-  //     setTimeout(getAndSetPrefectureData, 10000);
-  //   }
-  // }, [filter]);
-
   // Fetching prefecture data
   useEffect(() => {
     getAndSetPrefectureData();

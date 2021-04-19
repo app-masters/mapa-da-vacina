@@ -4,7 +4,6 @@ import { Car, PersonPin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Tag } from 'antd';
-import ButtonStyled from '../Button';
 /**
  * CardItem
  */
@@ -65,13 +64,6 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
           </CardItemExtra>
         ) : null}
       </CardItemContent>
-      {item.googleMapsUrl ? (
-        <CardItemContent md={10} sm={24}>
-          <CardItemExtra>
-            <ButtonStyled color={haveWarning ? 'error' : 'default'}>Como chegar</ButtonStyled>
-          </CardItemExtra>
-        </CardItemContent>
-      ) : null}
       <CardItemIconContent lg={2} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
         {renderIcon()}
         {placeQueueLabel[item.queueStatus]}

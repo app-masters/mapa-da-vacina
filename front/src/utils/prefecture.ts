@@ -26,7 +26,7 @@ export const getPrefectureData = async (
     }
     let url = `${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`;
     if (filter) {
-      url += `/${filter.latitude}/${filter.longitude}`;
+      url += `?latitude=${filter.latitude}&longitude=${filter.longitude}`;
     }
     const res = await fetch(url);
     const data = await res.json();
