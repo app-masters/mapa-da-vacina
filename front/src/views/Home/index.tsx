@@ -27,34 +27,44 @@ type HomeProps = {
 const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
   const [modal, setModal] = React.useState<boolean>(false);
   const [permission, setPermission] = React.useState<string>(undefined);
+  const [position, setPosition] = React.useState<{ latitude: number; longitude: number }>(undefined);
 
   /**
    * geolocation
    */
-  const geolocation = () => {
-    /**
-     * geoSuccess
-     */
-    const geoSuccess = (position) => {
-      setPermission('allowed');
-      filterByPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-    };
-    /**
-     * geoError
-     */
-    const geoError = (error) => {
-      if (error.code === 1) {
-        setPermission('denied');
-      }
-    };
-    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, { timeout: 10 * 1000 });
-  };
+  const geolocation = React.useCallback(
+    (noFilter?: boolean) => {
+      /**
+       * geoSuccess
+       */
+      const geoSuccess = (position) => {
+        setPermission('allowed');
+        setPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        if (!noFilter) {
+          filterByPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        }
+      };
+      /**
+       * geoError
+       */
+      const geoError = (error) => {
+        if (error.code === 1) {
+          setPermission('denied');
+        }
+      };
+      navigator.geolocation.getCurrentPosition(geoSuccess, geoError, { timeout: 10 * 1000 });
+    },
+    [filterByPosition]
+  );
 
   React.useEffect(() => {
     navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
       setPermission(permission.state);
+      if (permission.state === 'granted') {
+        geolocation(true);
+      }
     });
-  }, []);
+  }, [geolocation]);
 
   return (
     <HomeWrapper>
@@ -124,7 +134,7 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
               Pontos mais próximos
             </Button>
           </div>
-          <PlaceList prefecture={data} loading={loading} />
+          <PlaceList prefecture={data} loading={loading} position={position} />
         </HomeContainerWrapper>
       </div>
       <HomeFooterWrapper>
@@ -149,7 +159,7 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
       </HomeFooterWrapper>
       <Modal
         visible={modal}
-        onOk={geolocation}
+        onOk={() => geolocation()}
         onCancel={() => setModal(false)}
         okButtonProps={{ style: { display: permission === 'denied' ? 'none' : 'inline-block' } }}
         okText="Permitir"

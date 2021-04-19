@@ -13,6 +13,7 @@ export type PlaceListTemplateProps = CardProps & {
   header?: React.ReactNode;
   loading: boolean;
   shouldShowFeaturesBanner?: boolean;
+  position?: { latitude: number; longitude: number };
 };
 
 export const PlaceListWrapper = styled(Card)`

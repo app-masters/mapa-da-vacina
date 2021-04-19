@@ -29,10 +29,16 @@ const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, titl
   );
 };
 
+type PlaceListProps = {
+  prefecture: Prefecture;
+  loading: boolean;
+  position?: { latitude: number; longitude: number };
+};
+
 /**
  * PlaceList
  */
-const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ prefecture, loading }) => {
+const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, position }) => {
   const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
     age: undefined,
     zip: undefined,
@@ -93,7 +99,7 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
       city={prefecture.city}
       loading={loading}
       shouldShowFeaturesBanner={shouldShowFeaturesBanner}
-
+      position={position}
       // header={
       //   <Space wrap>
       //     <p>Encontre seu ponto</p>

@@ -6,14 +6,17 @@ import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Tag, Tooltip } from 'antd';
 
+type CardItemProps = {
+  item: Place;
+  showQueueUpdatedAt?: boolean;
+  haveWarning: boolean;
+  distance: string | null;
+};
+
 /**
  * CardItem
  */
-const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarning: boolean }> = ({
-  item,
-  showQueueUpdatedAt,
-  haveWarning
-}) => {
+const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning, distance }) => {
   /**
    * Render the icon based on status
    */
@@ -43,26 +46,30 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
 
   return (
     <CardItemWrapper>
-      <CardItemContent lg={12} sm={24}>
+      <CardItemContent md={12} lg={14} sm={24}>
         <div>
           {title}
-          <p>
-            {`${item.addressStreet ? item.addressStreet : ''}${
+          <div>
+            {`${item.addressStreet ? item.addressStreet : ''}`}
+            {/* {`${item.addressStreet ? item.addressStreet : ''}${
               item.addressDistrict ? ', ' + item.addressDistrict : ''
             }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
               item.addressZip ? ', ' + item.addressZip : ''
-            }`}
+            }`} */}
             {!!item.googleMapsUrl && (
-              <Tooltip title="Veja como chegar no mapa">
+              <Tooltip title="Veja como chegar">
                 <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
                   <Pin width={20} height={16} />
                 </a>
               </Tooltip>
             )}
-          </p>
+            {!!(distance && item.latitude && item.longitude) && (
+              <strong style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}>{`- ${distance}`}</strong>
+            )}
+          </div>
         </div>
       </CardItemContent>
-      <CardItemContent md={10} sm={24}>
+      <CardItemContent md={5} sm={24}>
         {item.open && item.closeAt ? (
           <CardItemExtra>
             <Tag color="default"> Fecha às {dayjs(item.closeAt._seconds * 1000).format('HH:mm')}</Tag>
@@ -77,7 +84,7 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
           </CardItemExtra>
         )}
       </CardItemContent>
-      <CardItemContent md={10} sm={24}>
+      <CardItemContent md={5} sm={24}>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&
