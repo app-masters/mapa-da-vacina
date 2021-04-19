@@ -234,23 +234,21 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       const addressDistrict = sanitizeAddress(json.addressDistrict);
       const addressCityState = sanitizeAddress(json.addressCityState);
 
-      const openAt = DateTime.fromISO(json.openAt).toJSDate();
-      const closeAt = DateTime.fromISO(json.closeAt).toJSDate();
-
       const addressZip = sanitizeZip(json.addressZip);
       const googleMapsUrl = sanitizeString(json.googleMapsUrl);
 
       const active = json.active !== undefined ? parseBoolFromString(json.active) : true;
 
-      const open = IsNowBetweenTimes(openAt, closeAt);
+      const openAt = json.openAt ? DateTime.fromISO(json.openAt).toJSDate() : undefined;
+      const closeAt = json.closeAt ? DateTime.fromISO(json.closeAt).toJSDate() : undefined;
+
+      const open = openAt && closeAt ? IsNowBetweenTimes(openAt, closeAt) : false;
       const queueStatus = open ? 'open' : 'closed';
       const queueUpdatedAt = new Date();
       result = {
         title,
         internalTitle,
         type,
-        openAt,
-        closeAt,
         open,
         queueStatus,
         queueUpdatedAt,
@@ -266,6 +264,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
       if (json.openToday !== undefined) result.openToday = json.openToday;
       if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
+
+      if (openAt) result.openAt = openAt;
+      if (closeAt) result.closeAt = closeAt;
 
       place.push(result);
     }
