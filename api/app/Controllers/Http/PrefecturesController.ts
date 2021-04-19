@@ -39,10 +39,8 @@ export default class PrefecturesController {
     // Tentar obter do cache
     const cacheKey = `prefecture-${params.id}-zip:${params.zip}`;
     console.log('Reading cache: ', cacheKey);
-
     let data = Cache.get(cacheKey);
 
-    const cacheKeys = Cache.keys();
     // Se não tiver, salva no cache
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
@@ -91,6 +89,44 @@ export default class PrefecturesController {
       console.log('Adding cache: ', cacheKey);
       Cache.put(cacheKey, data, 30 * 60 * 1000);
     }
+
+    response.send(data);
+  }
+
+  /**
+   * Find a prefecture by id
+   */
+  public async showCoordinates({ response, params }: HttpContextContract) {
+    const { latitude, longitude } = params;
+
+    // Se não tiver, salva no cache
+    const data = await PrefectureRepository.findByIdWithPlaces(params.id);
+
+    console.log(latitude, longitude);
+    let coordinates;
+    console.log(coordinates);
+
+    for (const place of data.places) {
+      if (
+        place.open &&
+        place.queueStatus !== 'open' &&
+        place.queueUpdatedAt &&
+        Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 50 * 60 * 1000
+      ) {
+        place.queueStatus = 'open';
+      }
+
+      if (coordinates && place.latitude && place.longitude) {
+        place.distance = calculateDistance(latitude, longitude, place.latitude, place.longitude);
+      }
+    }
+    // sort by distance
+    data.places.sort((a, b) => {
+      return +b.open - +a.open || a.distance - b.distance;
+    });
+
+    console.log('Adding cache: ', cacheKey);
+    Cache.put(cacheKey, data, 30 * 60 * 1000);
 
     response.send(data);
   }

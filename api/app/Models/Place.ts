@@ -5,6 +5,8 @@ import QueueUpdate from 'App/Models/QueueUpdate';
 
 import Cache from 'memory-cache';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
+import Config from '@ioc:Adonis/Core/Config';
+
 import {
   getSlug,
   IsNowBetweenTimes,
@@ -13,11 +15,11 @@ import {
   sanitizeAddress,
   sanitizePlaceTitle,
   sanitizeString,
-  sanitizeSurname,
   sanitizeZip
 } from 'App/Helpers';
 
 import { DateTime } from 'luxon';
+
 export interface PlaceType extends BaseModel {
   prefectureId: string;
   title: string;
@@ -175,20 +177,23 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Update Open Today with Open Tomorrow field
    */
   public async openOrClosePlaces() {
+    const minutesToCheck = Config.get('app.minutesRangeToCheck');
+    // console.log(minutesToCheck);
     if (this._activeObserver) {
       const now = new Date();
       const placesToOpen = this.places.filter((p) => {
-        //console.log(p.openAt ? this.minutesDiff(p.openAt.toDate(), now) : '');
-        const timeDiff = p.openAt ? minutesDiff(p.openAt.toDate(), now) : 0;
+        const timeDiff = p.openAt ? minutesDiff(now, p.openAt.toDate()) : 0;
+        // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+
         // Only open if opens today and still not open
-        return p.openAt && !p.open && p.openToday && timeDiff <= -1 && timeDiff > -2;
+        return p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
       });
 
       const placesToClose = this.places.filter((p) => {
         //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
-        const timeDiff = p.closeAt ? minutesDiff(p.closeAt.toDate(), now) : 0;
+        const timeDiff = p.closeAt ? minutesDiff(now, p.closeAt.toDate()) : 0;
         // Only closes if not open
-        return p.closeAt && p.open && timeDiff <= -1 && timeDiff > -2;
+        return p.closeAt && p.open && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
       });
 
       for (const place of placesToOpen) {
@@ -232,23 +237,21 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       const addressDistrict = sanitizeAddress(json.addressDistrict);
       const addressCityState = sanitizeAddress(json.addressCityState);
 
-      const openAt = DateTime.fromISO(json.openAt).toJSDate();
-      const closeAt = DateTime.fromISO(json.closeAt).toJSDate();
-
       const addressZip = sanitizeZip(json.addressZip);
       const googleMapsUrl = sanitizeString(json.googleMapsUrl);
 
       const active = json.active !== undefined ? parseBoolFromString(json.active) : true;
 
-      const open = IsNowBetweenTimes(openAt, closeAt);
+      const openAt = json.openAt ? DateTime.fromISO(json.openAt).toJSDate() : undefined;
+      const closeAt = json.closeAt ? DateTime.fromISO(json.closeAt).toJSDate() : undefined;
+
+      const open = openAt && closeAt ? IsNowBetweenTimes(openAt, closeAt) : false;
       const queueStatus = open ? 'open' : 'closed';
       const queueUpdatedAt = new Date();
       result = {
         title,
         internalTitle,
         type,
-        openAt,
-        closeAt,
         open,
         queueStatus,
         queueUpdatedAt,
@@ -264,6 +267,9 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
       if (json.openToday !== undefined) result.openToday = json.openToday;
       if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
+
+      if (openAt) result.openAt = openAt;
+      if (closeAt) result.closeAt = closeAt;
 
       place.push(result);
     }
@@ -337,7 +343,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         // 50 * 60 * 1000
 
         // random update to 25%
-        if ((place.id && prob <= randomness) || minutesSinceLastUpdate >= 45) {
+        if (place.id && (prob <= randomness || minutesSinceLastUpdate >= 45)) {
           await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
         }
       }
