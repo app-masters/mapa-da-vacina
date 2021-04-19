@@ -24,7 +24,7 @@ const firebaseAuthConfig = {
     /**
      * signInSuccessWithAuthResult
      */
-    signInSuccessWithAuthResult: () => false
+    signInSuccessWithAuthResult: () => true
   }
 };
 

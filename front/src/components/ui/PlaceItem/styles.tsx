@@ -66,6 +66,17 @@ export const CardItemContent = styled(Col)<ColProps>`
   .item-place {
     font-size: 23px;
   }
+  .item-header {
+    flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    h1 {
+      margin-right: ${(props) => props.theme.spacing.sm};
+    }
+    > small {
+      font-size: 14px;
+    }
+  }
 `;
 
 export const CardItemExtra = styled.div`

@@ -19,7 +19,7 @@ type DashboardViewProps = {
  * @params NextPage
  */
 const Dashboard: React.FC<DashboardViewProps> = ({ user, prefecture, places, pageLoading }) => {
-  const userRole = user.role;
+  const userRole = user?.role;
   return (
     <Layout userRole={userRole} user={user}>
       <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>

@@ -29,6 +29,12 @@ export const ModalQueueContent = styled(Space)`
   align-items: center;
   justify-content: center;
   display: flex;
+  width: 75%;
+  margin-left: auto;
+  margin-right: auto;
+  .ant-space-item {
+    width: 100%;
+  }
 `;
 
 export const PlaceQueueCard = styled(Card)`
@@ -38,7 +44,7 @@ export const PlaceQueueCard = styled(Card)`
   }
 `;
 
-export const PlaceQueueItem = styled(Row)<{ warning?: boolean }>`
+export const PlaceQueueItem = styled(Row)<{ warning: boolean }>`
   background-color: ${(props) => (props.warning ? props.theme.colors.alertColor : 'transparent')};
   padding: ${(props) => props.theme.spacing.default} 0px;
   border-bottom: 1px solid #00000012;
@@ -78,7 +84,7 @@ export const PlaceQueueItemContent = styled.div`
 
 export const QueueButton = styled.div<{ disabled?: boolean; color: string }>`
   cursor: pointer;
-  width: 200px;
+  width: 100%;
   padding: 4px 16px;
   border-radius: 2px;
   border: 1px solid ${(props) => (props.disabled ? props.theme.colors.disabled : props.color)};

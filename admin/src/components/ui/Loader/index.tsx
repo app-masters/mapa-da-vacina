@@ -8,7 +8,7 @@ import { LoaderWrapper } from './styles';
 const Loader = () => {
   return (
     <LoaderWrapper>
-      <LoadingOutlined color={theme.colors.primary} size={36} spin />
+      <LoadingOutlined color={theme.colors.primary} size={60} spin />
     </LoaderWrapper>
   );
 };

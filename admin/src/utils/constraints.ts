@@ -9,9 +9,9 @@ export const userRoles = {
 
 export const userRolesLabel = {
   superAdmin: 'Super Admin',
-  prefectureAdmin: 'Admin da prefeitura',
-  placeAdmin: 'Admin do local',
-  queueObserver: 'Observador'
+  prefectureAdmin: 'Administrador na prefeitura',
+  placeAdmin: 'Administrador no ponto de vacinação',
+  queueObserver: 'Observador da fila'
 };
 
 export type placeQueueStatusType = 'open' | 'closed' | 'noQueue' | 'smallQueue' | 'mediumQueue' | 'longQueue';
