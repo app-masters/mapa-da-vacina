@@ -33,7 +33,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
       <PlaceListWrapper {...props}>
         {isDemonstration && (
           <Alert
-            style={{ marginBottom: 16 }}
+            style={{ marginBottom: 16, textAlign: 'center' }}
             message="Esta é uma cidade de demonstração do sistema Mapa da Vacina, para que você possa entender como os pontos de vacinação são apresentados com suas respectivas filas"
             type="success"
           />
@@ -82,6 +82,13 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
             </ul>
           </div>
           <p>
+            Veja
+            <a href={`https://demonstracao.mapadavacina.com.br/`} rel="noreferrer">
+              um exemplo
+            </a>
+            com este recursos em funcionamento.
+          </p>
+          <p>
             Se você é da prefeitura de <strong>{city}</strong>{' '}
             <a
               href={`https://api.whatsapp.com/send?phone=5532988735683&text=Sou da prefeitura de ${city} e gostaria de saber como utilizar o Mapa da Vacina.`}
@@ -90,6 +97,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
             >
               entre em contato conosco
             </a>
+            .
           </p>
         </WarningBox>
       )}

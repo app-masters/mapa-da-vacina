@@ -19,7 +19,6 @@ import {
 } from 'App/Helpers';
 
 import { DateTime } from 'luxon';
-
 export interface PlaceType extends BaseModel {
   prefectureId: string;
   title: string;
@@ -337,9 +336,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
           (place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) / 60 / 1000
         );
         console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
-        // 50 * 60 * 1000
-
-        // random update to 25%
+        // random update || keep updated
         if (place.id && (prob <= randomness || minutesSinceLastUpdate >= 45)) {
           await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
         }
