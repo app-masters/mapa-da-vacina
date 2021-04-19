@@ -11,7 +11,11 @@ import HomeView from '../../views/Home';
 const Home: NextPage<{ data: Prefecture }> = (props) => {
   return (
     <>
-      <NextSeo title={props.data.name} description={`Descubra onde vacinar em ${props.data.city} contra a COVID-19`} />
+      <NextSeo
+        title={props.data.name}
+        description={`Descubra onde vacinar em ${props.data.city} contra a COVID-19`}
+        openGraph={{ images: [{ url: props.data.primaryLogo, alt: `Logo da prefeitura de ${props.data.name}` }] }}
+      />
       <HomeView loading={!props.data?.id} data={props.data || ({} as Prefecture)} />
     </>
   );
