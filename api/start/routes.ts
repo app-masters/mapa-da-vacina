@@ -26,7 +26,7 @@ Route.get('/', async () => {
 // Prefecture
 Route.get('/prefecture', 'PrefecturesController.index');
 //Route.get('/prefecture/:id/:zip?', 'PrefecturesController.show');
-Route.get('/prefecture/:id/', 'PrefecturesController.showCoordinates');
+Route.get('/prefecture/:id/', 'PrefecturesController.show');
 Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 
 // User
