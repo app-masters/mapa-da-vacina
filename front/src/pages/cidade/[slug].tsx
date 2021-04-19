@@ -32,7 +32,7 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
     <>
       <NextSeo
         title={props.data?.name}
-        description={`Descubra onde vacinar em ${props.data?.city} contra a COVID-19`}
+        description={`Descubra onde vacinar em ${props.data?.city || 'sua cidade'} contra a COVID-19`}
         openGraph={{ images: [{ url: props.data?.primaryLogo, alt: `Logo da prefeitura de ${props.data?.name}` }] }}
       />
       <HomeView loading={!props.data?.id} data={data?.id ? data : props.data || ({} as Prefecture)} />
@@ -45,6 +45,8 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
  */
 export const getStaticProps: GetStaticProps = async (ctx) => {
   try {
+    if (!ctx.params.slug) return { props: { data: {} } }; // Don't try to regenerate base html
+    console.log('[debug] Regenerating page for', ctx.params.slug);
     const data = await getPrefectureData(ctx.params.slug as string);
     return { props: { data }, revalidate: 60 };
   } catch (error) {
