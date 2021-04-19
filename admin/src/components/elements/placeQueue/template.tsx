@@ -20,7 +20,7 @@ import {
   QueueTag,
   ModalQueueContent
 } from './styles';
-import { Typography, Modal, Tag, Space, Col } from 'antd';
+import { Typography, Modal, Tag, Space, Col, Radio } from 'antd';
 import { PersonPin } from '../../ui/Icons';
 import Button from '../../ui/Button';
 import React from 'react';
@@ -31,12 +31,20 @@ export type PlaceQueueProps = {
   userRole: userRoleType;
   prefecture: Prefecture;
   loading?: boolean;
-  extra?: React.ReactNode;
   placeQueueUpdate?: (placeId: string, prefectureId: string, status: placeQueueStatusType) => Promise<void>;
   placeStatusUpdate?: (place: Place, status: boolean) => Promise<void>;
   places: Place[];
   user: User;
 };
+
+const minutesUntilWarning = process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING
+  ? Number(process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING)
+  : 15;
+if (!process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING) {
+  console.error(
+    'Configuration for minutesUntilWarning not found on env (process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING), using default 15 minutes'
+  );
+}
 
 /**
  * PlaceQueueTemplate
@@ -46,9 +54,11 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
   places,
   placeStatusUpdate,
   loading,
-  placeQueueUpdate,
-  extra
+  placeQueueUpdate
 }) => {
+  const [loadingPlace, setLoadingPlace] = React.useState<string>(undefined);
+  const [filter, setFilter] = React.useState<string>('all');
+  const [data, setData] = React.useState<Place[]>([]);
   const [modalOpen, setModalOpen] = React.useState<{
     open: boolean;
     placeId: string;
@@ -61,6 +71,14 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
     clickedOption: undefined
   });
 
+  React.useEffect(() => {
+    let list = places;
+    if (filter !== 'all') {
+      list = list.filter((f) => f.open);
+    }
+    setData(list);
+  }, [filter, places]);
+
   /**
    * handleCloseModal
    */
@@ -71,12 +89,17 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
   /**
    * confirmModal
    */
-  const confirmModal = (place: Place) => {
+  const confirmModal = async (place: Place) => {
+    if (!place.open) {
+      setLoadingPlace(place.id);
+      await placeStatusUpdate(place, true);
+      return;
+    }
     Modal.confirm({
-      title: `Confirmar ${place.open ? 'fechamento' : 'abertura'} do local`,
+      title: `Confirmar fechamento do local`,
       content: (
         <>
-          {`Deseja realmente ${place.open ? 'fechar' : 'abrir'} este ponto de vacinação agora ? `}
+          {`Deseja realmente fechar este ponto de vacinação agora ? `}
           <strong>{place.title}</strong>
         </>
       ),
@@ -85,7 +108,10 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
       /**
        * onOk
        */
-      onOk: async () => await placeStatusUpdate(place, !place.open)
+      onOk: async () => {
+        setLoadingPlace(place.id);
+        await placeStatusUpdate(place, false);
+      }
     });
   };
 
@@ -105,11 +131,18 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
       <PlaceQueueCard>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {prefecture?.name && <h1>{`Prefeitura de ${prefecture?.name}`}</h1>}
-          {extra}
+          <Space>
+            <Radio.Group size="large" defaultValue="all" onChange={({ target }) => setFilter(target.value)}>
+              <Radio.Button value="all">Todos</Radio.Button>
+              <Radio.Button value="open">Abertos</Radio.Button>
+            </Radio.Group>
+          </Space>
         </div>
-        {places.map((place) => {
+        {data.map((place) => {
           const formattedDate = new Date(place.queueUpdatedAt?.seconds * 1000);
-          const haveWarning = !place.open ? false : dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
+          const haveWarning = !place.open
+            ? false
+            : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());
           return (
             <PlaceQueueItem warning={haveWarning} key={place.id}>
               <PlaceQueueItemAvatar xs={24} sm={24} md={4} lg={2} color={placeQueueColor[place.queueStatus]}>
@@ -140,7 +173,12 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
               </Col>
               <Col xs={24} sm={24} md={6} lg={4} style={{ justifyContent: 'flex-end' }}>
                 <Space className="queue-action" direction="vertical" align="end">
-                  <Button type={place.open ? 'default' : 'primary'} onClick={() => confirmModal(place)}>
+                  <Button
+                    loading={loading && loadingPlace === place.id}
+                    disabled={loading && loadingPlace !== place.id}
+                    type={place.open ? 'default' : 'primary'}
+                    onClick={() => confirmModal(place)}
+                  >
                     {place.open ? 'Fechar ponto de vacinação' : 'Abrir ponto de vacinação'}
                   </Button>
                   {place.open && (

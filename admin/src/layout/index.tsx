@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutContentWrapper, LayoutHeader, LayoutWrapper } from './styles';
+import { FooterWrapper, LayoutContentWrapper, LayoutHeader, LayoutWrapper } from './styles';
 import { Layout as ALayout, Menu, Typography } from 'antd';
 import NextLink from 'next/link';
 import Image from 'next/image';
@@ -137,13 +137,23 @@ const Layout: React.FC<{ userRole: userRoleType; user: User }> = ({ children, us
           </Menu.Item>
         </Menu>
       </Sider>
-      <LayoutContentWrapper>
-        <LayoutHeader>
-          <Typography.Title level={4}>{`${user?.name} (${userRolesLabel[userRole]})`}</Typography.Title>
-          <Typography.Title>{selectedPlace?.title}</Typography.Title>
-        </LayoutHeader>
-        {children}
-      </LayoutContentWrapper>
+      <div style={{ width: '100%' }}>
+        <LayoutContentWrapper>
+          <LayoutHeader>
+            <Typography.Title level={4}>{`${user?.name} (${userRolesLabel[userRole]})`}</Typography.Title>
+            <Typography.Title>{selectedPlace?.title}</Typography.Title>
+          </LayoutHeader>
+          {children}
+        </LayoutContentWrapper>
+        <FooterWrapper>
+          <Typography.Title level={5}>
+            Desenvolvido pela{' '}
+            <a href="www.appmasters.io/pt" target="_blank">
+              App Masters
+            </a>
+          </Typography.Title>
+        </FooterWrapper>
+      </div>
     </LayoutWrapper>
   );
 };
