@@ -14,6 +14,33 @@ const nextBaseConfig = {
   },
   images: {
     domains: ['firebasestorage.googleapis.com']
+  },
+  /**
+   * Adding rewrite paths
+   */
+  async rewrites() {
+    let rewriteList = [];
+    if (process.env.NEXT_PUBLIC_HEROKU) {
+      rewriteList = JSON.parse(process.env.NEXT_PUBLIC_HEROKU).map((item) => ({
+        source: '/',
+        has: [
+          {
+            type: 'host',
+            value: `${item}.mapadavacina.com.br`
+          }
+        ],
+        destination: `/cidade/${item}`
+      }));
+    }
+
+    return [
+      ...rewriteList,
+      {
+        // Fallback
+        source: '/',
+        destination: '/cidade/new'
+      }
+    ];
   }
 };
 
