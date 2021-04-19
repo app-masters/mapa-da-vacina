@@ -1,4 +1,5 @@
 import { GetStaticProps, NextPage } from 'next';
+import { NextSeo } from 'next-seo';
 import { Prefecture } from '../../lib/Prefecture';
 import { getPrefectureData } from '../../utils/prefecture';
 import HomeView from '../../views/Home';
@@ -8,7 +9,12 @@ import HomeView from '../../views/Home';
  * @params NextPage
  */
 const Home: NextPage<{ data: Prefecture }> = (props) => {
-  return <HomeView loading={!props.data?.id} data={props.data || ({} as Prefecture)} />;
+  return (
+    <>
+      <NextSeo title={props.data.name} description={`Descubra onde vacinar em ${props.data.city} contra a COVID-19`} />
+      <HomeView loading={!props.data?.id} data={props.data || ({} as Prefecture)} />
+    </>
+  );
 };
 
 /**

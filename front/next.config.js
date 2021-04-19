@@ -20,7 +20,15 @@ const nextBaseConfig = {
    */
   async rewrites() {
     let rewriteList = [];
-    if (process.env.NEXT_PUBLIC_HEROKU) {
+    if (process.env.NEXT_PUBLIC_PREFECTURE_ID) {
+      // Rewriting the root folder to the city page
+      rewriteList = [
+        {
+          source: '/',
+          destination: `/cidade/${process.env.NEXT_PUBLIC_PREFECTURE_ID}`
+        }
+      ];
+    } else if (process.env.NEXT_PUBLIC_HEROKU) {
       rewriteList = JSON.parse(process.env.NEXT_PUBLIC_HEROKU).map((item) => ({
         source: '/',
         has: [
