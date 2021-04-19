@@ -41,6 +41,7 @@ export interface PlaceType extends BaseModel {
 
   latitude?: number;
   longitude?: number;
+  distance?: number;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {

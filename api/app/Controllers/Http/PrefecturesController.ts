@@ -34,8 +34,15 @@ export default class PrefecturesController {
   /**
    * Find a prefecture by id
    */
-  public async show({ response, params }: HttpContextContract) {
+  public async show({ request, response, params }: HttpContextContract) {
     //const cacheKey = `prefecture-${params.id}`;
+
+    const queryParams = request.get();
+
+    const latitude = queryParams['latitude'];
+    const longitude = queryParams['longitude'];
+    const zip = queryParams['zip'];
+
     // Tentar obter do cache
     const cacheKey = `prefecture-${params.id}-zip:${params.zip}`;
     console.log('Reading cache: ', cacheKey);
@@ -45,12 +52,12 @@ export default class PrefecturesController {
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
 
-      console.log(params.zip);
+      console.log(zip);
       let coordinates;
-      if (params.zip) {
+      if (zip) {
         const resp = await fetch(Config.get('app.getCoordinatesUrl'), {
           method: 'post',
-          body: JSON.stringify({ addressZip: params.zip }),
+          body: JSON.stringify({ addressZip: zip }),
           headers: { 'Content-Type': 'application/json' }
         });
         if (resp.status === 200) {
@@ -59,6 +66,8 @@ export default class PrefecturesController {
           coordinates = undefined;
           console.log('Error fetching coordinates... Check cloud functions log for more information');
         }
+      } else if (latitude && longitude) {
+        coordinates = { latitude, longitude };
       }
       console.log(coordinates);
 
@@ -98,13 +107,12 @@ export default class PrefecturesController {
    */
   public async showCoordinates({ response, params }: HttpContextContract) {
     const { latitude, longitude } = params;
+    // Arrendondar
+    const lat = Number(latitude).toFixed(3);
+    const lon = Number(longitude).toFixed(3);
 
-    // Se não tiver, salva no cache
     const data = await PrefectureRepository.findByIdWithPlaces(params.id);
-
     console.log(latitude, longitude);
-    let coordinates;
-    console.log(coordinates);
 
     for (const place of data.places) {
       if (
@@ -116,17 +124,13 @@ export default class PrefecturesController {
         place.queueStatus = 'open';
       }
 
-      if (coordinates && place.latitude && place.longitude) {
+      if (latitude && longitude && place.latitude && place.longitude) {
         place.distance = calculateDistance(latitude, longitude, place.latitude, place.longitude);
       }
     }
-    // sort by distance
-    data.places.sort((a, b) => {
-      return +b.open - +a.open || a.distance - b.distance;
-    });
 
-    console.log('Adding cache: ', cacheKey);
-    Cache.put(cacheKey, data, 30 * 60 * 1000);
+    // console.log('Adding cache: ', cacheKey);
+    // Cache.put(cacheKey, data, 30 * 60 * 1000);
 
     response.send(data);
   }
