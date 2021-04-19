@@ -62,11 +62,6 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
         <div>
           {title}
           <p>
-            {`${item.addressStreet ? item.addressStreet : ''}${
-              item.addressDistrict ? ', ' + item.addressDistrict : ''
-            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
-              item.addressZip ? ', ' + item.addressZip : ''
-            }`}
             {!!item.googleMapsUrl && (
               <Tooltip title="Veja como chegar no mapa">
                 <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
@@ -74,6 +69,11 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
                 </a>
               </Tooltip>
             )}
+            {`${item.addressStreet ? item.addressStreet : ''}${
+              item.addressDistrict ? ', ' + item.addressDistrict : ''
+            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
+              item.addressZip ? ', ' + item.addressZip : ''
+            }`}
           </p>
         </div>
       </CardItemContent>
