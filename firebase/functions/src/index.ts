@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
-import { Client } from "@googlemaps/google-maps-services-js";
+import { Client, AddressType } from "@googlemaps/google-maps-services-js";
 const client = new Client({});
 
 admin.initializeApp();
@@ -21,8 +21,11 @@ function sanitizeZip(zip: string): string {
 
 async function returnCoordinates(zip: string) {
   // Checks database first
-  const dbResult = await db.collection("zipCoordinate").doc(zip).get();
-  if (dbResult.exists) return dbResult.data();
+  const dbResult = await db
+    .collection("zipCoordinate")
+    .where("zip", "==", zip)
+    .get();
+  if (!dbResult.empty) return dbResult.docs[0].data();
 
   //If non-existent, check google API
   const googleApiKey = functions.config().googlemaps.key;
@@ -50,7 +53,63 @@ async function returnCoordinates(zip: string) {
       latitude: geometry.location.lat,
       longitude: geometry.location.lng,
     };
-    await dbResult.ref.create(returnData);
+    await db.collection("zipCoordinate").add({
+      addressZip: zip,
+      latitude: geometry.location.lat.toFixed(3),
+      longitude: geometry.location.lng.toFixed(3),
+    });
+
+    return returnData;
+  } else if (queryData.data) {
+    // Show some log if we don't know how to handle this result
+    if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
+      console.log("  ‼️ unexpected result from Google Maps", queryData);
+    }
+  }
+  //return undefined;
+  throw new Error("No results found.");
+}
+
+async function returnZip(latitude: number, longitude: number) {
+  // Checks database first
+  const dbResult = await db
+    .collection("zipCoordinate")
+    .where("latitude", "==", latitude)
+    .where("longitude", "==", longitude)
+    .get();
+  if (!dbResult.empty) return dbResult.docs[0].data();
+
+  //If non-existent, check google API
+  const googleApiKey = functions.config().googlemaps.key;
+  if (!googleApiKey) {
+    console.log("    👉  No GOOGLE_API_KEY, will not fetch coordinates");
+    //return undefined;
+    throw new Error("No GOOGLE_API_KEY credentials.");
+  }
+
+  const queryData = await client.reverseGeocode({
+    params: {
+      latlng: [latitude, longitude],
+      key: googleApiKey,
+    },
+  });
+
+  if (queryData && queryData.statusText === "OK") {
+    const zip = queryData.data.results[0].address_components.filter((ac) =>
+      ac.types.includes(AddressType.postal_code)
+    );
+    const sanitizedZip = sanitizeZip(zip[0].long_name);
+    console.log("zip", sanitizedZip);
+
+    const returnData = {
+      zip: sanitizedZip,
+    };
+
+    await db.collection("zipCoordinate").add({
+      addressZip: sanitizedZip,
+      latitude: latitude.toFixed(3),
+      longitude: longitude.toFixed(3),
+    });
 
     return returnData;
   } else if (queryData.data) {
@@ -94,9 +153,11 @@ export const totalizeOpenPlacesCount = functions.firestore
     //If was created OR zip changed
     if (
       (!change.before.exists && change.after.exists) ||
-      (afterValue && beforeValue && afterValue.zip !== beforeValue.zip)
+      (afterValue &&
+        beforeValue &&
+        afterValue.addressZip !== beforeValue.addressZip)
     ) {
-      returnCoordinates(afterValue?.zip)
+      returnCoordinates(afterValue?.addressZip)
         .then((data) => {
           if (data) {
             db.collection("prefecture")
@@ -106,7 +167,7 @@ export const totalizeOpenPlacesCount = functions.firestore
               .update({
                 latitude: data.latitude,
                 longitude: data.longitude,
-                zip: data.zip,
+                addressZip: data.zip,
               });
           }
         })
@@ -159,6 +220,21 @@ export const getCoordinates = functions.https.onRequest(async (req, res) => {
     const coordinates = await returnCoordinates(zip);
     console.log(coordinates);
     res.json(coordinates);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
+
+export const getZip = functions.https.onRequest(async (req, res) => {
+  try {
+    console.log(req.body);
+    const { latitude, longitude } = req.body;
+    console.log(latitude, longitude);
+
+    const zip = await returnZip(latitude, longitude);
+    console.log(zip);
+    res.json(zip);
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

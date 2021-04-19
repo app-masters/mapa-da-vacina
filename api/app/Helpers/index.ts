@@ -1,4 +1,5 @@
 import slugify from 'slugify';
+import Cache from 'memory-cache';
 
 /**
  * Returns a slug
@@ -201,4 +202,17 @@ export const parseBoolFromString = (value: string) => {
  */
 export const calculateDistance = (x1: number, y1: number, x2: number, y2: number) => {
   return Math.sqrt(Math.pow(x1 - x2, 2) - Math.pow(y1 - y2, 2));
+};
+
+/**
+ * Delete all keys from cache starting with a prefix string
+ * @param prefix
+ */
+export const deleteCacheByPrefix = (prefix: string) => {
+  const cacheKeys = Cache.keys();
+  const keysToDelete = cacheKeys.filter((key: string) => key.startsWith(prefix));
+
+  for (const key of keysToDelete) {
+    Cache.del(key);
+  }
 };

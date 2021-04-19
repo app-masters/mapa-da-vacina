@@ -3,7 +3,8 @@ import Config from '@ioc:Adonis/Core/Config';
 import PrefectureRepository from 'App/Models/Prefecture';
 import Cache from 'memory-cache';
 import fetch from 'node-fetch';
-import { calculateDistance } from 'App/Helpers';
+import { calculateDistance, sanitizeZip } from 'App/Helpers';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 export default class PrefecturesController {
   /**
    * Index
@@ -36,24 +37,44 @@ export default class PrefecturesController {
    */
   public async show({ request, response, params }: HttpContextContract) {
     //const cacheKey = `prefecture-${params.id}`;
-    console.log('aqui??');
     const queryParams = request.get();
     console.log(queryParams);
-    console.log(request.get());
 
+    const zip = queryParams['zip'];
     const latitude = queryParams['latitude'];
     const longitude = queryParams['longitude'];
-    const zip = queryParams['zip'];
 
-    // Tentar obter do cache
-    const cacheKey = `prefecture-${params.id}-zip:${params.zip}`;
+    // Se tiver latitude e longitude / zip
+    // acha o zip e verifica o cache
+    let foundZip = zip;
+    if (latitude && longitude) {
+      const responseZip = await fetch(Config.get('app.getZipUrl'), {
+        method: 'POST',
+        body: JSON.stringify({ latitude: Number(latitude).toFixed(3), longitude: Number(longitude).toFixed(3) }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (responseZip.status === 200) {
+        foundZip = sanitizeZip((await responseZip.json()).zip);
+        RollbarProvider.info('Found zip via coordinates', { zip: foundZip, coordinates: { latitude, longitude } });
+      } else {
+        foundZip = undefined;
+        RollbarProvider.info('Error fetching zip', { coordinates: { latitude, longitude } });
+        console.log('Error fetching zip... Check cloud functions log for more information');
+      }
+    }
+    // verifica o cache
+    let cacheKey = `prefecture:${params.id}-`;
+    if (foundZip) cacheKey += `zip:${foundZip}`;
     console.log('Reading cache: ', cacheKey);
     let data = Cache.get(cacheKey);
 
-    // Se não tiver, salva no cache
+    // Se não tiver cache, salva
     if (!data) {
       data = await PrefectureRepository.findByIdWithPlaces(params.id);
 
+      // Se tiver zip, encontra as coordenadas e calcula as distancias
+      // Se tiver lat long, calcula as distancias
+      // Se não tiver nada, não calcula as distancias
       console.log(zip);
       let coordinates;
       if (zip) {
@@ -64,6 +85,7 @@ export default class PrefecturesController {
         });
         if (resp.status === 200) {
           coordinates = await resp.json();
+          RollbarProvider.info('Found coordinates via zip', { zip: zip, coordinates });
         } else {
           coordinates = undefined;
           console.log('Error fetching coordinates... Check cloud functions log for more information');
@@ -94,7 +116,7 @@ export default class PrefecturesController {
       }
       // sort by distance
       data.places.sort((a, b) => {
-        return +b.open - +a.open || a.distance - b.distance;
+        return a.distance - b.distance;
       });
 
       console.log('Adding cache: ', cacheKey);
