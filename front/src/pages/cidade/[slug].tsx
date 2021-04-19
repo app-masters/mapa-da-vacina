@@ -1,3 +1,4 @@
+import { useEffect, useState, useCallback } from 'react';
 import { GetStaticProps, NextPage } from 'next';
 import { NextSeo } from 'next-seo';
 import { Prefecture } from '../../lib/Prefecture';
@@ -9,14 +10,32 @@ import HomeView from '../../views/Home';
  * @params NextPage
  */
 const Home: NextPage<{ data: Prefecture }> = (props) => {
+  // Local state
+  const [data, setData] = useState(props.data as Prefecture);
+
+  // Dealing with the fetch and re-fetch of the data
+  const getAndSetPrefectureData = useCallback(async () => {
+    const prefectureData = await getPrefectureData();
+    setData(prefectureData);
+    if (prefectureData && prefectureData.id) {
+      // If the data is defined, update it after some time
+      setTimeout(getAndSetPrefectureData, 60000);
+    }
+  }, []);
+
+  // Fetching prefecture data
+  useEffect(() => {
+    getAndSetPrefectureData();
+  }, [getAndSetPrefectureData]);
+
   return (
     <>
       <NextSeo
-        title={props.data.name}
-        description={`Descubra onde vacinar em ${props.data.city} contra a COVID-19`}
-        openGraph={{ images: [{ url: props.data.primaryLogo, alt: `Logo da prefeitura de ${props.data.name}` }] }}
+        title={props.data?.name}
+        description={`Descubra onde vacinar em ${props.data?.city} contra a COVID-19`}
+        openGraph={{ images: [{ url: props.data?.primaryLogo, alt: `Logo da prefeitura de ${props.data?.name}` }] }}
       />
-      <HomeView loading={!props.data?.id} data={props.data || ({} as Prefecture)} />
+      <HomeView loading={!props.data?.id} data={data?.id ? data : props.data || ({} as Prefecture)} />
     </>
   );
 };

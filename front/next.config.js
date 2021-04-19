@@ -29,6 +29,7 @@ const nextBaseConfig = {
         }
       ];
     } else if (process.env.NEXT_PUBLIC_HEROKU) {
+      console.log(process.env.NEXT_PUBLIC_HEROKU);
       rewriteList = JSON.parse(process.env.NEXT_PUBLIC_HEROKU).map((item) => ({
         source: '/',
         has: [
@@ -40,6 +41,8 @@ const nextBaseConfig = {
         destination: `/cidade/${item}`
       }));
     }
+
+    console.log(rewriteList);
 
     return [
       ...rewriteList,
