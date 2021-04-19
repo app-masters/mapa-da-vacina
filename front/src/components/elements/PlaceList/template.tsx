@@ -38,7 +38,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
     const distance = getDistance(position, { latitude: item.latitude, longitude: item.longitude });
     const metersAway = distance / 1000;
     if (metersAway > 1) {
-      return `${metersAway.toFixed(1)}km`.replace(',', '.');
+      return `${metersAway.toFixed(1)}km`.replace('.', ',');
     }
     return `${metersAway * 1000}m`;
   };
