@@ -18,7 +18,6 @@ import {
 } from 'App/Helpers';
 
 import { DateTime } from 'luxon';
-import slugify from 'slugify';
 export interface PlaceType extends BaseModel {
   prefectureId: string;
   title: string;
@@ -37,6 +36,9 @@ export interface PlaceType extends BaseModel {
   openTomorrow?: boolean;
   openAt?: Timestamp;
   closeAt?: Timestamp;
+
+  latitude?: number;
+  longitude?: number;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {

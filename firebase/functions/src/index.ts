@@ -1,5 +1,9 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+
+import { Client } from "@googlemaps/google-maps-services-js";
+const client = new Client({});
+
 admin.initializeApp();
 const db = admin.firestore();
 
@@ -18,7 +22,7 @@ export const createQueueUpdate = functions.firestore
     return placeRef?.update({
       queueStatus: newValue.queueStatus,
       open: newValue.open,
-      queueUpdatedAt: new Date()
+      queueUpdatedAt: new Date(),
     });
   });
 
@@ -31,6 +35,27 @@ export const totalizeOpenPlacesCount = functions.firestore
 
     const afterValue = change.after.data();
     const beforeValue = change.before.data();
+    //If was created OR zip changed
+    if (
+      (!change.before.exists && change.after.exists) ||
+      (afterValue && beforeValue && afterValue.zip !== beforeValue.zip)
+    ) {
+      returnCoordinates(afterValue?.zip)
+        .then((data) => {
+          db.collection("prefecture")
+            .doc(context.params.prefectureId)
+            .collection("place")
+            .doc(context.params.placeId)
+            .update({
+              latitude: data?.latitude,
+              longitude: data?.longitude,
+              zip: data?.zip,
+            });
+        })
+        .catch((err) => {
+          console.log("Error setting coordinates ", err);
+        });
+    }
 
     if (
       (change.after.exists && !change.before.exists) ||
@@ -45,7 +70,8 @@ export const totalizeOpenPlacesCount = functions.firestore
       const placeRef = change.after.ref;
       const prefectureRef = placeRef.parent.parent;
 
-      return db.collection("prefecture")
+      return db
+        .collection("prefecture")
         .doc(context.params.prefectureId)
         .collection("place")
         .where("active", "==", true)
@@ -60,8 +86,70 @@ export const totalizeOpenPlacesCount = functions.firestore
             numPlacesOpen: numOpen,
           });
         });
-        
     } else {
       return null;
     }
   });
+
+/**
+ * Sanitize a zip, return it with only numbers, or null
+ */
+function sanitizeZip(zip: string): string {
+  if (!zip) return "";
+  const match = zip.match(/\d+/g);
+  if (!match) return "";
+  const zipCode = match.join("");
+  if (zipCode.length !== 8) return "";
+  return zipCode;
+}
+
+async function returnCoordinates(zip: string) {
+  // Checks database first
+  const dbResult = await db.collection("zipCoordinate").doc(zip).get();
+  if (dbResult.exists) return dbResult.data();
+
+  //If non-existent, check google API
+  const googleApiKey = functions.config().googlemaps.key;
+  // console.log(googleApiKey);
+  if (!googleApiKey) {
+    console.log("    👉  No GOOGLE_API_KEY, will not fetch coordinates");
+    throw new Error("No GOOGLE_API_KEY credentials.");
+  }
+
+  const queryData = await client.geocode({
+    params: {
+      components: "postal_code:" + zip + "|country:BR",
+      key: googleApiKey,
+    },
+  });
+  console.log(queryData);
+
+  if (queryData && queryData.statusText === "OK") {
+    const geometry = queryData.data.results[0].geometry;
+
+    console.log("geometry", geometry);
+
+    const returnData = {
+      zip: zip,
+      latitude: geometry.location.lat,
+      longitude: geometry.location.lng,
+    };
+    await dbResult.ref.create(returnData);
+
+    return returnData;
+  } else if (queryData.data) {
+    // Show some log if we don't know how to handle this result
+    if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
+      console.log("  ‼️ unexpected result from Google Maps", queryData);
+    }
+  }
+  throw new Error("No results found.");
+}
+
+export const getCoordinates = functions.https.onRequest(async (req, res) => {
+  const { data } = req.body;
+  console.log(data);
+  const zip = sanitizeZip(data.zip);
+  const coordinates = await returnCoordinates(zip);
+  res.json(coordinates);
+});
