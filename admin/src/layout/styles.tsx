@@ -12,6 +12,7 @@ export const LayoutWrapper = styled(Layout)`
 `;
 
 export const LayoutContentWrapper = styled(Layout)`
+  height: 100%;
   max-width: 1600px;
   width: 100%;
   // margin-left: auto;
@@ -31,5 +32,19 @@ export const LayoutHeader = styled.div`
   h4 {
     color: ${(props) => props.theme.colors.gray} !important;
     font-weight: 400;
+  }
+`;
+
+export const FooterWrapper = styled.div`
+  background-color: #f9f9ff;
+  border-top: 1px solid #00000012;
+  width: 100%;
+  min-height: 50px;
+  padding: ${(props) => props.theme.spacing.default};
+  text-align: center;
+  h5 {
+    font-weight: 300;
+    margin: 0;
+    color: ${(props) => props.theme.colors.darkGray} !important;
   }
 `;
