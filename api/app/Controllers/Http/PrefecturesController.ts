@@ -36,8 +36,10 @@ export default class PrefecturesController {
    */
   public async show({ request, response, params }: HttpContextContract) {
     //const cacheKey = `prefecture-${params.id}`;
-
+    console.log('aqui??');
     const queryParams = request.get();
+    console.log(queryParams);
+    console.log(request.get());
 
     const latitude = queryParams['latitude'];
     const longitude = queryParams['longitude'];
