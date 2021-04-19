@@ -2,13 +2,14 @@ import { Prefecture } from '../lib/Prefecture';
 import logging from './logging';
 
 /**
- * Get prefecture ID
+ * Get prefecture Data
  */
-export const getPrefectureData = async (): Promise<Prefecture> => {
+export const getPrefectureData = async (id?: string): Promise<Prefecture> => {
   try {
+    if (id === 'new') id = null; // Undefined ID, don't fetch it
+
     // Defining NEXT_PUBLIC_PREFECTURE_ID as prefecture ID
-    let prefectureId = process.env.NEXT_PUBLIC_PREFECTURE_ID;
-    console.log(prefectureId);
+    let prefectureId = id || process.env.NEXT_PUBLIC_PREFECTURE_ID;
     if (!prefectureId) {
       // No prefecture id defined, getting from online variable
       const possibleId = window.location.host.split('.')[0];
