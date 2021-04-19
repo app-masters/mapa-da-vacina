@@ -135,6 +135,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
       const prefDemonstration = this.prefectures.filter(
         (p) => p.name.includes('Demonstração') || p.city.includes('Demonstração')
       );
+      // console.log('prefDemonstration', prefDemonstration);
       if (!(prefDemonstration.length > 0) || !prefDemonstration[0].id) {
         console.log("Couldn't find prefecture for Demonstração");
         return;

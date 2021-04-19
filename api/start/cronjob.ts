@@ -64,14 +64,14 @@ const openOrClosePlaceJob = async () => {
  * Update random queue status
  */
 const updateRandomQueueStatusJob = async () => {
-  // console.log('cronJob - Open or Close place Job started ✔');
+  console.log('cronJob - Update Random Queue Status Job started ✔');
   if (updateRandomQueueStatusJobRunning) return RollbarProvider.error('cronJob already running');
 
   try {
     updateRandomQueueStatusJobRunning = true;
-    // console.log('cronJob - Opening or Closing Places ...');
+    console.log('cronJob - Updating Random Queue Status ...');
     await Prefecture.updatePlacesForDemonstration();
-    // console.log('cronJob - Open or Close place Job ended ✔');
+    console.log('cronJob - Update Random Queue Status Job ended ✔');
     updateRandomQueueStatusJobRunning = false;
   } catch (err) {
     console.log('cronJob - Update Demonstração Job ended with error ❌');
@@ -89,7 +89,7 @@ const init = async () => {
     console.log('cronJob - Crons started');
     cron.schedule('1 0 */1 * *', () => updateOpensTodayJob()).start();
     cron.schedule('*/1 * * * *', () => openOrClosePlaceJob()).start();
-    cron.schedule('*/5 * * * *', () => updateRandomQueueStatusJob()).start();
+    cron.schedule('*/6 * * * *', () => updateRandomQueueStatusJob()).start();
   } catch (error) {
     RollbarProvider.error('Failed to execute crons', { error });
   }

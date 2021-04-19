@@ -54,7 +54,8 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
    * @param placeId
    */
   public async addRandomUpdate(prefectureId: string, placeId: string) {
-    const status = ['noQueue', 'smallQueue', 'mediumQueue', 'longQueue', 'open'];
+    const status = ['noQueue', 'smallQueue', 'mediumQueue', 'longQueue'];
+    console.log('Update placeId: ' + placeId);
     await this.save(
       {
         userId: 'cronjob',
