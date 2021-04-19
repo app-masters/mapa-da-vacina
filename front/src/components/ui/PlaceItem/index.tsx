@@ -4,7 +4,7 @@ import { Car, PersonPin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Tag } from 'antd';
-
+import ButtonStyled from '../Button';
 /**
  * CardItem
  */
@@ -22,7 +22,10 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
   };
 
   const formattedDate = new Date(item.queueUpdatedAt?._seconds * 1000);
-  const haveWarning = dayjs(formattedDate).add(15, 'minutes').isBefore(dayjs());
+
+  const haveWarning = dayjs(formattedDate)
+    .add(Number(process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING), 'minutes')
+    .isBefore(dayjs());
 
   return (
     <CardItemWrapper>
@@ -37,6 +40,21 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
         </div>
       </CardItemContent>
       <CardItemContent md={10} sm={24}>
+        {item.open && item.closeAt ? (
+          <CardItemExtra>
+            <Tag color="default"> Fecha às {dayjs(item.closeAt._seconds * 1000).format('HH:mm')}</Tag>
+          </CardItemExtra>
+        ) : (
+          <CardItemExtra>
+            <Tag color="default">
+              {item.openTomorrow && item.openAt
+                ? `Abre amanhã às ${dayjs(item.closeAt._seconds * 1000).format('HH:mm')}`
+                : `Não abrirá amanhã`}
+            </Tag>
+          </CardItemExtra>
+        )}
+      </CardItemContent>
+      <CardItemContent md={10} sm={24}>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&
@@ -47,6 +65,13 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean }> = ({ ite
           </CardItemExtra>
         ) : null}
       </CardItemContent>
+      {item.googleMapsUrl ? (
+        <CardItemContent md={10} sm={24}>
+          <CardItemExtra>
+            <ButtonStyled color={haveWarning ? 'error' : 'default'}>Como chegar</ButtonStyled>
+          </CardItemExtra>
+        </CardItemContent>
+      ) : null}
       <CardItemIconContent lg={2} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
         {renderIcon()}
         {placeQueueLabel[item.queueStatus]}

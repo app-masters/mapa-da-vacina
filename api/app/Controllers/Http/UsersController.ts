@@ -14,6 +14,7 @@ import ValidateValidator from 'App/Validators/ValidateValidator';
 
 // Resources
 import SmsMessages from 'App/Models/Messages/SmsMessages';
+import parsePhoneNumberFromString from 'libphonenumber-js';
 
 export default class UsersController {
   /**
@@ -49,8 +50,11 @@ export default class UsersController {
     }
     const existUser = await UserRepository.findByPhone(data.phone, data.prefectureId);
     if (existUser) return response.status(401).send(`Número de telefone já convidado para esta prefeitura.`);
-
-    const newUser = await UserRepository.save({ ...data, active: false, invitedAt: new Date() }, data.prefectureId);
+    const phoneId = parsePhoneNumberFromString(data.phone)?.nationalNumber.toString();
+    const newUser = await UserRepository.save(
+      { ...data, id: phoneId, active: false, invitedAt: new Date() },
+      data.prefectureId
+    );
     // Todo: get data from listener instead of querying again
     const prefecture = await Prefecture.findById(data.prefectureId);
     let placeTitle: string | undefined = '';

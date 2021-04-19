@@ -30,8 +30,8 @@ const App = ({ Component, pageProps }: AppProps) => {
   return (
     <>
       <NextSeo
-        title="Mapa da Vacina | Encontre a vacina para COVID"
-        description="Descubra onde é vacina de COVID mais próxima de você"
+        titleTemplate="Mapa da Vacina | %s"
+        defaultTitle="Encontre a vacina para COVID"
         canonical="https://mapadavacina.com.br"
         openGraph={{
           url: 'https://mapadavacina.com.br',
