@@ -42,16 +42,28 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
   }, [item]);
 
   const timeInfoText = React.useMemo(() => {
+    const now = dayjs();
+    const openTime = dayjs(item.openAt._seconds * 1000);
+    const closeTime = dayjs(item.closeAt._seconds * 1000);
     if (item.open) {
       if (item.closeAt) {
-        return `Fecha às ${dayjs(item.closeAt._seconds * 1000).format('HH:mm')}`;
-      }
-    } else if (item.openTomorrow) {
-      if (item.openAt) {
-        return `Abre amanhã às ${dayjs(item.openAt._seconds * 1000).format('HH:mm')}`;
+        return `Fecha às ${closeTime.format('HH:mm')}`;
       }
     } else {
-      return `Não abrirá amanhã`;
+      // It's closed, show info with open time
+      const openTodayTime = dayjs().set('h', openTime.hour()).set('m', openTime.minute());
+      if (now.isBefore(openTodayTime)) {
+        // Not open yet
+        return `Abre hoje às ${openTime.format('HH:mm')}`;
+      } else {
+        if (item.openTomorrow) {
+          if (item.openAt) {
+            return `Abre amanhã às ${openTime.format('HH:mm')}`;
+          }
+        } else {
+          return `Não abrirá amanhã`;
+        }
+      }
     }
     return '';
   }, [item]);
