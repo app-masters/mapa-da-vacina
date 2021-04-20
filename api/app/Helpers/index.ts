@@ -193,6 +193,15 @@ export const parseBoolFromString = (value: string) => {
 };
 
 /**
+ * Degree to rad
+ * @param num
+ * @returns
+ */
+const toRad = (num: number) => {
+  return (num * Math.PI) / 180;
+};
+
+/**
  * Calculate distance between points (x1,y1) and (x2,y2)
  * @param x1
  * @param y1
@@ -201,7 +210,15 @@ export const parseBoolFromString = (value: string) => {
  * @returns distance
  */
 export const calculateDistance = (x1: number, y1: number, x2: number, y2: number) => {
-  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+  const R = 6371; // Radius of the earth in km
+  const dLat = toRad(x1 - x2); // Javascript functions in radians
+  const dLon = toRad(y1 - y2);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(x2)) * Math.cos(toRad(x1)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
 };
 
 /**
