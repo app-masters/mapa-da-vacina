@@ -278,8 +278,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
       if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
 
-      if (json.openToday !== undefined) result.openToday = json.openToday;
-      if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
+      if (json.openToday !== undefined) result.openToday = parseBoolFromString(json.openToday);
+      if (json.openTomorrow !== undefined) result.openTomorrow = parseBoolFromString(json.openTomorrow);
 
       if (openAt) result.openAt = openAt;
       if (closeAt) result.closeAt = closeAt;

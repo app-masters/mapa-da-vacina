@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
 import { Client, AddressType } from "@googlemaps/google-maps-services-js";
+
 const client = new Client({});
 
 admin.initializeApp();
@@ -147,7 +148,7 @@ export const createQueueUpdate = functions.firestore
 
 export const totalizeOpenPlacesCount = functions.firestore
   .document("prefecture/{prefectureId}/place/{placeId}")
-  .onWrite((change, context) => {
+  .onWrite(async (change, context) => {
     console.log(
       `Prefecture: ${context.params.prefectureId}, Place: ${context.params.placeId}`
     );
@@ -162,23 +163,38 @@ export const totalizeOpenPlacesCount = functions.firestore
         afterValue.addressZip !== beforeValue.addressZip)
     ) {
       console.log("Updating coordinates", afterValue?.addressZip);
-      returnCoordinates(afterValue?.addressZip)
-        .then((data) => {
-          if (data) {
-            db.collection("prefecture")
-              .doc(context.params.prefectureId)
-              .collection("place")
-              .doc(context.params.placeId)
-              .update({
-                latitude: data.latitude,
-                longitude: data.longitude,
-                addressZip: data.zip,
-              });
-          }
-        })
-        .catch((err) => {
+      let coordinates = await returnCoordinates(afterValue?.addressZip).catch(
+        (err) => {
           console.log("Error setting coordinates ", err);
-        });
+          return undefined;
+        }
+      );
+
+      if (!coordinates) {
+        // get from string
+        const url: string = afterValue?.googleMapsUrl;
+        const lon_lat_match = url.match(new RegExp("@(.*),(.*),"));
+        if (lon_lat_match && lon_lat_match?.length > 0) {
+          coordinates = {
+            latitude: lon_lat_match[1],
+            longitude: lon_lat_match[2],
+            zip: afterValue?.addressZip,
+          };
+        }
+      }
+
+      if (coordinates) {
+        await db
+          .collection("prefecture")
+          .doc(context.params.prefectureId)
+          .collection("place")
+          .doc(context.params.placeId)
+          .update({
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            addressZip: coordinates.zip,
+          });
+      }
     }
 
     if (
@@ -194,7 +210,7 @@ export const totalizeOpenPlacesCount = functions.firestore
       const placeRef = change.after.ref;
       const prefectureRef = placeRef.parent.parent;
 
-      return db
+      return await db
         .collection("prefecture")
         .doc(context.params.prefectureId)
         .collection("place")
