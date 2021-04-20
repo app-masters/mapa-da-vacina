@@ -213,6 +213,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       RollbarProvider.info(`Opening Place ${place.id}`);
       console.log(`Opening Place ${place.id}`);
       place.open = true;
+      place.queueStatus = 'open';
       //await this.save(place);
       await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, true);
     }
@@ -222,6 +223,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       RollbarProvider.info(`Closing Place ${place.id}`);
       console.log(`Closing Place ${place.id}`);
       place.open = false;
+      place.queueStatus = 'closed';
       // await this.save(place);
       await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, false);
     }
