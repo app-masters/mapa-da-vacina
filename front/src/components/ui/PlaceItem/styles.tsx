@@ -44,6 +44,10 @@ export const CardItemIconContent = styled(Col)<ColProps & { bgcolor: string }>`
     text-transform: initial;
     font-size: 12px;
     font-weight: initial;
+    svg {
+      font-size: 14px;
+      margin-left: ${(props) => props.theme.spacing.sm};
+    }
   }
 `;
 
@@ -54,6 +58,19 @@ export const CardItemContent = styled(Col)<ColProps>`
   flex-wrap: wrap;
   padding: ${(props) => props.theme.spacing.sm};
   padding-left: ${(props) => props.theme.spacing.default};
+
+  span {
+    display: flex;
+    h1 {
+      margin-right: ${(props) => props.theme.spacing.default};
+    }
+    @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+    }
+  }
+
   > div {
     display: flex;
     flex-direction: column;
