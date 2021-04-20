@@ -117,22 +117,7 @@ export default class PrefecturesController {
         ) {
           place.queueStatus = 'open';
         }
-        // If there are coordinates, calculate the distance
-        if (coordinates && place.latitude && place.longitude) {
-          place.distance = calculateDistance(
-            coordinates.latitude,
-            coordinates.longitude,
-            place.latitude,
-            place.longitude
-          );
-        } else {
-          place.distance = Number.MAX_VALUE;
-        }
       }
-      // sort by distance
-      data.places.sort((a, b) => {
-        return a.distance - b.distance;
-      });
 
       console.log('Adding cache: ', cacheKey);
       Cache.put(cacheKey, data, 30 * 60 * 1000);

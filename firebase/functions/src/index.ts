@@ -42,8 +42,11 @@ async function returnCoordinates(zip: string) {
       key: googleApiKey,
     },
   });
-
-  if (queryData && queryData.statusText === "OK") {
+  if (
+    queryData &&
+    queryData.statusText === "OK" &&
+    queryData.data.results.length > 0
+  ) {
     const geometry = queryData.data.results[0].geometry;
 
     const returnData = {
@@ -60,7 +63,7 @@ async function returnCoordinates(zip: string) {
     return returnData;
   } else if (queryData.data) {
     // Show some log if we don't know how to handle this result
-    if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
+    if (!["ZERO_RESULTS"].includes(queryData.data.status)) {
       console.log("  ‼️ unexpected result from Google Maps", queryData);
     }
   }
@@ -92,23 +95,28 @@ async function returnZip(latitude: number, longitude: number) {
     },
   });
 
-  if (queryData && queryData.statusText === "OK") {
+  if (
+    queryData &&
+    queryData.statusText === "OK" &&
+    queryData.data.results.length > 0
+  ) {
     const zip = queryData.data.results[0].address_components.filter((ac) =>
       ac.types.includes(AddressType.postal_code)
     );
     const sanitizedZip = sanitizeZip(zip[0].long_name);
+    if (sanitizedZip && sanitizedZip.length > 0) {
+      const returnData = {
+        zip: sanitizedZip,
+      };
 
-    const returnData = {
-      zip: sanitizedZip,
-    };
+      await db.collection("zipCoordinate").add({
+        zip: sanitizedZip,
+        latitude: Number(latitude).toFixed(3),
+        longitude: Number(longitude).toFixed(3),
+      });
 
-    await db.collection("zipCoordinate").add({
-      zip: sanitizedZip,
-      latitude: Number(latitude).toFixed(3),
-      longitude: Number(longitude).toFixed(3),
-    });
-
-    return returnData;
+      return returnData;
+    }
   } else if (queryData.data) {
     // Show some log if we don't know how to handle this result
     if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
@@ -154,6 +162,7 @@ export const totalizeOpenPlacesCount = functions.firestore
         beforeValue &&
         afterValue.addressZip !== beforeValue.addressZip)
     ) {
+      console.log("Updating coordinates", afterValue?.addressZip);
       returnCoordinates(afterValue?.addressZip)
         .then((data) => {
           if (data) {
@@ -216,7 +225,7 @@ export const getCoordinates = functions.https.onRequest(async (req, res) => {
     res.json(coordinates);
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).send("Couldn't fetch coordinates.");
   }
 });
 
@@ -229,6 +238,6 @@ export const getZip = functions.https.onRequest(async (req, res) => {
     res.json(zip);
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).send("Couldn't fetch zip.");
   }
 });

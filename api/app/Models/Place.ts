@@ -86,7 +86,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Init places
    */
   public async initPlaces() {
-    console.log(this._activeObserver);
     if (!this._activeObserver) {
       const docSnapshot = await FirebaseProvider.db.collectionGroup('place').get();
       this.places = docSnapshot.docs.map((d) => {

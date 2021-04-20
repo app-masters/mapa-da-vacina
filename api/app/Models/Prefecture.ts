@@ -60,6 +60,22 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
   }
 
   /**
+   * Init prefectures
+   */
+  public async initPrefectures() {
+    if (!this._activeObserver) {
+      const docSnapshot = await FirebaseProvider.db.collection('prefecture').get();
+      this.prefectures = docSnapshot.docs.map((d) => {
+        return {
+          ...this.getObjectFromData(d.data()),
+          id: d.id,
+          createdAt: d.createTime.toDate(),
+          updatedAt: d.updateTime.toDate()
+        } as PrefectureType;
+      });
+    }
+  }
+  /**
    * Get Object from Firestore DocumentData
    * @param data DocumentData
    * @returns PrefectureType
@@ -128,10 +144,11 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     let documents;
     if (this._activeObserver) {
       documents = this.prefectures.filter((pref) => pref.active);
+    } else {
+      documents = await this.query((qb) => {
+        return qb.where('active', '==', true);
+      });
     }
-    documents = await this.query((qb) => {
-      return qb.where('active', '==', true);
-    });
 
     return documents.sort((p1, p2) => p1.city.localeCompare(p2.city));
   }
@@ -140,6 +157,9 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * Update queue status for demonstration city
    */
   public async updatePlacesForDemonstration() {
+    if (!this._activeObserver) {
+      await this.initPrefectures();
+    }
     if (this._activeObserver) {
       const prefDemonstration = this.prefectures.filter(
         (p) => p.name.includes('Demonstração') || p.city.includes('Demonstração')
