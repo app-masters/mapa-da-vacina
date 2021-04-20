@@ -56,8 +56,8 @@ async function returnCoordinates(zip: string) {
     };
     await db.collection("zipCoordinate").add({
       zip: zip,
-      latitude: geometry.location.lat.toFixed(3),
-      longitude: geometry.location.lng.toFixed(3),
+      latitude: Number(geometry.location.lat.toFixed(3)),
+      longitude: Number(geometry.location.lng.toFixed(3)),
     });
 
     return returnData;
@@ -111,8 +111,8 @@ async function returnZip(latitude: number, longitude: number) {
 
       await db.collection("zipCoordinate").add({
         zip: sanitizedZip,
-        latitude: Number(latitude).toFixed(3),
-        longitude: Number(longitude).toFixed(3),
+        latitude: Number(Number(latitude).toFixed(3)),
+        longitude: Number(Number(longitude).toFixed(3)),
       });
 
       return returnData;
