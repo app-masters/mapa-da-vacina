@@ -15,11 +15,12 @@ import Github from '../../components/ui/Icons/Github';
 import { Prefecture } from '../../lib/Prefecture';
 import Link from 'next/link';
 import React from 'react';
+import { Coordinates } from '../../lib/Coordinates';
 
 type HomeProps = {
   data: Prefecture;
   loading: boolean;
-  filterByPosition: (coords: { latitude: number; longitude: number }) => void;
+  filterByPosition: (coords: Coordinates) => void;
 };
 /**
  * CardItem
@@ -27,7 +28,7 @@ type HomeProps = {
 const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
   const [modal, setModal] = React.useState<boolean>(false);
   const [permission, setPermission] = React.useState<string>(undefined);
-  const [position, setPosition] = React.useState<{ latitude: number; longitude: number }>(undefined);
+  const [coordinates, setCoordinates] = React.useState<Coordinates>(undefined);
 
   /**
    * geolocation
@@ -39,7 +40,7 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
        */
       const geoSuccess = (position) => {
         setPermission('allowed');
-        setPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        setCoordinates({ latitude: position.coords.latitude, longitude: position.coords.longitude });
         if (!noFilter) {
           filterByPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
         }
@@ -134,7 +135,7 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
               Pontos mais próximos
             </Button>
           </div>
-          <PlaceList prefecture={data} loading={loading} position={position} />
+          <PlaceList prefecture={data} loading={loading} coordinates={coordinates} />
         </HomeContainerWrapper>
       </div>
       <HomeFooterWrapper>

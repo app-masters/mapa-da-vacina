@@ -7,6 +7,7 @@ import { ButtonIconWrapper, HeaderCard } from './styles';
 import { Place } from '../../../lib/Place';
 import { placeQueue, placeType } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
+import { Coordinates } from '../../../lib/Coordinates';
 
 type IconButtonProps = {
   onPress?: (value: string) => void;
@@ -32,13 +33,13 @@ const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, titl
 type PlaceListProps = {
   prefecture: Prefecture;
   loading: boolean;
-  position?: { latitude: number; longitude: number };
+  coordinates?: Coordinates;
 };
 
 /**
  * PlaceList
  */
-const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, position }) => {
+const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, coordinates }) => {
   const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
     age: undefined,
     zip: undefined,
@@ -99,7 +100,7 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, position }) 
       city={prefecture.city}
       loading={loading}
       shouldShowFeaturesBanner={shouldShowFeaturesBanner}
-      position={position}
+      coordinates={coordinates}
       // header={
       //   <Space wrap>
       //     <p>Encontre seu ponto</p>
