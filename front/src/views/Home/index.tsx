@@ -15,58 +15,55 @@ import Github from '../../components/ui/Icons/Github';
 import { Prefecture } from '../../lib/Prefecture';
 import Link from 'next/link';
 import React from 'react';
-import { Coordinates } from '../../lib/Coordinates';
 
 type HomeProps = {
   data: Prefecture;
   loading: boolean;
-  filterByPosition: (coords: Coordinates) => void;
+  filterByPosition: (coords: GeolocationPosition) => void;
 };
+
+const geolocationConfig = { timeout: 10 * 1000 };
+
 /**
  * CardItem
  */
 const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
   const [modal, setModal] = React.useState<boolean>(false);
   const [permission, setPermission] = React.useState<string>(undefined);
-  const [coordinates, setCoordinates] = React.useState<Coordinates>(undefined);
+
+  /**
+   * geoError
+   */
+  const geoError = React.useCallback((error) => {
+    if (error.code === 1) {
+      setPermission('denied');
+    }
+  }, []);
 
   /**
    * geolocation
    */
-  const geolocation = React.useCallback(
-    (noFilter?: boolean) => {
-      /**
-       * geoSuccess
-       */
-      const geoSuccess = (position) => {
-        setModal(false);
-        setPermission('allowed');
-        setCoordinates({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        if (!noFilter) {
-          filterByPosition({ latitude: position.coords.latitude, longitude: position.coords.longitude });
-        }
-      };
-      /**
-       * geoError
-       */
-      const geoError = (error) => {
-        if (error.code === 1) {
-          setPermission('denied');
-        }
-      };
-      navigator.geolocation.getCurrentPosition(geoSuccess, geoError, { timeout: 10 * 1000 });
-    },
-    [filterByPosition]
-  );
+  const geolocation = React.useCallback(() => {
+    /**
+     * geoSuccess
+     */
+    const geoSuccess = (position) => {
+      setModal(false);
+      setPermission('allowed');
+      filterByPosition(position);
+    };
+    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geolocationConfig);
+  }, [filterByPosition, geoError]);
 
   React.useEffect(() => {
     navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
+      console.log('Permission', permission.state);
       setPermission(permission.state);
       if (permission.state === 'granted') {
-        geolocation(true);
+        navigator.geolocation.getCurrentPosition((position) => filterByPosition(position), geoError, geolocationConfig);
       }
     });
-  }, [geolocation]);
+  }, [filterByPosition, geoError]);
 
   return (
     <HomeWrapper>
@@ -136,7 +133,7 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
               Pontos mais próximos
             </Button>
           </div>
-          <PlaceList prefecture={data} loading={loading} coordinates={coordinates} />
+          <PlaceList prefecture={data} loading={loading} />
         </HomeContainerWrapper>
       </div>
       <HomeFooterWrapper>
@@ -171,8 +168,12 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
           {permission === 'denied' ? (
             <p>
               O acesso a localização está bloqueado para este navegador, por favor acesse
-              <a href="www.google.com/" target="_blank" rel="noreferrer">
-                este link
+              <a
+                href="https://support.google.com/chrome/answer/142065?co=GENIE.Platform%3DDesktop&hl=pt"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {` este link `}
               </a>
               para saber mais.
             </p>

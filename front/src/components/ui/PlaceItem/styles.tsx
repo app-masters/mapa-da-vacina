@@ -51,6 +51,9 @@ export const CardItemContent = styled(Col)<ColProps>`
     display: flex;
     flex-direction: column;
     justify-content: center;
+    > div {
+      color: ${(props) => props.theme.colors.darkGray};
+    }
   }
   h1,
   p {
