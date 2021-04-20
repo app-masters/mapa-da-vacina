@@ -38,7 +38,7 @@ export default class PrefecturesController {
   public async show({ request, response, params }: HttpContextContract) {
     //const cacheKey = `prefecture-${params.id}`;
     const queryParams = request.get();
-    console.log(queryParams);
+    console.log('Query params', queryParams);
 
     let zip = queryParams['zip'];
     const latitude = queryParams['latitude'];
@@ -107,7 +107,6 @@ export default class PrefecturesController {
           console.log('Error fetching coordinates', err);
         }
       }
-      console.log(coordinates);
 
       for (const place of data.places) {
         if (
