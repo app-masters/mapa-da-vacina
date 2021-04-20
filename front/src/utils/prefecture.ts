@@ -31,7 +31,11 @@ export const getPrefectureData = async (id?: string, coordinates?: GeolocationPo
       distance: calcDistance(coordinates, place)
     }));
 
-    places = places.sort((a, b) => (!a.distance || !b.distance ? -1 : a.distance - b.distance ? -1 : 1));
+    places = places.sort((a, b) => {
+      if (!b.distance) return -1;
+      if (!a.distance) return 0;
+      return a.distance - b.distance;
+    });
 
     return { ...data, places };
   } catch (error) {
