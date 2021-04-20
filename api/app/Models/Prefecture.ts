@@ -35,7 +35,6 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
         console.log(`Received doc snapshot user`);
         console.log('Deleting cache: ', 'prefectures-list');
         Cache.del('prefectures-list');
-        console.log('aa');
         this.prefectures = docSnapshot.docs.map((d) => {
           const cacheKey = `prefecture-${d.id}`;
           console.log('Deleting cache: ', cacheKey);
@@ -47,7 +46,6 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
             updatedAt: d.updateTime.toDate()
           } as PrefectureType;
         });
-        console.log('leng', this.prefectures.length);
         this._activeObserver = true;
       },
       (err) => {
@@ -89,6 +87,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     if (!prefecture) throw new Error("Couldn't find Prefecture with id: " + id);
 
     const places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
+    console.log('places findByIdWithPlaces ', places.length);
 
     return { ...prefecture, places: places };
   }

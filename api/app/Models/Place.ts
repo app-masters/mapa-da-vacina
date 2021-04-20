@@ -55,7 +55,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     this._snapshotObserver.onSnapshot(
       (docSnapshot) => {
         console.log(`Received doc snapshot place`);
-        this._activeObserver = true;
         this.places = docSnapshot.docs.map((d) => {
           // deletar cache da prefeitura id
           const cacheKey = `prefecture-${d.data().prefectureId}`;
@@ -68,6 +67,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
             updatedAt: d.updateTime.toDate()
           } as PlaceType;
         });
+        this._activeObserver = true;
       },
       (err) => {
         this._activeObserver = false;
@@ -116,6 +116,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns Active places
    */
   public async listActive(prefectureId: string) {
+    console.log('this._activeObserver', this._activeObserver);
     if (this._activeObserver) {
       return this.places
         .filter((place) => place.active && place.prefectureId === prefectureId)
@@ -129,13 +130,18 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         });
     }
     return await this.query((qb) => {
-      return qb
-        .where('active', '==', true)
-        .orderBy('open', 'desc')
-        .orderBy('openToday', 'desc')
-        .orderBy('type', 'desc')
-        .orderBy('title', 'asc');
+      return qb.where('active', '==', true);
     }, prefectureId);
+  }
+
+  /**
+   *
+   */
+  public async all() {
+    if (this._activeObserver) {
+      return this.places;
+    }
+    return await super.list();
   }
 
   /**
