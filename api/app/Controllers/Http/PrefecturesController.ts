@@ -50,21 +50,26 @@ export default class PrefecturesController {
     if (latitude && longitude) {
       const roundedLatitude = Number(latitude).toFixed(3);
       const roundedLongitude = Number(longitude).toFixed(3);
-      const responseZip = await fetch(Config.get('app.getZipUrl'), {
-        method: 'POST',
-        body: JSON.stringify({ latitude: roundedLatitude, longitude: roundedLongitude }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      if (responseZip.status === 200) {
-        zip = sanitizeZip((await responseZip.json()).zip);
-        RollbarProvider.info('Found zip via coordinates', { zip: zip, coordinates: { latitude, longitude } });
-      } else {
+      try {
+        const responseZip = await fetch(Config.get('app.getZipUrl'), {
+          method: 'POST',
+          body: JSON.stringify({ latitude: roundedLatitude, longitude: roundedLongitude }),
+          headers: { 'Content-Type': 'application/json' }
+        });
+        if (responseZip.status === 200) {
+          zip = sanitizeZip((await responseZip.json()).zip);
+          RollbarProvider.info('Found zip via coordinates', { zip: zip, coordinates: { latitude, longitude } });
+        } else {
+          zip = undefined;
+          RollbarProvider.info('Error fetching zip', { coordinates: { latitude, longitude } });
+          console.log('Error fetching zip... Check cloud functions log for more information');
+        }
+      } catch (err) {
         zip = undefined;
         RollbarProvider.info('Error fetching zip', { coordinates: { latitude, longitude } });
-        console.log('Error fetching zip... Check cloud functions log for more information');
+        console.log('Error fetching zip', err);
       }
     }
-    console.log(zip, latitude, longitude);
     // verifica o cache
     let cacheKey = `prefecture:${params.id}-`;
     if (zip) cacheKey += `zip:${zip}`;
@@ -82,21 +87,27 @@ export default class PrefecturesController {
       if (latitude && longitude) {
         coordinates = { latitude, longitude };
       } else if (zip) {
-        const resp = await fetch(Config.get('app.getCoordinatesUrl'), {
-          method: 'post',
-          body: JSON.stringify({ addressZip: zip }),
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if (resp.status === 200) {
-          coordinates = await resp.json();
-          RollbarProvider.info('Found coordinates via zip', { zip: zip, coordinates });
-        } else {
+        try {
+          const resp = await fetch(Config.get('app.getCoordinatesUrl'), {
+            method: 'post',
+            body: JSON.stringify({ addressZip: zip }),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (resp.status === 200) {
+            coordinates = await resp.json();
+            RollbarProvider.info('Found coordinates via zip', { zip: zip, coordinates });
+          } else {
+            coordinates = undefined;
+            RollbarProvider.info('Error fetching coordinates', { zip: zip });
+            console.log('Error fetching coordinates... Check cloud functions log for more information');
+          }
+        } catch (err) {
           coordinates = undefined;
           RollbarProvider.info('Error fetching coordinates', { zip: zip });
-          console.log('Error fetching coordinates... Check cloud functions log for more information');
+          console.log('Error fetching coordinates', err);
         }
       }
-      console.log('Coordinates ', coordinates);
+      console.log(coordinates);
 
       for (const place of data.places) {
         if (
@@ -107,10 +118,8 @@ export default class PrefecturesController {
         ) {
           place.queueStatus = 'open';
         }
-
         // If there are coordinates, calculate the distance
         if (coordinates && place.latitude && place.longitude) {
-          console.log('Calculating disntaces');
           place.distance = calculateDistance(
             coordinates.latitude,
             coordinates.longitude,
