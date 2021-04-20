@@ -34,6 +34,10 @@ jobs:
         run: npm install
         working-directory: ./firebase/functions
 
+      - name: Set Secrets
+        run: firebase  --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} functions:config:set googlemaps.key=${{ secrets.GOOGLE_MAPS_KEY }}
+        working-directory: ./firebase
+
       - name: Deploy Functions
         run: firebase --token ${{ secrets.FIREBASE_TOKEN }} --project ${{ secrets.FIREBASE_PROJECT_ID }} deploy --only functions
         working-directory: ./firebase

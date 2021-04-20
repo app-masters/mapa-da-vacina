@@ -4,5 +4,6 @@ import Person from './Person';
 import PersonPin from './PersonPin';
 import Pin from './Pin';
 import Search from './Search';
+import Coordinate from './Coordinate';
 
-export { Car, Github, Person, PersonPin, Pin, Search };
+export { Car, Github, Person, PersonPin, Pin, Search, Coordinate };

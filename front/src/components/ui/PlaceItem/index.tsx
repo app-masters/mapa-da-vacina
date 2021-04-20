@@ -1,3 +1,4 @@
+import React from 'react';
 import { placeQueueLabel, placeQueueColor, placeType, placeQueue } from '../../../utils/constraints';
 import { CardItemContent, CardItemExtra, CardItemIconContent, CardItemWrapper } from './styles';
 import { Car, PersonPin, Pin } from '../Icons';
@@ -6,15 +7,18 @@ import dayjs from 'dayjs';
 import { Space, Tag, Tooltip, Image } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import React from 'react';
+import { distanceHumanize } from '../../../utils/geolocation';
+
+type CardItemProps = {
+  item: Place;
+  showQueueUpdatedAt?: boolean;
+  haveWarning: boolean;
+};
 
 /**
  * CardItem
  */
-const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarning: boolean }> = ({
-  item,
-  showQueueUpdatedAt,
-  haveWarning
-}) => {
+const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning }) => {
   /**
    * Render the icon based on status
    */
@@ -69,12 +73,12 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
 
   return (
     <CardItemWrapper>
-      <CardItemContent lg={12} sm={24}>
+      <CardItemContent md={12} lg={14} sm={24}>
         <div>
           {title}
-          <p>
+          <div>
             {!!item.googleMapsUrl && (
-              <Tooltip title="Veja como chegar no mapa">
+              <Tooltip title="Veja como chegar">
                 <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
                   <Pin width={20} height={16} />
                 </a>
@@ -82,10 +86,14 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
             )}
             {`${item.addressStreet ? item.addressStreet : ''}${
               item.addressDistrict ? ', ' + item.addressDistrict : ''
-            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
-              item.addressZip ? ', ' + item.addressZip : ''
             }`}
-          </p>
+            {item.distance && (
+              <label
+                className="location-label"
+                style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
+              >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
+            )}
+          </div>
         </div>
       </CardItemContent>
       <CardItemContent md={6} sm={24}>

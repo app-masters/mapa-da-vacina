@@ -1,17 +1,60 @@
-import { HomeWrapper, HomeHeaderWrapper, HomeContentWrapper, HomeFooterWrapper, HomeContainerWrapper } from './style';
+import {
+  HomeWrapper,
+  HomeHeaderWrapper,
+  HomeContentWrapper,
+  HomeFooterWrapper,
+  HomeContainerWrapper,
+  ModalContainerWrapper
+} from './style';
 import Image from 'next/image';
 import Card from '../../components/ui/Card';
-import { Row, Col, Typography, Space } from 'antd';
+import { Row, Col, Typography, Space, Modal } from 'antd';
 import PlaceList from '../../components/elements/PlaceList';
 import Button from '../../components/ui/Button';
 import Github from '../../components/ui/Icons/Github';
 import { Prefecture } from '../../lib/Prefecture';
 import Link from 'next/link';
+import React from 'react';
+
+type HomeProps = {
+  data: Prefecture;
+  loading: boolean;
+  filterByPosition: (coords: GeolocationPosition) => void;
+};
+
+const geolocationConfig = { timeout: 10 * 1000 };
 
 /**
  * CardItem
  */
-const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading }) => {
+const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
+  const [modal, setModal] = React.useState<boolean>(false);
+  const [permission, setPermission] = React.useState<string>(undefined);
+
+  /**
+   * geoError
+   */
+  const geoError = React.useCallback((error) => {
+    if (error.code === 1) {
+      setPermission('denied');
+    }
+  }, []);
+
+  /**
+   * geolocation
+   */
+  const geolocation = React.useCallback(() => {
+    /**
+     * geoSuccess
+     */
+    const geoSuccess = (position) => {
+      setModal(false);
+      setPermission('allowed');
+      filterByPosition(position);
+    };
+    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geolocationConfig);
+  }, [filterByPosition, geoError]);
+
   return (
     <HomeWrapper>
       <div className="page-body">
@@ -66,6 +109,20 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
         ) : null}
 
         <HomeContainerWrapper>
+          <div style={{ display: 'grid', justifyContent: 'flex-end' }}>
+            <Button
+              type="default"
+              onClick={() => {
+                if (permission === 'granted' || permission === 'allowed') {
+                  geolocation();
+                } else {
+                  setModal(true);
+                }
+              }}
+            >
+              Pontos mais próximos
+            </Button>
+          </div>
           <PlaceList prefecture={data} loading={loading} />
         </HomeContainerWrapper>
       </div>
@@ -89,6 +146,32 @@ const Home: React.FC<{ data: Prefecture; loading: boolean }> = ({ data, loading 
           </a>
         </div>
       </HomeFooterWrapper>
+      <Modal
+        visible={modal}
+        onOk={() => geolocation()}
+        onCancel={() => setModal(false)}
+        okButtonProps={{ style: { display: permission === 'denied' ? 'none' : 'inline-block' } }}
+        okText="Permitir"
+        cancelText="Fechar"
+      >
+        <ModalContainerWrapper>
+          {permission === 'denied' ? (
+            <p>
+              O acesso a localização está bloqueado para este navegador, por favor acesse
+              <a
+                href="https://support.google.com/chrome/answer/142065?co=GENIE.Platform%3DDesktop&hl=pt"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {` este link `}
+              </a>
+              para saber mais.
+            </p>
+          ) : (
+            <p>É necessário permitir que o navegador acesse a sua localização para continuar.</p>
+          )}
+        </ModalContainerWrapper>
+      </Modal>
     </HomeWrapper>
   );
 };

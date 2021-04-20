@@ -27,6 +27,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
   ...props
 }) => {
   const isDemonstration = city && city.includes('Demonstração');
+
   return (
     <React.Fragment>
       <PlaceListSearchWrapper>{header}</PlaceListSearchWrapper>

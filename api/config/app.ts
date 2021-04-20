@@ -37,6 +37,10 @@ export const mailFrom: string = Env.get('MAIL_FROM', 'noreply@appmasters.io');
 
 export const minutesRangeToCheck: number = Env.get('MINUTES_RANGE_TO_CHECK', 1);
 
+export const getCoordinatesUrl: string = Env.get('GET_COORDINATES_URL');
+
+export const getZipUrl: string = Env.get('GET_ZIP_URL');
+
 /*
 |--------------------------------------------------------------------------
 | Http server configuration

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GetStaticProps, NextPage } from 'next';
 import { NextSeo } from 'next-seo';
 import { Prefecture } from '../../lib/Prefecture';
@@ -12,23 +12,51 @@ import HomeView from '../../views/Home';
 const Home: NextPage<{ data: Prefecture }> = (props) => {
   // Local state
   const [data, setData] = useState(props.data as Prefecture);
+  const [filter, setFilter] = useState<{ permission?: string; position?: GeolocationPosition }>(null);
 
-  // Dealing with the fetch and re-fetch of the data
-  const getAndSetPrefectureData = useCallback(async () => {
-    const prefectureData = await getPrefectureData();
+  const interval = useRef(null);
 
-    if (prefectureData && prefectureData.id) {
-      // only set if successful, keeping old values if couldn't fetch
+  useEffect(() => {
+    if (interval.current) clearInterval(interval.current);
+    /**
+     * getData
+     */
+    const getData = async () => {
+      const prefectureData = await getPrefectureData(null, filter.position);
       setData(prefectureData);
-      // If the data is defined, update it after some time
-      setTimeout(getAndSetPrefectureData, 60000);
+      interval.current = setInterval(async () => {
+        const prefectureData = await getPrefectureData(null, filter.position);
+        setData(prefectureData);
+      }, 10000);
+    };
+    if (filter && filter.permission) {
+      getData();
     }
-  }, []);
+  }, [filter]);
 
   // Fetching prefecture data
   useEffect(() => {
-    getAndSetPrefectureData();
-  }, [getAndSetPrefectureData]);
+    /**
+     * initData
+     */
+    const initData = async () => {
+      const permission = await navigator.permissions.query({ name: 'geolocation' });
+      if (permission.state === 'granted') {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setFilter({ position, permission: permission.state });
+          },
+          null,
+          { timeout: 10 * 10000 }
+        );
+      } else {
+        setFilter({ permission: permission.state });
+      }
+    };
+    if (process.browser && 'navigator' in window) {
+      initData();
+    }
+  }, []);
 
   return (
     <>
@@ -37,7 +65,11 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
         description={`Descubra onde vacinar em ${props.data?.city || 'sua cidade'} contra a COVID-19`}
         openGraph={{ images: [{ url: props.data?.primaryLogo, alt: `Logo da prefeitura de ${props.data?.name}` }] }}
       />
-      <HomeView loading={!props.data?.id} data={data?.id ? data : props.data || ({} as Prefecture)} />
+      <HomeView
+        loading={!props.data?.id}
+        data={data?.id ? data : props.data || ({} as Prefecture)}
+        filterByPosition={(position) => setFilter({ permission: 'granted', position })}
+      />
     </>
   );
 };

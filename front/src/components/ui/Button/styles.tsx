@@ -32,5 +32,13 @@ export const ButtonStyled: React.FC<ButtonProps> = styled(Button)<ButtonProps>`
         box-shadow: none;
       `;
     }
+    if (props.type === 'default') {
+      return `
+        :hover {
+          color: ${colors.primary} !important;
+          border-color: ${colors.primary} !important;
+        }
+      `;
+    }
   }}
 `;

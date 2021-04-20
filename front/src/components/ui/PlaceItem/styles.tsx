@@ -58,6 +58,9 @@ export const CardItemContent = styled(Col)<ColProps>`
     display: flex;
     flex-direction: column;
     justify-content: center;
+    > div {
+      color: ${(props) => props.theme.colors.darkGray};
+    }
   }
   h1,
   p {
@@ -83,6 +86,10 @@ export const CardItemContent = styled(Col)<ColProps>`
     > small {
       font-size: 14px;
     }
+  }
+  .location-label {
+    font-weight: 900;
+    color: ${(props) => props.theme.colors.green1};
   }
 `;
 
