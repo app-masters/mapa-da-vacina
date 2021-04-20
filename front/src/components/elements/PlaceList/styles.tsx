@@ -4,6 +4,7 @@ import { CardProps } from 'antd/lib/card';
 import { InputStyled } from '../../ui/Input/styles';
 import { Place } from '../../../lib/Place';
 import { LoadingOutlined } from '@ant-design/icons';
+import { Coordinates } from '../../../lib/Coordinates';
 
 export type PlaceListTemplateProps = CardProps & {
   data: Place[];
@@ -13,6 +14,7 @@ export type PlaceListTemplateProps = CardProps & {
   header?: React.ReactNode;
   loading: boolean;
   shouldShowFeaturesBanner?: boolean;
+  coordinates?: Coordinates;
 };
 
 export const PlaceListWrapper = styled(Card)`

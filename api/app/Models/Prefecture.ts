@@ -5,6 +5,7 @@ import PlaceRepository, { PlaceType } from './Place';
 
 import Cache from 'memory-cache';
 import Place from './Place';
+import { deleteCacheByPrefix } from 'App/Helpers';
 
 export interface PrefectureType extends BaseModel {
   name: string;
@@ -35,11 +36,13 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
         console.log(`Received doc snapshot user`);
         console.log('Deleting cache: ', 'prefectures-list');
         Cache.del('prefectures-list');
-        console.log('aa');
+        docSnapshot.docChanges().forEach((d) => {
+          // deletar cache da prefeitura que mudou somente
+          const cacheKeyPrefix = `prefecture:${d.doc.id}-`;
+          // console.log('Deleting cache: ', cacheKey);
+          deleteCacheByPrefix(cacheKeyPrefix);
+        });
         this.prefectures = docSnapshot.docs.map((d) => {
-          const cacheKey = `prefecture-${d.id}`;
-          console.log('Deleting cache: ', cacheKey);
-          Cache.del(cacheKey);
           return {
             ...this.getObjectFromData(d.data()),
             id: d.id,

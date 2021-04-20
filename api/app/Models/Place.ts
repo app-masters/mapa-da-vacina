@@ -8,6 +8,7 @@ import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Config from '@ioc:Adonis/Core/Config';
 
 import {
+  deleteCacheByPrefix,
   getSlug,
   IsNowBetweenTimes,
   minutesDiff,
@@ -37,6 +38,10 @@ export interface PlaceType extends BaseModel {
   openTomorrow?: boolean;
   openAt?: Timestamp;
   closeAt?: Timestamp;
+
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {
@@ -55,12 +60,13 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     this._snapshotObserver.onSnapshot(
       (docSnapshot) => {
         console.log(`Received doc snapshot place`);
-        this._activeObserver = true;
-        this.places = docSnapshot.docs.map((d) => {
-          // deletar cache da prefeitura id
-          const cacheKey = `prefecture-${d.data().prefectureId}`;
+        docSnapshot.docChanges().forEach((d) => {
+          // deletar cache da prefeitura que mudou somente
+          const cacheKeyPrefix = `prefecture:${d.doc.data().prefectureId}-`;
           // console.log('Deleting cache: ', cacheKey);
-          Cache.del(cacheKey);
+          deleteCacheByPrefix(cacheKeyPrefix);
+        });
+        this.places = docSnapshot.docs.map((d) => {
           return {
             ...this.getObjectFromData(d.data()),
             id: d.id,
@@ -68,6 +74,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
             updatedAt: d.updateTime.toDate()
           } as PlaceType;
         });
+        this._activeObserver = true;
       },
       (err) => {
         this._activeObserver = false;
