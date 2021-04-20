@@ -88,9 +88,10 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
               item.addressDistrict ? ', ' + item.addressDistrict : ''
             }`}
             {item.distance && (
-              <strong
-                style={{ marginLeft: item.googleMapsUrl ? 0 : 4, fontWeight: 900 }}
-              >{`- Distância: ${distanceHumanize(item.distance)}`}</strong>
+              <label
+                className="location-label"
+                style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
+              >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
             )}
           </div>
         </div>

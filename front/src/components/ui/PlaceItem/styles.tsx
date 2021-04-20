@@ -80,6 +80,10 @@ export const CardItemContent = styled(Col)<ColProps>`
       font-size: 14px;
     }
   }
+  .location-label {
+    font-weight: 900;
+    color: ${(props) => props.theme.colors.green1};
+  }
 `;
 
 export const CardItemExtra = styled.div`
