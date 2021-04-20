@@ -1,19 +1,22 @@
+import React from 'react';
 import { placeQueueLabel, placeQueueColor, placeType, placeQueue } from '../../../utils/constraints';
 import { CardItemContent, CardItemExtra, CardItemIconContent, CardItemWrapper } from './styles';
 import { Car, PersonPin, Pin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Tag, Tooltip } from 'antd';
-import React from 'react';
+
+type CardItemProps = {
+  item: Place;
+  showQueueUpdatedAt?: boolean;
+  haveWarning: boolean;
+  distance: string | null;
+};
 
 /**
  * CardItem
  */
-const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarning: boolean }> = ({
-  item,
-  showQueueUpdatedAt,
-  haveWarning
-}) => {
+const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning, distance }) => {
   /**
    * Render the icon based on status
    */
@@ -58,29 +61,33 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
 
   return (
     <CardItemWrapper>
-      <CardItemContent lg={12} sm={24}>
+      <CardItemContent md={12} lg={14} sm={24}>
         <div>
           {title}
-          <p>
+          <div>
+            {`${item.addressStreet ? item.addressStreet : ''}`}
+            {/* {`${item.addressStreet ? item.addressStreet : ''}${
+              item.addressDistrict ? ', ' + item.addressDistrict : ''
+            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
+              item.addressZip ? ', ' + item.addressZip : ''
+            }`} */}
             {!!item.googleMapsUrl && (
-              <Tooltip title="Veja como chegar no mapa">
+              <Tooltip title="Veja como chegar">
                 <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
                   <Pin width={20} height={16} />
                 </a>
               </Tooltip>
             )}
-            {`${item.addressStreet ? item.addressStreet : ''}${
-              item.addressDistrict ? ', ' + item.addressDistrict : ''
-            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
-              item.addressZip ? ', ' + item.addressZip : ''
-            }`}
-          </p>
+            {!!(distance && item.latitude && item.longitude) && (
+              <strong style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}>{`- ${distance}`}</strong>
+            )}
+          </div>
         </div>
       </CardItemContent>
-      <CardItemContent md={10} sm={24}>
+      <CardItemContent md={5} sm={24}>
         <CardItemExtra>{timeInfoText ? <Tag color="default">{timeInfoText}</Tag> : null}</CardItemExtra>
       </CardItemContent>
-      <CardItemContent md={10} sm={24}>
+      <CardItemContent md={5} sm={24}>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&

@@ -1,8 +1,10 @@
 import { Alert, Spin } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
+import { Place } from '../../../lib/Place';
 import CardItem from '../../ui/PlaceItem';
 import { PlaceListWrapper, PlaceListTemplateProps, PlaceListSearchWrapper, Loading, WarningBox } from './styles';
+import { getDistance } from 'geolib';
 
 const minutesUntilWarning = process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING
   ? Number(process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING)
@@ -24,9 +26,23 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
   sampleMode,
   city,
   shouldShowFeaturesBanner,
+  position,
   ...props
 }) => {
   const isDemonstration = city && city.includes('Demonstração');
+
+  /**
+   * calcDistance
+   */
+  const calcDistance = (position: { latitude: number; longitude: number }, item: Place): string => {
+    const distance = getDistance(position, { latitude: item.latitude, longitude: item.longitude });
+    const metersAway = distance / 1000;
+    if (metersAway > 1) {
+      return `${metersAway.toFixed(1)}km`.replace('.', ',');
+    }
+    return `${metersAway * 1000}m`;
+  };
+
   return (
     <React.Fragment>
       <PlaceListSearchWrapper>{header}</PlaceListSearchWrapper>
@@ -41,11 +57,18 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
         <Spin spinning={loading} indicator={<Loading spin />} size="large" style={{ marginTop: 28 }}>
           {data.map((item) => {
             const formattedDate = new Date(item.queueUpdatedAt?._seconds * 1000);
+            const distance = position && item.latitude && item.longitude ? calcDistance(position, item) : null;
             const haveWarning = !item.open
               ? false
               : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());
             return (
-              <CardItem key={item.id} showQueueUpdatedAt={showQueueUpdatedAt} haveWarning={haveWarning} item={item} />
+              <CardItem
+                key={item.id}
+                showQueueUpdatedAt={showQueueUpdatedAt}
+                haveWarning={haveWarning}
+                item={item}
+                distance={distance}
+              />
             );
           })}
         </Spin>

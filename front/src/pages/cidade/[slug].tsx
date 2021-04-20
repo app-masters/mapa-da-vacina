@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { GetStaticProps, NextPage } from 'next';
 import { NextSeo } from 'next-seo';
 import { Prefecture } from '../../lib/Prefecture';
@@ -12,18 +12,19 @@ import HomeView from '../../views/Home';
 const Home: NextPage<{ data: Prefecture }> = (props) => {
   // Local state
   const [data, setData] = useState(props.data as Prefecture);
+  const [filter, setFilter] = useState<{ latitude: number; longitude: number }>(null);
 
-  // Dealing with the fetch and re-fetch of the data
+  const interval = useRef(null);
+
   const getAndSetPrefectureData = useCallback(async () => {
-    const prefectureData = await getPrefectureData();
-
-    if (prefectureData && prefectureData.id) {
-      // only set if successful, keeping old values if couldn't fetch
+    const prefectureData = await getPrefectureData(null, filter);
+    setData(prefectureData);
+    if (interval.current) clearInterval(interval.current);
+    interval.current = setInterval(async () => {
+      const prefectureData = await getPrefectureData(null, filter);
       setData(prefectureData);
-      // If the data is defined, update it after some time
-      setTimeout(getAndSetPrefectureData, 60000);
-    }
-  }, []);
+    }, 10000);
+  }, [filter]);
 
   // Fetching prefecture data
   useEffect(() => {
@@ -37,7 +38,11 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
         description={`Descubra onde vacinar em ${props.data?.city || 'sua cidade'} contra a COVID-19`}
         openGraph={{ images: [{ url: props.data?.primaryLogo, alt: `Logo da prefeitura de ${props.data?.name}` }] }}
       />
-      <HomeView loading={!props.data?.id} data={data?.id ? data : props.data || ({} as Prefecture)} />
+      <HomeView
+        loading={!props.data?.id}
+        data={data?.id ? data : props.data || ({} as Prefecture)}
+        filterByPosition={(coords) => setFilter(coords)}
+      />
     </>
   );
 };

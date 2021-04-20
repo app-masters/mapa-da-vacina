@@ -4,7 +4,10 @@ import logging from './logging';
 /**
  * Get prefecture Data
  */
-export const getPrefectureData = async (id?: string): Promise<Prefecture> => {
+export const getPrefectureData = async (
+  id?: string,
+  filter?: { latitude: number; longitude: number }
+): Promise<Prefecture> => {
   try {
     if (id === 'new') id = null; // Undefined ID, don't fetch it
 
@@ -21,7 +24,11 @@ export const getPrefectureData = async (id?: string): Promise<Prefecture> => {
         throw Error('You need to define a NEXT_PUBLIC_PREFECTURE_ID on your .env to be able to fetch the data');
       }
     }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`);
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`;
+    if (filter) {
+      url += `?latitude=${filter.latitude}&longitude=${filter.longitude}`;
+    }
+    const res = await fetch(url);
     const data = await res.json();
     return data;
   } catch (error) {
