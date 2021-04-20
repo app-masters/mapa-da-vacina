@@ -79,7 +79,7 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
  */
 export const getStaticProps: GetStaticProps = async (ctx) => {
   try {
-    if (!ctx.params.slug) return { props: { data: {} } }; // Don't try to regenerate base html
+    if (!ctx.params.slug) return { props: { data: {} }, revalidate: 60 }; // Don't try to fetch
     console.log('[debug] Regenerating page for', ctx.params.slug);
     const data = await getPrefectureData(ctx.params.slug as string);
     return { props: { data }, revalidate: 60 };

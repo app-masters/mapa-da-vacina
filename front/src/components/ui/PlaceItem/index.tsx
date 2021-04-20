@@ -4,7 +4,8 @@ import { CardItemContent, CardItemExtra, CardItemIconContent, CardItemWrapper } 
 import { Car, PersonPin, Pin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
-import { Tag, Tooltip } from 'antd';
+import { Space, Tag, Tooltip } from 'antd';
+import { WarningFilled } from '@ant-design/icons';
 import { distanceHumanize } from '../../../utils/geolocation';
 
 type CardItemProps = {
@@ -48,10 +49,10 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
     const now = dayjs();
     const openTime = dayjs(item.openAt._seconds * 1000);
     const closeTime = dayjs(item.closeAt._seconds * 1000);
+    if (!item.openAt || !item.closeAt) return ''; // Don't have a defined time
     if (item.open) {
-      if (item.closeAt) {
-        return `Fecha às ${closeTime.format('HH:mm')}`;
-      }
+      // Place is open
+      return `Fecha às ${closeTime.format('HH:mm')}`;
     } else {
       // It's closed, show info with open time
       const openTodayTime = dayjs().set('h', openTime.hour()).set('m', openTime.minute());
@@ -59,23 +60,29 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
         // Not open yet
         return `Abre hoje às ${openTime.format('HH:mm')}`;
       } else {
+        // Already closed
         if (item.openTomorrow) {
-          if (item.openAt) {
-            return `Abre amanhã às ${openTime.format('HH:mm')}`;
-          }
+          return `Abre amanhã às ${openTime.format('HH:mm')}`;
         } else {
           return `Não abrirá amanhã`;
         }
       }
     }
-    return '';
   }, [item]);
 
   return (
     <CardItemWrapper>
-      <CardItemContent md={12} lg={14} sm={24}>
+      <CardItemContent md={18} sm={24}>
         <div>
-          {title}
+          <span>
+            {title}
+            {timeInfoText ? (
+              <CardItemExtra>
+                <Tag color="default">{timeInfoText}</Tag>{' '}
+              </CardItemExtra>
+            ) : null}
+          </span>
+
           <div>
             {!!item.googleMapsUrl && (
               <Tooltip title="Veja como chegar">
@@ -96,25 +103,21 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
           </div>
         </div>
       </CardItemContent>
-      <CardItemContent md={5} sm={24}>
-        <CardItemExtra>{timeInfoText ? <Tag color="default">{timeInfoText}</Tag> : null}</CardItemExtra>
-      </CardItemContent>
-      <CardItemContent md={5} sm={24}>
+      <CardItemIconContent md={6} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
+        <Space>
+          {renderIcon()}
+          {placeQueueLabel[item.queueStatus]}
+        </Space>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&
         item.queueStatus !== placeQueue.open &&
         item.queueStatus !== placeQueue.closed ? (
-          <CardItemExtra>
-            <Tag color={haveWarning ? 'error' : 'default'}>
-              Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}
-            </Tag>
-          </CardItemExtra>
+          <span>
+            Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}
+            {haveWarning ? <WarningFilled /> : null}
+          </span>
         ) : null}
-      </CardItemContent>
-      <CardItemIconContent lg={2} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
-        {renderIcon()}
-        {placeQueueLabel[item.queueStatus]}
       </CardItemIconContent>
     </CardItemWrapper>
   );
