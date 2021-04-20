@@ -18,10 +18,28 @@ type UpdateViewProps = {
  * @params NextPage
  */
 const Update: React.FC<UpdateViewProps> = ({ user, prefectures, places, pageLoading }) => {
+  const [data, setData] = React.useState<Prefecture[]>([]);
+
+  React.useEffect(() => {
+    setData(prefectures);
+  }, [prefectures]);
+
+  const interval = React.useRef(null);
+
+  React.useEffect(() => {
+    if (data && data.length > 0) {
+      if (interval) clearInterval(interval.current);
+      interval.current = setInterval(() => {
+        setData([...data]);
+      }, 10000);
+    }
+    return () => clearInterval(interval.current);
+  }, [data]);
+
   return (
     <Layout userRole={user.role} user={user}>
       <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
-        {(prefectures || []).map((prefecture) => (
+        {(data || []).map((prefecture) => (
           <PlaceQueue
             key={prefecture.id}
             userRole={user.role}

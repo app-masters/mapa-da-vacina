@@ -18,7 +18,8 @@ export default class AuthActive {
     try {
       // checks for Firebase user first
       const idToken = request.header('Authorization') as string;
-      if (!idToken) return response.status(401).send({ message: 'Usuário não autorizado.' });
+      if (!idToken)
+        return response.status(401).send({ message: 'Usuário não autorizado. IdToken recebido: ' + idToken });
 
       const decodedToken = await FirebaseProvider.app.auth().verifyIdToken(idToken);
       console.log('decodedToken', JSON.stringify(decodedToken));

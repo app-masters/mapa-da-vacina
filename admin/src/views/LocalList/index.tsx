@@ -38,6 +38,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
   const onSubmitForm = async (data) => {
     setLoading(true);
     try {
+      localStorage.setItem('default_time', JSON.stringify({ openAt: data.openAt, closeAt: data.closeAt }));
       const convertData: Place = {
         ...data,
         internalTitle: data.internalTitle || data.title,
@@ -174,15 +175,17 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
 
   return (
     <Layout userRole={user.role} user={user}>
-      <FormPlace
-        open={modal.open}
-        setOpen={setModal}
-        loading={loading}
-        onSubmit={onSubmitForm}
-        place={modal.place}
-        defaultCity={modal.prefecture?.city}
-        defaultState={modal.prefecture?.state}
-      />
+      {modal.open && (
+        <FormPlace
+          open={modal.open}
+          setOpen={setModal}
+          loading={loading}
+          onSubmit={onSubmitForm}
+          place={modal.place}
+          defaultCity={modal.prefecture?.city}
+          defaultState={modal.prefecture?.state}
+        />
+      )}
       <ModalUpload
         loading={loading}
         open={modalUpload.open}
