@@ -32,7 +32,6 @@ async function returnCoordinates(zip: string) {
 
   if (!googleApiKey) {
     console.log("    👉  No GOOGLE_API_KEY, will not fetch coordinates");
-    //return undefined;
     throw new Error("No GOOGLE_API_KEY credentials.");
   }
 
