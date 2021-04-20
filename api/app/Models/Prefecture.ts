@@ -36,7 +36,6 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
         console.log(`Received doc snapshot user`);
         console.log('Deleting cache: ', 'prefectures-list');
         Cache.del('prefectures-list');
-        console.log('aa');
         docSnapshot.docChanges().forEach((d) => {
           // deletar cache da prefeitura que mudou somente
           const cacheKeyPrefix = `prefecture:${d.doc.id}-`;
