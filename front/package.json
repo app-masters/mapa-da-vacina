@@ -10,6 +10,7 @@
     "check-prettier": "prettier-check \"{src,cypress}/**/*.{js,ts,tsx}\"",
     "check-lint": "eslint \"{src,cypress}/**/*.{js,ts,tsx}\" --max-warnings 0",
     "check-typescript": "tsc --noEmit",
+    "debug": "node --inspect-brk ./node_modules/next/dist/bin/next",
     "checks": "yarn check --integrity && yarn run check-lint && yarn run check-prettier && yarn run check-typescript"
   },
   "dependencies": {

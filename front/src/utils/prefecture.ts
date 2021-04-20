@@ -32,10 +32,21 @@ export const getPrefectureData = async (id?: string, coordinates?: GeolocationPo
     }));
 
     places = places.sort((a, b) => {
-      if (!b.distance) return -1;
-      if (!a.distance) return 0;
-      return a.distance - b.distance;
+      return (
+        +b.open - +a.open ||
+        +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
+        b.type.localeCompare(a.type) ||
+        a.title.localeCompare(b.title)
+      );
     });
+
+    if (coordinates) {
+      places = places.sort((a, b) => {
+        if (!b.distance) return -1;
+        if (!a.distance) return 0;
+        return a.distance - b.distance;
+      });
+    }
 
     return { ...data, places };
   } catch (error) {
