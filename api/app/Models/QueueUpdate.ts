@@ -1,6 +1,8 @@
-import { BaseRepository, BaseModel } from 'firestore-storage';
+import Config from '@ioc:Adonis/Core/Config';
+import { BaseRepository, BaseModel, Timestamp, isTimestamp } from 'firestore-storage';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
+import { QueueUpdateConstraint, QueueUpdateIndexes, QueueUpdateValues } from './Constraints';
 
 export interface QueueUpdateType extends BaseModel {
   userId: string;
@@ -12,11 +14,68 @@ export interface QueueUpdateType extends BaseModel {
 
 export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
   private static instance: QueueUpdateRepository;
+
+  private queueUpdates: QueueUpdateType[];
+  private _snapshotObserver;
+  private _activeObserver: boolean = false;
+
   /**
    * Constructor
    */
   constructor() {
     super(FirebaseProvider.storage, errorFactory);
+
+    this._snapshotObserver = FirebaseProvider.db.collectionGroup('queueUpdate').onSnapshot(
+      (docSnapshot) => {
+        console.log(`Received doc snapshot queueUpdate`);
+
+        this.queueUpdates = docSnapshot.docs.map((d) => {
+          return {
+            ...this.getObjectFromData(d.data()),
+            queueUpdatedAt: isTimestamp(d.data().queueUpdatedAt)
+              ? d.data().queueUpdatedAt.toDate()
+              : d.data().queueUpdatedAt,
+            id: d.id,
+            createdAt: d.createTime.toDate(),
+            updatedAt: d.updateTime.toDate()
+          } as QueueUpdateType;
+        });
+        this._activeObserver = true;
+      },
+      (err) => {
+        this._activeObserver = false;
+        console.error(`Encountered error: ${err}`);
+      }
+    );
+  }
+
+  /**
+   * init
+   */
+  public async init() {
+    if (!this._activeObserver) {
+      const docSnapshot = await FirebaseProvider.db.collectionGroup('queueUpdate').get();
+      this.queueUpdates = docSnapshot.docs.map((d) => {
+        return {
+          ...this.getObjectFromData(d.data()),
+          queueUpdatedAt: isTimestamp(d.data().queueUpdatedAt)
+            ? d.data().queueUpdatedAt.toDate()
+            : d.data().queueUpdatedAt,
+          id: d.id,
+          createdAt: d.createTime.toDate(),
+          updatedAt: d.updateTime.toDate()
+        } as PlaceType;
+      });
+    }
+  }
+
+  /**
+   * Get Object from Firestore DocumentData
+   * @param data DocumentData
+   * @returns PrefectureType
+   */
+  private getObjectFromData(data: FirebaseFirestore.DocumentData) {
+    return data as QueueUpdateType;
   }
 
   /**
@@ -67,6 +126,57 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
       prefectureId,
       placeId
     );
+  }
+
+  /**
+   * Math to calculate mean status
+   * @param status
+   * @returns
+   */
+  public getMeanStatus(status: string[]) {
+    const sum = status
+      .map((s) => QueueUpdateValues[s])
+      .reduce((acc, val) => {
+        return acc + val;
+      }, 0);
+
+    return Math.round(sum / status.length);
+  }
+
+  /**
+   * Calculate mean queue update and insert into table
+   * @param prefectureId
+   * @param placeId
+   * @param status
+   * @param ip
+   */
+  public async insertMeanQueueUpdate(prefectureId: string, placeId: string, status: string, ip: string) {
+    if (!this._activeObserver) await this.init();
+
+    const meanRange = Config.get('app.queueStatusMeanInterval');
+    const minutesAgo = new Date(Date.now() - 1000 * 60 * meanRange);
+    // get latest for place, discarding open and closed
+    const latestUpdates = this.queueUpdates
+      .filter(
+        (qu) =>
+          qu.placeId === placeId &&
+          qu.queueUpdatedAt >= minutesAgo &&
+          qu.queueStatus !== QueueUpdateConstraint.open &&
+          qu.queueStatus !== QueueUpdateConstraint.closed
+      )
+      .map((qu) => qu.queueStatus);
+    console.log('latest', latestUpdates);
+
+    const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
+    const newStatus = {
+      userId: ip,
+      placeId: placeId,
+      open: true,
+      queueStatus: QueueUpdateIndexes[meanStatusIndex],
+      queueUpdatedAt: new Date()
+    };
+    await this.save(newStatus, prefectureId, placeId);
+    return newStatus;
   }
 
   /**

@@ -41,6 +41,8 @@ export const getCoordinatesUrl: string = Env.get('GET_COORDINATES_URL');
 
 export const getZipUrl: string = Env.get('GET_ZIP_URL');
 
+export const queueStatusMeanInterval: number = Env.get('QUEUE_STATUS_MEAN_INTERVAL', 20);
+
 /*
 |--------------------------------------------------------------------------
 | Http server configuration
