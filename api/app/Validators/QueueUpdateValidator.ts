@@ -2,6 +2,10 @@ import { schema } from '@ioc:Adonis/Core/Validator';
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 
 export default class QueueUpdateValidator {
+  /**
+   * Constructor
+   * @param ctx
+   */
   constructor(protected ctx: HttpContextContract) {}
 
   /*
@@ -26,9 +30,8 @@ export default class QueueUpdateValidator {
   public schema = schema.create({
     prefectureId: schema.string({}),
     placeId: schema.string({}),
-    status: schema.string({})
+    status: schema.enum(['noQueue', 'smallQueue', 'mediumQueue', 'longQueue'] as const)
   });
-
   /**
    * Custom messages for validation failures. You can make use of dot notation `(.)`
    * for targeting nested fields and array expressions `(*)` for targeting all

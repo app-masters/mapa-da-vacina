@@ -50,6 +50,26 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
   }
 
   /**
+   * init
+   */
+  public async init() {
+    if (!this._activeObserver) {
+      const docSnapshot = await FirebaseProvider.db.collectionGroup('queueUpdate').get();
+      this.queueUpdates = docSnapshot.docs.map((d) => {
+        return {
+          ...this.getObjectFromData(d.data()),
+          queueUpdatedAt: isTimestamp(d.data().queueUpdatedAt)
+            ? d.data().queueUpdatedAt.toDate()
+            : d.data().queueUpdatedAt,
+          id: d.id,
+          createdAt: d.createTime.toDate(),
+          updatedAt: d.updateTime.toDate()
+        } as PlaceType;
+      });
+    }
+  }
+
+  /**
    * Get Object from Firestore DocumentData
    * @param data DocumentData
    * @returns PrefectureType
@@ -131,6 +151,8 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
    * @param ip
    */
   public async insertMeanQueueUpdate(prefectureId: string, placeId: string, status: string, ip: string) {
+    if (!this._activeObserver) await this.init();
+
     const meanRange = Config.get('app.queueStatusMeanInterval');
     const minutesAgo = new Date(Date.now() - 1000 * 60 * meanRange);
     // get latest for place, discarding open and closed
