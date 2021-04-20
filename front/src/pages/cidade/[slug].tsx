@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GetStaticProps, NextPage } from 'next';
 import { NextSeo } from 'next-seo';
 import { Prefecture } from '../../lib/Prefecture';
