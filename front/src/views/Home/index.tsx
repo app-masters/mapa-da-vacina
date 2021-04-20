@@ -39,6 +39,7 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
        * geoSuccess
        */
       const geoSuccess = (position) => {
+        setModal(false);
         setPermission('allowed');
         setCoordinates({ latitude: position.coords.latitude, longitude: position.coords.longitude });
         if (!noFilter) {

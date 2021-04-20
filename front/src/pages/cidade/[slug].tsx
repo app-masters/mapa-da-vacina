@@ -23,7 +23,7 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
     interval.current = setInterval(async () => {
       const prefectureData = await getPrefectureData(null, filter);
       setData(prefectureData);
-    }, 10000);
+    }, 60000);
   }, [filter]);
 
   // Fetching prefecture data
