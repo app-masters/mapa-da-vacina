@@ -96,7 +96,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, canUpdate
                 style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
               >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
             )}
-            {canUpdate && (
+            {item.open && canUpdate && (
               <Button size="small" onClick={publicUpdate} style={{ marginLeft: 4 }}>
                 Informar fila
               </Button>
