@@ -38,7 +38,7 @@ export default class PrefecturesController {
   public async show({ request, response, params }: HttpContextContract) {
     //const cacheKey = `prefecture-${params.id}`;
     const queryParams = request.get();
-    console.log('Query params', queryParams);
+    // console.log('Query params', queryParams);
 
     let zip = queryParams['zip'];
     const latitude = queryParams['latitude'];
@@ -73,7 +73,7 @@ export default class PrefecturesController {
     // verifica o cache
     let cacheKey = `prefecture:${params.id}-`;
     if (zip) cacheKey += `zip:${zip}`;
-    console.log('Reading cache: ', cacheKey);
+    // console.log('Reading cache: ', cacheKey);
     let data = Cache.get(cacheKey);
 
     // Se não tiver cache, salva
