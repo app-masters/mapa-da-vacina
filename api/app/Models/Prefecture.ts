@@ -125,12 +125,15 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * @returns Active prefectures
    */
   public async listActive() {
+    let documents;
     if (this._activeObserver) {
-      return this.prefectures.filter((pref) => pref.active).sort((p1, p2) => p1.city.localeCompare(p2.city));
+      documents = this.prefectures.filter((pref) => pref.active);
     }
-    return await this.query((qb) => {
-      return qb.where('active', '==', true).orderBy('city', 'asc');
+    documents = await this.query((qb) => {
+      return qb.where('active', '==', true);
     });
+
+    return documents.sort((p1, p2) => p1.city.localeCompare(p2.city));
   }
 
   /**

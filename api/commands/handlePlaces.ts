@@ -30,32 +30,6 @@ export default class HandlePlaces extends BaseCommand {
     this.logger.info('Running command...');
     console.log('prefectureId: ' + this.prefectureId);
 
-    // Load all prefectures
-    const prefectures = await Prefecture.list();
-
-    // for (const prefecture of prefectures) {
-    //   // Places without prefectureId
-    //   const placesWithoutPrefecture = (await Place.list({}, prefecture.id)).filter((p) => !p.prefectureId);
-    //   // placesWithoutPrefecture;
-    //   console.log(`Places without prefectureId in ${prefecture.id} : ${placesWithoutPrefecture?.length}`);
-    //   // return;
-    //   // if (places) {
-    //   //   for (const place of places) {
-    //   //     console.log('Updating ' + place.id + ' ...');
-    //   //     await Place.save(
-    //   //       {
-    //   //         ...place,
-    //   //         // open: true,
-    //   //         openToday: true,
-    //   //         openTomorrow: true
-    //   //       },
-    //   //       this.prefectureId
-    //   //     );
-    //   //   }
-    //   //
-    // }
-    // return;
-
     // Force open places now, today, tomorrow
     const prefecture = await Prefecture.findByIdWithPlaces(this.prefectureId);
     if (!prefecture) {
