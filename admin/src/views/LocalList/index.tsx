@@ -120,6 +120,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       title: 'Localização',
       dataIndex: 'googleMapsUrl',
       key: 'googleMapsUrl',
+      align: 'center',
       /**
        * render
        */
@@ -154,6 +155,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       title: 'Abre hoje',
       dataIndex: 'openToday',
       key: 'openToday',
+      align: 'center',
       /**
        * render
        */
@@ -163,6 +165,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       title: 'Abre amanhã',
       dataIndex: 'openTomorrow',
       key: 'openTomorrow',
+      align: 'center',
       /**
        * render
        */
