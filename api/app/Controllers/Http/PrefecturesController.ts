@@ -58,7 +58,7 @@ export default class PrefecturesController {
         });
         if (responseZip.status === 200) {
           zip = sanitizeZip((await responseZip.json()).zip);
-          RollbarProvider.info('Found zip via coordinates', { zip: zip, coordinates: { latitude, longitude } });
+          //RollbarProvider.info('Found zip via coordinates', { zip: zip, coordinates: { latitude, longitude } });
         } else {
           zip = undefined;
           RollbarProvider.info('Error fetching zip', { coordinates: { latitude, longitude } });
@@ -95,7 +95,7 @@ export default class PrefecturesController {
           });
           if (resp.status === 200) {
             coordinates = await resp.json();
-            RollbarProvider.info('Found coordinates via zip', { zip: zip, coordinates });
+            //RollbarProvider.info('Found coordinates via zip', { zip: zip, coordinates });
           } else {
             coordinates = undefined;
             RollbarProvider.info('Error fetching coordinates', { zip: zip });
