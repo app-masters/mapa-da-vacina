@@ -25,15 +25,19 @@ Route.get('/', async () => {
 
 // Prefecture
 Route.get('/prefecture', 'PrefecturesController.index');
-Route.get('/prefecture/:id', 'PrefecturesController.show');
+//Route.get('/prefecture/:id/:zip?', 'PrefecturesController.show');
+Route.get('/prefecture/:id/', 'PrefecturesController.show');
 Route.get('/prefectures-list/', 'PrefecturesController.listActive');
 
 // User
 Route.post('/invite', 'UsersController.invite').middleware(['authActive']);
 Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 
+//Contact
+Route.post('/contact', 'ContactsController.sendContact');
+
 // Places
-Route.post('/import-places', 'PlacesController.importPlacesFromCSV');
+Route.post('/import-places', 'PlacesController.importPlacesFromCSV').middleware(['authActive']);
 
 //Test
-Route.get('/test/sms', 'TestController.testSms');
+// Route.get('/test/sms', 'TestController.testSms');

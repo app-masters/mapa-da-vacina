@@ -24,7 +24,7 @@ const firebaseAuthConfig = {
     /**
      * signInSuccessWithAuthResult
      */
-    signInSuccessWithAuthResult: () => false
+    signInSuccessWithAuthResult: () => true
   }
 };
 
@@ -45,7 +45,7 @@ const Auth: React.FC = () => {
   return (
     <AuthWrapper>
       <AuthContent>
-        <Image src={'/images/logo-app.png'} width={280} height={60} alt="app-logo" />
+        <Image src={'/images/logo-mapa.svg'} width={280} height={100} alt="app-logo" />
         <div id="#firebase-auth" />
       </AuthContent>
     </AuthWrapper>

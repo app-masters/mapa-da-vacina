@@ -33,8 +33,26 @@ export const HomeHeaderWrapper = styled.div`
     display: grid;
     align-items: center;
   }
+  .logo-text {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    h1 {
+      margin: 0;
+      font-size: 48px;
+      color: #ffffff !important;
+      font-weight: 400;
+      text-shadow: 2px 2px 6px #00000030;
+      @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+        font-size: 36px;
+      }
+    }
+  }
   .logo {
     @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
+      flex: none;
       padding-bottom: ${(props) => props.theme.spacing.default};
       display: flex;
       justify-content: center;
@@ -122,5 +140,15 @@ export const HomeFooterWrapper = styled.footer`
         margin-top: ${(props) => props.theme.spacing.default};
       }
     }
+  }
+`;
+
+export const ModalContainerWrapper = styled.div`
+  margin-top: ${(props) => props.theme.spacing.default};
+  p {
+    margin: 0;
+  }
+  a {
+    font-weight: bold;
   }
 `;

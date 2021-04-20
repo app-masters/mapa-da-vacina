@@ -1,7 +1,7 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "license": "Commons Clause",
+  "license": "CC BY-NC 2.0",
   "private": true,
   "scripts": {
     "build": "node ace build --production",
@@ -35,14 +35,18 @@
   },
   "dependencies": {
     "@adonisjs/core": "~5.0.4-preview-rc",
+    "@adonisjs/mail": "^7.0.0",
     "@adonisjs/repl": "^1.0.0",
+    "@adonisjs/view": "^3.1.0",
     "@aws-sdk/client-sns": "^3.11.0",
+    "@types/node-fetch": "^2.5.10",
     "csvtojson": "^2.0.10",
     "firebase-admin": "^9.6.0",
     "firestore-storage": "^4.3.1",
     "libphonenumber-js": "^1.9.16",
     "memory-cache": "^0.2.0",
     "node-cron": "^3.0.0",
+    "node-fetch": "^2.6.1",
     "proxy-addr": "^2.0.6",
     "reflect-metadata": "^0.1.13",
     "rollbar": "^2.21.1",

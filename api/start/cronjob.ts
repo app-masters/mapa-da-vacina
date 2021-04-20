@@ -11,11 +11,13 @@ import Config from '@ioc:Adonis/Core/Config';
 
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Place from 'App/Models/Place';
+import Prefecture from 'App/Models/Prefecture';
 
 import cron from 'node-cron';
 
 let updateOpenTodayJobRunning = false;
 let openOrClosePlaceJobRunning = false;
+let updateRandomQueueStatusJobRunning = false;
 
 /**
  * Update Open Today Job
@@ -59,6 +61,27 @@ const openOrClosePlaceJob = async () => {
 };
 
 /**
+ * Update random queue status
+ */
+const updateRandomQueueStatusJob = async () => {
+  console.log('cronJob - Update Random Queue Status Job started ✔');
+  if (updateRandomQueueStatusJobRunning) return RollbarProvider.error('cronJob already running');
+
+  try {
+    updateRandomQueueStatusJobRunning = true;
+    console.log('cronJob - Updating Random Queue Status ...');
+    await Prefecture.updatePlacesForDemonstration();
+    console.log('cronJob - Update Random Queue Status Job ended ✔');
+    updateRandomQueueStatusJobRunning = false;
+  } catch (err) {
+    console.log('cronJob - Update Demonstração Job ended with error ❌');
+    console.log(err);
+    RollbarProvider.error('Failed to execute Update Demonstração place Job', { err });
+    updateRandomQueueStatusJobRunning = false;
+  }
+};
+
+/**
  * Initialize cron
  */
 const init = async () => {
@@ -66,6 +89,7 @@ const init = async () => {
     console.log('cronJob - Crons started');
     cron.schedule('1 0 */1 * *', () => updateOpensTodayJob()).start();
     cron.schedule('*/1 * * * *', () => openOrClosePlaceJob()).start();
+    cron.schedule('*/6 * * * *', () => updateRandomQueueStatusJob()).start();
   } catch (error) {
     RollbarProvider.error('Failed to execute crons', { error });
   }

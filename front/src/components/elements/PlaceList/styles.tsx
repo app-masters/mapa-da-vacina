@@ -4,15 +4,21 @@ import { CardProps } from 'antd/lib/card';
 import { InputStyled } from '../../ui/Input/styles';
 import { Place } from '../../../lib/Place';
 import { LoadingOutlined } from '@ant-design/icons';
+import { Coordinates } from '../../../lib/Coordinates';
 
 export type PlaceListTemplateProps = CardProps & {
   data: Place[];
   showQueueUpdatedAt?: boolean;
+  sampleMode?: boolean;
+  city?: string;
   header?: React.ReactNode;
   loading: boolean;
+  shouldShowFeaturesBanner?: boolean;
+  coordinates?: Coordinates;
 };
 
 export const PlaceListWrapper = styled(Card)`
+  overflow: hidden;
   .ant-card-head-title {
     font-size: 32px;
     font-weight: 700;
@@ -21,6 +27,32 @@ export const PlaceListWrapper = styled(Card)`
   }
   .ant-card-body {
     min-height: 100px;
+  }
+`;
+
+export const WarningBox = styled.div`
+  margin-top: ${(props) => props.theme.spacing.default} !important;
+  border-radius: 2px;
+  color: ${(props) => props.theme.colors.darkGray};
+  text-align: center;
+  background-color: ${(props) => props.theme.colors.alert};
+  padding: ${(props) => props.theme.spacing.default} !important;
+  p {
+    font-size: 16px;
+    margin: 0;
+    > a {
+      text-decoration: underline;
+    }
+  }
+  div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: ${(props) => props.theme.spacing.sm};
+  }
+  ul {
+    text-align: left;
   }
 `;
 

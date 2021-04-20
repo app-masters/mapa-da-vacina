@@ -17,4 +17,15 @@ export type Place = {
   };
   createdAt: Date;
   updatedAt: Date;
+  openToday?: boolean;
+  openTomorrow?: boolean;
+
+  openAt?: {
+    _seconds: number;
+  };
+  closeAt?: {
+    _seconds: number;
+  };
+  latitude?: number;
+  longitude?: number;
 };

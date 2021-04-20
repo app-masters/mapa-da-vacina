@@ -5,19 +5,21 @@ import QueueUpdate from 'App/Models/QueueUpdate';
 
 import Cache from 'memory-cache';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
+import Config from '@ioc:Adonis/Core/Config';
+
 import {
+  deleteCacheByPrefix,
   getSlug,
   IsNowBetweenTimes,
   minutesDiff,
   parseBoolFromString,
+  sanitizeAddress,
   sanitizePlaceTitle,
   sanitizeString,
-  sanitizeSurname,
   sanitizeZip
 } from 'App/Helpers';
 
 import { DateTime } from 'luxon';
-import slugify from 'slugify';
 export interface PlaceType extends BaseModel {
   prefectureId: string;
   title: string;
@@ -36,6 +38,10 @@ export interface PlaceType extends BaseModel {
   openTomorrow?: boolean;
   openAt?: Timestamp;
   closeAt?: Timestamp;
+
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 }
 
 export class PlaceRepository extends BaseRepository<PlaceType> {
@@ -54,12 +60,13 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     this._snapshotObserver.onSnapshot(
       (docSnapshot) => {
         console.log(`Received doc snapshot place`);
-        this._activeObserver = true;
-        this.places = docSnapshot.docs.map((d) => {
-          // deletar cache da prefeitura id
-          const cacheKey = `prefecture-${d.data().prefectureId}`;
+        docSnapshot.docChanges().forEach((d) => {
+          // deletar cache da prefeitura que mudou somente
+          const cacheKeyPrefix = `prefecture:${d.doc.data().prefectureId}-`;
           // console.log('Deleting cache: ', cacheKey);
-          Cache.del(cacheKey);
+          deleteCacheByPrefix(cacheKeyPrefix);
+        });
+        this.places = docSnapshot.docs.map((d) => {
           return {
             ...this.getObjectFromData(d.data()),
             id: d.id,
@@ -67,6 +74,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
             updatedAt: d.updateTime.toDate()
           } as PlaceType;
         });
+        this._activeObserver = true;
       },
       (err) => {
         this._activeObserver = false;
@@ -111,8 +119,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
-   * List active prefectures
-   * @returns Active prefectures
+   * List active places
+   * @returns Active places
    */
   public async listActive(prefectureId: string) {
     if (this._activeObserver) {
@@ -172,20 +180,23 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Update Open Today with Open Tomorrow field
    */
   public async openOrClosePlaces() {
+    const minutesToCheck = Config.get('app.minutesRangeToCheck');
+    // console.log(minutesToCheck);
     if (this._activeObserver) {
       const now = new Date();
       const placesToOpen = this.places.filter((p) => {
-        //console.log(p.openAt ? this.minutesDiff(p.openAt.toDate(), now) : '');
-        const timeDiff = p.openAt ? minutesDiff(p.openAt.toDate(), now) : 0;
+        const timeDiff = p.openAt ? minutesDiff(now, p.openAt.toDate()) : 0;
+        // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+
         // Only open if opens today and still not open
-        return p.openAt && !p.open && p.openToday && timeDiff <= -1 && timeDiff > -2;
+        return p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
       });
 
       const placesToClose = this.places.filter((p) => {
         //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
-        const timeDiff = p.closeAt ? minutesDiff(p.closeAt.toDate(), now) : 0;
+        const timeDiff = p.closeAt ? minutesDiff(now, p.closeAt.toDate()) : 0;
         // Only closes if not open
-        return p.closeAt && p.open && timeDiff <= -1 && timeDiff > -2;
+        return p.closeAt && p.open && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
       });
 
       for (const place of placesToOpen) {
@@ -225,27 +236,25 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         console.log("Place type isn't fixed or driveThru... Defaulting to fixed");
         type = 'fixed';
       }
-      const addressStreet = sanitizeString(json.addressStreet);
-      const addressDistrict = sanitizeString(json.addressDistrict);
-      const addressCityState = sanitizeString(json.addressCityState);
-
-      const openAt = DateTime.fromISO(json.openAt).toJSDate();
-      const closeAt = DateTime.fromISO(json.closeAt).toJSDate();
+      const addressStreet = sanitizeAddress(json.addressStreet);
+      const addressDistrict = sanitizeAddress(json.addressDistrict);
+      const addressCityState = sanitizeAddress(json.addressCityState);
 
       const addressZip = sanitizeZip(json.addressZip);
       const googleMapsUrl = sanitizeString(json.googleMapsUrl);
 
       const active = json.active !== undefined ? parseBoolFromString(json.active) : true;
 
-      const open = IsNowBetweenTimes(openAt, closeAt);
+      const openAt = json.openAt ? DateTime.fromISO(json.openAt).toJSDate() : undefined;
+      const closeAt = json.closeAt ? DateTime.fromISO(json.closeAt).toJSDate() : undefined;
+
+      const open = openAt && closeAt ? IsNowBetweenTimes(openAt, closeAt) : false;
       const queueStatus = open ? 'open' : 'closed';
       const queueUpdatedAt = new Date();
       result = {
         title,
         internalTitle,
         type,
-        openAt,
-        closeAt,
         open,
         queueStatus,
         queueUpdatedAt,
@@ -258,6 +267,12 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
       if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
       if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
+
+      if (json.openToday !== undefined) result.openToday = json.openToday;
+      if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
+
+      if (openAt) result.openAt = openAt;
+      if (closeAt) result.closeAt = closeAt;
 
       place.push(result);
     }
@@ -275,16 +290,19 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       console.log('Erro ao encontrar prefeitura informada.');
       throw new Error('Não foi possível encontrar a prefeitura informada.');
     }
-    /*
+
     if (deactivateMissing) {
       // First deactivate every place, then defaults to true when present in file
-      this._snapshotObserver.get().then((docs) => {
-        docs.forEach((place) => {
-          place.ref.set({ active: false });
+      await this._snapshotObserver
+        .where('prefectureId', '==', prefectureId)
+        .get()
+        .then(async (docs) => {
+          for (const place of docs.docs) {
+            await place.ref.update({ active: false });
+          }
         });
-      });
     }
-    */
+
     const places = await this.sanitizeJson(placesJson);
     console.log('Places from file ', places);
 
@@ -306,6 +324,31 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         );
     }
     console.log('Done importing places');
+  }
+
+  /**
+   * Update queue status for demonstration city
+   */
+  public async updateQueueStatusForDemonstration(prefectureId: string) {
+    if (this._activeObserver) {
+      const placesDemo = this.places.filter((p) => {
+        return p.prefectureId === prefectureId && p.active && p.open;
+      });
+      const randomness = placesDemo.length === 1 ? 0.5 : 0.2;
+      console.log('randomness', randomness);
+      for (const place of placesDemo) {
+        const prob = Math.random();
+        console.log('prob', prob);
+        const minutesSinceLastUpdate = Math.abs(
+          (place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) / 60 / 1000
+        );
+        console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
+        // random update || keep updated
+        if (place.id && (prob <= randomness || minutesSinceLastUpdate >= 45)) {
+          await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
+        }
+      }
+    }
   }
 
   /**

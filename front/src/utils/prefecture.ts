@@ -2,18 +2,20 @@ import { Prefecture } from '../lib/Prefecture';
 import logging from './logging';
 
 /**
- * Get prefecture ID
+ * Get prefecture Data
  */
-export const getPrefectureData = async (): Promise<Prefecture> => {
+export const getPrefectureData = async (
+  id?: string,
+  filter?: { latitude: number; longitude: number }
+): Promise<Prefecture> => {
   try {
+    if (id === 'new') id = null; // Undefined ID, don't fetch it
+
     // Defining NEXT_PUBLIC_PREFECTURE_ID as prefecture ID
-    let prefectureId = process.env.NEXT_PUBLIC_PREFECTURE_ID;
+    let prefectureId = id || process.env.NEXT_PUBLIC_PREFECTURE_ID;
     if (!prefectureId) {
       // No prefecture id defined, getting from online variable
-      console.log('NEXT_PUBLIC_HEROKU', process.env.NEXT_PUBLIC_HEROKU);
-      console.log('window.location', window.location);
       const possibleId = window.location.host.split('.')[0];
-      console.log('subdomain', possibleId);
       if (JSON.parse(process.env.NEXT_PUBLIC_HEROKU).indexOf(possibleId) > -1) {
         prefectureId = possibleId;
       }
@@ -22,8 +24,11 @@ export const getPrefectureData = async (): Promise<Prefecture> => {
         throw Error('You need to define a NEXT_PUBLIC_PREFECTURE_ID on your .env to be able to fetch the data');
       }
     }
-    console.log('prefectureId', prefectureId);
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`);
+    let url = `${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`;
+    if (filter) {
+      url += `?latitude=${filter.latitude}&longitude=${filter.longitude}`;
+    }
+    const res = await fetch(url);
     const data = await res.json();
     return data;
   } catch (error) {

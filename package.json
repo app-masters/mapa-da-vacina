@@ -1,6 +1,6 @@
 {
   "private": true,
-  "license": "Commons Clause",
+  "license": "CC BY-NC 2.0",
   "engines": {
     "node": ">=15"
   },

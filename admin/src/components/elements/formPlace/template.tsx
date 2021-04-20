@@ -37,6 +37,23 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
     setTitle(undefined);
   };
 
+  const initialDateValues = React.useMemo(() => {
+    const dates = {
+      openAt: undefined,
+      closeAt: undefined
+    };
+    if (place) {
+      dates.openAt = dayjs(new Date(place?.openAt.seconds * 1000), 'HH:mm');
+      dates.closeAt = dayjs(new Date(place?.closeAt.seconds * 1000), 'HH:mm');
+    }
+    const localDate = JSON.parse(localStorage.getItem('default_time') || '{}');
+    if (!place && localDate) {
+      dates.openAt = dayjs(localDate.openAt, 'HH:mm');
+      dates.closeAt = dayjs(localDate.closeAt, 'HH:mm');
+    }
+    return dates;
+  }, [place]);
+
   return (
     <Modal title="Novo Ponto de Vacinação" visible={open} destroyOnClose onCancel={closeModal} footer={null}>
       <Form
@@ -46,7 +63,7 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
           await onSubmit(values);
         }}
       >
-        <Form.Item initialValue={place?.active || true} name="active" valuePropName="checked">
+        <Form.Item initialValue={place ? place.active : true} name="active" valuePropName="checked">
           <Checkbox>Posto de vacinação ativo</Checkbox>
         </Form.Item>
         <Form.Item
@@ -75,11 +92,38 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
           </Select>
         </Form.Item>
         <Input.Group compact>
+          <Form.Item name="open" style={{ width: '33%' }} initialValue={place?.open || false} valuePropName="checked">
+            <Checkbox style={{ width: '100%' }} disabled={loading}>
+              Aberto agora
+            </Checkbox>
+          </Form.Item>
+          <Form.Item
+            name="openToday"
+            style={{ width: '33%' }}
+            initialValue={place?.openToday || false}
+            valuePropName="checked"
+          >
+            <Checkbox style={{ width: '100%' }} disabled={loading}>
+              Abre hoje
+            </Checkbox>
+          </Form.Item>
+          <Form.Item
+            name="openTomorrow"
+            style={{ width: '33%' }}
+            initialValue={place?.openTomorrow || false}
+            valuePropName="checked"
+          >
+            <Checkbox style={{ width: '100%' }} disabled={loading}>
+              Abre Amanhã
+            </Checkbox>
+          </Form.Item>
+        </Input.Group>
+        <Input.Group compact>
           <Form.Item
             name="openAt"
             label="Abertura"
             style={{ width: '50%' }}
-            initialValue={place?.openAt ? dayjs(new Date(place?.openAt.seconds * 1000), 'HH:mm') : undefined}
+            initialValue={initialDateValues.openAt}
             rules={[
               { required: true, message: 'Por favor informe o horário de abertura' },
               ({ getFieldValue }) => ({
@@ -103,7 +147,7 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
             name="closeAt"
             label="Fechamento"
             style={{ width: '50%' }}
-            initialValue={place?.closeAt ? dayjs(new Date(place?.closeAt.seconds * 1000), 'HH:mm') : undefined}
+            initialValue={initialDateValues.closeAt}
             rules={[
               { type: 'object' as const, required: true, message: 'Por favor informe o horário de fechamento' },
               ({ getFieldValue }) => ({
@@ -134,10 +178,13 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
         </Form.Item>
         <Form.Item
           label="Bairro"
-          initialValue={place?.addressDistrict}
+          initialValue={place?.addressDistrict || ''}
           name="addressDistrict"
-          rules={[{ required: true, message: 'Por favor informe o bairro' }]}
+          rules={[{ required: false, message: 'Por favor informe o bairro' }]}
         >
+          <Input disabled={loading} />
+        </Form.Item>
+        <Form.Item label="CEP" initialValue={place?.addressZip || ''} name="addressZip">
           <Input disabled={loading} />
         </Form.Item>
         <Input.Group compact>

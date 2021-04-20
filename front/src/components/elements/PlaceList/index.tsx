@@ -5,8 +5,9 @@ import PersonPin from '../../ui/Icons/PersonPin';
 import React from 'react';
 import { ButtonIconWrapper, HeaderCard } from './styles';
 import { Place } from '../../../lib/Place';
-import { placeType } from '../../../utils/constraints';
+import { placeQueue, placeType } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
+import { Coordinates } from '../../../lib/Coordinates';
 
 type IconButtonProps = {
   onPress?: (value: string) => void;
@@ -29,10 +30,16 @@ const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, titl
   );
 };
 
+type PlaceListProps = {
+  prefecture: Prefecture;
+  loading: boolean;
+  coordinates?: Coordinates;
+};
+
 /**
  * PlaceList
  */
-const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ prefecture, loading }) => {
+const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, coordinates }) => {
   const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
     age: undefined,
     zip: undefined,
@@ -53,6 +60,16 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
     }
     return listPlaces;
   }, [prefecture.places, filter]);
+
+  const shouldShowFeaturesBanner = React.useMemo(() => {
+    const hasLogo = !!prefecture?.primaryLogo;
+    const isUsingQueue = prefecture?.places?.some(
+      (place) => place.queueStatus !== placeQueue.open && place.queueStatus !== placeQueue.closed
+    );
+
+    // Probably, the prefecture has not paid for the system
+    return !loading && !hasLogo && !isUsingQueue;
+  }, [loading, prefecture.primaryLogo, prefecture.places]);
 
   return (
     <PlaceListTemplate
@@ -78,8 +95,12 @@ const PlaceList: React.FC<{ prefecture: Prefecture; loading: boolean }> = ({ pre
         </HeaderCard>
       }
       data={data}
-      showQueueUpdatedAt={prefecture.showQueueUpdatedAt}
+      showQueueUpdatedAt={prefecture.showQueueUpdatedAt !== false}
+      sampleMode={prefecture.sampleMode}
+      city={prefecture.city}
       loading={loading}
+      shouldShowFeaturesBanner={shouldShowFeaturesBanner}
+      coordinates={coordinates}
       // header={
       //   <Space wrap>
       //     <p>Encontre seu ponto</p>

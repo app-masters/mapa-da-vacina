@@ -1,4 +1,5 @@
 import slugify from 'slugify';
+import Cache from 'memory-cache';
 
 /**
  * Returns a slug
@@ -48,6 +49,59 @@ export const sanitizePlaceTitle = (value: string) => {
     }
   }
   return result.join(' ');
+};
+
+/**
+ * Return the sanitized surname
+ */
+export const sanitizeAddress = (value: string) => {
+  if (!value) return;
+  const removeBreaks = value.trim().replace(/\n|\r/g, '');
+  const array = removeBreaks.split(' ');
+  const result: Array<string> = [];
+  const values = ['de', 'da', 'das', 'do', 'dos', 'del', 'e', 'DE', 'DA', 'DAS', 'DO', 'DOS', 'DEL', 'E'];
+  const keys = ['ubs', 'ama', 'ubs/ama', 'ama/ubs'];
+  const states = [
+    'AC',
+    'AL',
+    'AP',
+    'AM',
+    'BA',
+    'CE',
+    'DF',
+    'ES',
+    'GO',
+    'MA',
+    'MT',
+    'MS',
+    'MG',
+    'PA',
+    'PB',
+    'PR',
+    'PE',
+    'PI',
+    'RJ',
+    'RN',
+    'RS',
+    'RO',
+    'RR',
+    'SC',
+    'SP',
+    'SE',
+    'TO'
+  ];
+  for (const word of array) {
+    if (values.includes(word)) {
+      result.push(word.toLowerCase());
+    } else if (keys.includes(word.toLowerCase())) {
+      result.push(word.toUpperCase());
+    } else if (states.includes(word.toUpperCase())) {
+      result.push(word.toUpperCase());
+    } else {
+      result.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    }
+  }
+  return result.join(' ').replace(/,/g, ', ');
 };
 
 /**
@@ -136,4 +190,29 @@ export const parseBoolFromString = (value: string) => {
   if (trues.includes(value)) return true;
   if (falses.includes(value)) return false;
   return false;
+};
+
+/**
+ * Calculate distance between points (x1,y1) and (x2,y2)
+ * @param x1
+ * @param y1
+ * @param x2
+ * @param y2
+ * @returns distance
+ */
+export const calculateDistance = (x1: number, y1: number, x2: number, y2: number) => {
+  return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
+};
+
+/**
+ * Delete all keys from cache starting with a prefix string
+ * @param prefix
+ */
+export const deleteCacheByPrefix = (prefix: string) => {
+  const cacheKeys = Cache.keys();
+  const keysToDelete = cacheKeys.filter((key: string) => key.startsWith(prefix));
+
+  for (const key of keysToDelete) {
+    Cache.del(key);
+  }
 };
