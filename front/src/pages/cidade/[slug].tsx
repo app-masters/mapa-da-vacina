@@ -17,14 +17,13 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
   const interval = useRef(null);
 
   const getAndSetPrefectureData = useCallback(async () => {
-    console.log('Filter: ', filter);
     if (interval.current) clearInterval(interval.current);
     const prefectureData = await getPrefectureData(null, filter);
     setData(prefectureData);
     interval.current = setInterval(async () => {
       const prefectureData = await getPrefectureData(null, filter);
       setData(prefectureData);
-    }, 10000);
+    }, 60000);
   }, [filter]);
 
   // Fetching prefecture data

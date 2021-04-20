@@ -57,7 +57,6 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
 
   React.useEffect(() => {
     navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
-      console.log('Permission', permission.state);
       setPermission(permission.state);
       if (permission.state === 'granted') {
         navigator.geolocation.getCurrentPosition((position) => filterByPosition(position), geoError, geolocationConfig);
