@@ -12,14 +12,14 @@ import HomeView from '../../views/Home';
 const Home: NextPage<{ data: Prefecture }> = (props) => {
   // Local state
   const [data, setData] = useState(props.data as Prefecture);
-  const [filter, setFilter] = useState<{ latitude: number; longitude: number }>(null);
+  const [filter, setFilter] = useState<GeolocationPosition>(null);
 
   const interval = useRef(null);
 
   const getAndSetPrefectureData = useCallback(async () => {
+    if (interval.current) clearInterval(interval.current);
     const prefectureData = await getPrefectureData(null, filter);
     setData(prefectureData);
-    if (interval.current) clearInterval(interval.current);
     interval.current = setInterval(async () => {
       const prefectureData = await getPrefectureData(null, filter);
       setData(prefectureData);
@@ -41,7 +41,7 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
       <HomeView
         loading={!props.data?.id}
         data={data?.id ? data : props.data || ({} as Prefecture)}
-        filterByPosition={(coords) => setFilter(coords)}
+        filterByPosition={setFilter}
       />
     </>
   );

@@ -1,13 +1,11 @@
 import { Prefecture } from '../lib/Prefecture';
+import { calcDistance } from './geolocation';
 import logging from './logging';
 
 /**
  * Get prefecture Data
  */
-export const getPrefectureData = async (
-  id?: string,
-  filter?: { latitude: number; longitude: number }
-): Promise<Prefecture> => {
+export const getPrefectureData = async (id?: string, coordinates?: GeolocationPosition): Promise<Prefecture> => {
   try {
     if (id === 'new') id = null; // Undefined ID, don't fetch it
 
@@ -24,13 +22,22 @@ export const getPrefectureData = async (
         throw Error('You need to define a NEXT_PUBLIC_PREFECTURE_ID on your .env to be able to fetch the data');
       }
     }
-    let url = `${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`;
-    if (filter) {
-      url += `?latitude=${filter.latitude}&longitude=${filter.longitude}`;
-    }
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/prefecture/${prefectureId}`;
     const res = await fetch(url);
-    const data = await res.json();
-    return data;
+    const data = (await res.json()) as Prefecture;
+
+    let places = data.places.map((place) => ({
+      ...place,
+      distance: calcDistance(coordinates, place)
+    }));
+
+    places = places.sort((a, b) => {
+      if (!b.distance) return -1;
+      if (!a.distance) return 0;
+      return a.distance - b.distance;
+    });
+
+    return { ...data, places };
   } catch (error) {
     logging.error(error);
     return {} as Prefecture;

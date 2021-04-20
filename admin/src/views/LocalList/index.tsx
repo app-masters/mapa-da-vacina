@@ -115,6 +115,15 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       render: (value) => placeTypeLabel[value]
     },
     {
+      title: 'Localização',
+      dataIndex: 'location',
+      key: 'location',
+      /**
+       * render
+       */
+      render: (value) => placeTypeLabel[value]
+    },
+    {
       title: 'Abre hoje',
       dataIndex: 'openToday',
       key: 'openToday',
