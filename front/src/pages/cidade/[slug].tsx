@@ -68,7 +68,8 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
       <HomeView
         loading={!props.data?.id}
         data={data?.id ? data : props.data || ({} as Prefecture)}
-        filterByPosition={(position) => setFilter({ permission: 'granted', position })}
+        setCoordinate={setFilter}
+        coordinate={filter}
       />
     </>
   );

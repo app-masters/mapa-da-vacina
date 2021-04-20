@@ -6,17 +6,20 @@ import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Tag, Tooltip } from 'antd';
 import { distanceHumanize } from '../../../utils/geolocation';
+import Button from '../Button';
 
 type CardItemProps = {
   item: Place;
   showQueueUpdatedAt?: boolean;
   haveWarning: boolean;
+  canUpdate?: boolean;
+  publicUpdate: () => void;
 };
 
 /**
  * CardItem
  */
-const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning }) => {
+const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, canUpdate, haveWarning, publicUpdate }) => {
   /**
    * Render the icon based on status
    */
@@ -92,6 +95,11 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
                 className="location-label"
                 style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
               >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
+            )}
+            {canUpdate && (
+              <Button size="small" onClick={publicUpdate} style={{ marginLeft: 4 }}>
+                Informar fila
+              </Button>
             )}
           </div>
         </div>

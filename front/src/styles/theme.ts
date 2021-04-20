@@ -31,6 +31,7 @@ export type ColorsList = {
   darkGray: string;
   alert: string;
   green1: string;
+  disabled: string;
 };
 
 export const colors: ColorsList = {
@@ -38,6 +39,7 @@ export const colors: ColorsList = {
   primary: '#55B4C8',
   alert: '#FFDDDD',
   darkGray: '#747474',
+  disabled: '#00000010',
   green1: '#16a085'
 };
 
