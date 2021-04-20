@@ -50,7 +50,6 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
             updatedAt: d.updateTime.toDate()
           } as PrefectureType;
         });
-        console.log('leng', this.prefectures.length);
         this._activeObserver = true;
       },
       (err) => {
@@ -92,6 +91,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     if (!prefecture) throw new Error("Couldn't find Prefecture with id: " + id);
 
     const places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
+    console.log('places findByIdWithPlaces ', places.length);
 
     return { ...prefecture, places: places };
   }

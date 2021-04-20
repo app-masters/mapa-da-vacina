@@ -3,7 +3,6 @@ import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import QueueUpdate from 'App/Models/QueueUpdate';
 
-import Cache from 'memory-cache';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Config from '@ioc:Adonis/Core/Config';
 
@@ -123,6 +122,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns Active places
    */
   public async listActive(prefectureId: string) {
+    console.log('this._activeObserver', this._activeObserver);
     if (this._activeObserver) {
       return this.places
         .filter((place) => place.active && place.prefectureId === prefectureId)
@@ -136,13 +136,18 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         });
     }
     return await this.query((qb) => {
-      return qb
-        .where('active', '==', true)
-        .orderBy('open', 'desc')
-        .orderBy('openToday', 'desc')
-        .orderBy('type', 'desc')
-        .orderBy('title', 'asc');
+      return qb.where('active', '==', true);
     }, prefectureId);
+  }
+
+  /**
+   *
+   */
+  public async all() {
+    if (this._activeObserver) {
+      return this.places;
+    }
+    return await super.list();
   }
 
   /**
