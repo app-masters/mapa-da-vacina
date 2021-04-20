@@ -58,12 +58,30 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
     }
   }, []);
 
+  const siteName = `Mapa da Vacina | Vacinas de COVID-19 em ${props.data?.city || 'sua cidade'}`;
+  const siteUrl = `https://${props.data?.id}.mapadavacina.com.br`;
+  const siteDescription = `Descubra onde se vacinar em ${
+    props.data?.city || 'sua cidade'
+  } contra a COVID-19. Veja os pontos de vacinação abertos e descubra o mais próximo de você.`;
   return (
     <>
       <NextSeo
-        title={props.data?.name}
-        description={`Descubra onde vacinar em ${props.data?.city || 'sua cidade'} contra a COVID-19`}
-        openGraph={{ images: [{ url: props.data?.primaryLogo, alt: `Logo da prefeitura de ${props.data?.name}` }] }}
+        title={siteName}
+        description={siteDescription}
+        openGraph={{
+          url: siteUrl,
+          title: siteName,
+          description: siteDescription,
+          images: [
+            props.data?.primaryLogo && props.data?.primaryLogo.indexOf('.svg') < 0
+              ? { url: props.data?.primaryLogo, alt: `Prefeitura de ${props.data?.name}` }
+              : {
+                  alt: `Vacinação acontecendo em ${props.data?.city || 'sua cidade'}`,
+                  url: '/images/Vaccination.jpeg'
+                }
+          ],
+          ['site_name']: siteName
+        }}
       />
       <HomeView
         loading={!props.data?.id}
