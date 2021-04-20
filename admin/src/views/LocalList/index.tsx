@@ -16,6 +16,7 @@ import ModalUpload from '../../components/elements/modalUpload';
 import { API } from '../../utils/api';
 import { Pin } from '../../components/ui/Icons';
 import { Coordinate } from '../../components/ui/Icons';
+import { ColumnsType } from 'antd/lib/table';
 
 type ListViewProps = {
   user: User;
@@ -101,7 +102,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
    * formatDate
    */
   const formatDate = ({ seconds }) => dayjs(new Date(seconds * 1000)).format('HH:mm');
-  const columns = [
+  const columns: ColumnsType = [
     {
       title: 'Ponto',
       dataIndex: 'title',
