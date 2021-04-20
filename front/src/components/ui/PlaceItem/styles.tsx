@@ -33,10 +33,17 @@ export const CardItemIconContent = styled(Col)<ColProps & { bgcolor: string }>`
   text-transform: uppercase;
   @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     max-width: 100%;
-    flex-direction: row;
+    div {
+      flex-direction: row;
+    }
     svg {
       margin-right: ${(props) => props.theme.spacing.sm};
     }
+  }
+  span {
+    text-transform: initial;
+    font-size: 12px;
+    font-weight: initial;
   }
 `;
 
