@@ -139,7 +139,7 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
       .reduce((acc, val) => {
         return acc + val;
       }, 0);
-
+    console.log(Math.round(sum / status.length), sum, status.length);
     return Math.round(sum / status.length);
   }
 
@@ -165,7 +165,6 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
           qu.queueStatus !== QueueUpdateConstraint.closed
       )
       .map((qu) => qu.queueStatus);
-    console.log('latest', latestUpdates);
 
     const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
     const newStatus = {
