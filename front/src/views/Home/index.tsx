@@ -55,15 +55,6 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
     navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geolocationConfig);
   }, [filterByPosition, geoError]);
 
-  React.useEffect(() => {
-    navigator.permissions.query({ name: 'geolocation' }).then((permission) => {
-      setPermission(permission.state);
-      if (permission.state === 'granted') {
-        navigator.geolocation.getCurrentPosition((position) => filterByPosition(position), geoError, geolocationConfig);
-      }
-    });
-  }, [filterByPosition, geoError]);
-
   return (
     <HomeWrapper>
       <div className="page-body">

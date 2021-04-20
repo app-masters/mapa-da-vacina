@@ -12,24 +12,51 @@ import HomeView from '../../views/Home';
 const Home: NextPage<{ data: Prefecture }> = (props) => {
   // Local state
   const [data, setData] = useState(props.data as Prefecture);
-  const [filter, setFilter] = useState<GeolocationPosition>(null);
+  const [filter, setFilter] = useState<{ permission?: string; position?: GeolocationPosition }>(null);
 
   const interval = useRef(null);
 
-  const getAndSetPrefectureData = useCallback(async () => {
+  useEffect(() => {
     if (interval.current) clearInterval(interval.current);
-    const prefectureData = await getPrefectureData(null, filter);
-    setData(prefectureData);
-    interval.current = setInterval(async () => {
-      const prefectureData = await getPrefectureData(null, filter);
+    /**
+     * getData
+     */
+    const getData = async () => {
+      const prefectureData = await getPrefectureData(null, filter.position);
       setData(prefectureData);
-    }, 60000);
+      interval.current = setInterval(async () => {
+        const prefectureData = await getPrefectureData(null, filter.position);
+        setData(prefectureData);
+      }, 10000);
+    };
+    if (filter && filter.permission) {
+      getData();
+    }
   }, [filter]);
 
   // Fetching prefecture data
   useEffect(() => {
-    getAndSetPrefectureData();
-  }, [getAndSetPrefectureData]);
+    /**
+     * initData
+     */
+    const initData = async () => {
+      const permission = await navigator.permissions.query({ name: 'geolocation' });
+      if (permission.state === 'granted') {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setFilter({ position, permission: permission.state });
+          },
+          null,
+          { timeout: 10 * 10000 }
+        );
+      } else {
+        setFilter({ permission: permission.state });
+      }
+    };
+    if (process.browser && 'navigator' in window) {
+      initData();
+    }
+  }, []);
 
   return (
     <>
@@ -41,7 +68,7 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
       <HomeView
         loading={!props.data?.id}
         data={data?.id ? data : props.data || ({} as Prefecture)}
-        filterByPosition={setFilter}
+        filterByPosition={(position) => setFilter({ permission: 'granted', position })}
       />
     </>
   );
