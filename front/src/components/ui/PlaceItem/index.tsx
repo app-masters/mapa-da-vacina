@@ -5,18 +5,18 @@ import { Car, PersonPin, Pin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Tag, Tooltip } from 'antd';
+import { distanceHumanize } from '../../../utils/geolocation';
 
 type CardItemProps = {
   item: Place;
   showQueueUpdatedAt?: boolean;
   haveWarning: boolean;
-  distance: string | null;
 };
 
 /**
  * CardItem
  */
-const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning, distance }) => {
+const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning }) => {
   /**
    * Render the icon based on status
    */
@@ -77,12 +77,6 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
         <div>
           {title}
           <div>
-            {`${item.addressStreet ? item.addressStreet : ''}`}
-            {/* {`${item.addressStreet ? item.addressStreet : ''}${
-              item.addressDistrict ? ', ' + item.addressDistrict : ''
-            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
-              item.addressZip ? ', ' + item.addressZip : ''
-            }`} */}
             {!!item.googleMapsUrl && (
               <Tooltip title="Veja como chegar">
                 <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
@@ -90,8 +84,14 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
                 </a>
               </Tooltip>
             )}
-            {!!(distance && item.latitude && item.longitude) && (
-              <strong style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}>{`- ${distance}`}</strong>
+            {`${item.addressStreet ? item.addressStreet : ''}${
+              item.addressDistrict ? ', ' + item.addressDistrict : ''
+            }`}
+            {item.distance && (
+              <label
+                className="location-label"
+                style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
+              >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
             )}
           </div>
         </div>

@@ -30,13 +30,15 @@ export type ColorsList = {
   primary: string;
   darkGray: string;
   alert: string;
+  green1: string;
 };
 
 export const colors: ColorsList = {
   background: '#f0f2f5',
   primary: '#55B4C8',
   alert: '#FFDDDD',
-  darkGray: '#747474'
+  darkGray: '#747474',
+  green1: '#16a085'
 };
 
 export type SpacingList = {
