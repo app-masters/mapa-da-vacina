@@ -64,6 +64,7 @@ export default class PrefecturesController {
         console.log('Error fetching zip... Check cloud functions log for more information');
       }
     }
+    console.log(zip, latitude, longitude);
     // verifica o cache
     let cacheKey = `prefecture:${params.id}-`;
     if (zip) cacheKey += `zip:${zip}`;
@@ -109,12 +110,15 @@ export default class PrefecturesController {
 
         // If there are coordinates, calculate the distance
         if (coordinates && place.latitude && place.longitude) {
+          console.log('Calculating disntaces');
           place.distance = calculateDistance(
             coordinates.latitude,
             coordinates.longitude,
             place.latitude,
             place.longitude
           );
+        } else {
+          place.distance = Number.MAX_VALUE;
         }
       }
       // sort by distance

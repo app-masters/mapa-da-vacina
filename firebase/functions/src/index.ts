@@ -46,15 +46,13 @@ async function returnCoordinates(zip: string) {
   if (queryData && queryData.statusText === "OK") {
     const geometry = queryData.data.results[0].geometry;
 
-    console.log("geometry", geometry);
-
     const returnData = {
       zip: zip,
       latitude: geometry.location.lat,
       longitude: geometry.location.lng,
     };
     await db.collection("zipCoordinate").add({
-      addressZip: zip,
+      zip: zip,
       latitude: geometry.location.lat.toFixed(3),
       longitude: geometry.location.lng.toFixed(3),
     });
@@ -99,16 +97,15 @@ async function returnZip(latitude: number, longitude: number) {
       ac.types.includes(AddressType.postal_code)
     );
     const sanitizedZip = sanitizeZip(zip[0].long_name);
-    console.log("zip", sanitizedZip);
 
     const returnData = {
       zip: sanitizedZip,
     };
 
     await db.collection("zipCoordinate").add({
-      addressZip: sanitizedZip,
-      latitude: latitude.toFixed(3),
-      longitude: longitude.toFixed(3),
+      zip: sanitizedZip,
+      latitude: Number(latitude).toFixed(3),
+      longitude: Number(longitude).toFixed(3),
     });
 
     return returnData;
@@ -214,11 +211,8 @@ export const getCoordinates = functions.https.onRequest(async (req, res) => {
   try {
     console.log(req.body);
     const { addressZip } = req.body;
-    console.log(addressZip);
     const zip = sanitizeZip(addressZip);
-    console.log(zip);
     const coordinates = await returnCoordinates(zip);
-    console.log(coordinates);
     res.json(coordinates);
   } catch (err) {
     console.log(err);
@@ -230,10 +224,8 @@ export const getZip = functions.https.onRequest(async (req, res) => {
   try {
     console.log(req.body);
     const { latitude, longitude } = req.body;
-    console.log(latitude, longitude);
-
     const zip = await returnZip(latitude, longitude);
-    console.log(zip);
+
     res.json(zip);
   } catch (err) {
     console.log(err);
