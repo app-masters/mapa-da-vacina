@@ -23,6 +23,8 @@ export type Place = {
   queueUpdatedAt?: {
     seconds: number;
   };
+  latitude?: number;
+  longitude?: number;
   createdAt?: Date;
   updatedAt?: Date;
 };
