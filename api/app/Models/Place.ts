@@ -62,7 +62,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         console.log(`Received doc snapshot place`);
         docSnapshot.docChanges().forEach((d) => {
           // deletar cache da prefeitura que mudou somente
-          const cacheKeyPrefix = `prefecture-${d.doc.data().prefectureId}`;
+          const cacheKeyPrefix = `prefecture:${d.doc.data().prefectureId}-`;
           // console.log('Deleting cache: ', cacheKey);
           deleteCacheByPrefix(cacheKeyPrefix);
         });
