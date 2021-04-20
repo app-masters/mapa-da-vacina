@@ -40,31 +40,33 @@ export default class PrefecturesController {
     const queryParams = request.get();
     console.log(queryParams);
 
-    const zip = queryParams['zip'];
+    let zip = queryParams['zip'];
     const latitude = queryParams['latitude'];
     const longitude = queryParams['longitude'];
 
     // Se tiver latitude e longitude / zip
     // acha o zip e verifica o cache
-    let foundZip = zip;
+    // let foundZip = zip;
     if (latitude && longitude) {
+      const roundedLatitude = Number(latitude).toFixed(3);
+      const roundedLongitude = Number(longitude).toFixed(3);
       const responseZip = await fetch(Config.get('app.getZipUrl'), {
         method: 'POST',
-        body: JSON.stringify({ latitude: Number(latitude).toFixed(3), longitude: Number(longitude).toFixed(3) }),
+        body: JSON.stringify({ latitude: roundedLatitude, longitude: roundedLongitude }),
         headers: { 'Content-Type': 'application/json' }
       });
       if (responseZip.status === 200) {
-        foundZip = sanitizeZip((await responseZip.json()).zip);
-        RollbarProvider.info('Found zip via coordinates', { zip: foundZip, coordinates: { latitude, longitude } });
+        zip = sanitizeZip((await responseZip.json()).zip);
+        RollbarProvider.info('Found zip via coordinates', { zip: zip, coordinates: { latitude, longitude } });
       } else {
-        foundZip = undefined;
+        zip = undefined;
         RollbarProvider.info('Error fetching zip', { coordinates: { latitude, longitude } });
         console.log('Error fetching zip... Check cloud functions log for more information');
       }
     }
     // verifica o cache
     let cacheKey = `prefecture:${params.id}-`;
-    if (foundZip) cacheKey += `zip:${foundZip}`;
+    if (zip) cacheKey += `zip:${zip}`;
     console.log('Reading cache: ', cacheKey);
     let data = Cache.get(cacheKey);
 
@@ -75,9 +77,10 @@ export default class PrefecturesController {
       // Se tiver zip, encontra as coordenadas e calcula as distancias
       // Se tiver lat long, calcula as distancias
       // Se não tiver nada, não calcula as distancias
-      console.log(zip);
       let coordinates;
-      if (zip) {
+      if (latitude && longitude) {
+        coordinates = { latitude, longitude };
+      } else if (zip) {
         const resp = await fetch(Config.get('app.getCoordinatesUrl'), {
           method: 'post',
           body: JSON.stringify({ addressZip: zip }),
@@ -88,12 +91,11 @@ export default class PrefecturesController {
           RollbarProvider.info('Found coordinates via zip', { zip: zip, coordinates });
         } else {
           coordinates = undefined;
+          RollbarProvider.info('Error fetching coordinates', { zip: zip });
           console.log('Error fetching coordinates... Check cloud functions log for more information');
         }
-      } else if (latitude && longitude) {
-        coordinates = { latitude, longitude };
       }
-      console.log(coordinates);
+      console.log('Coordinates ', coordinates);
 
       for (const place of data.places) {
         if (
@@ -105,6 +107,7 @@ export default class PrefecturesController {
           place.queueStatus = 'open';
         }
 
+        // If there are coordinates, calculate the distance
         if (coordinates && place.latitude && place.longitude) {
           place.distance = calculateDistance(
             coordinates.latitude,
