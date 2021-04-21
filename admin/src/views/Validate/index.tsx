@@ -40,11 +40,12 @@ const ValidateView: React.FC = () => {
       const user = (response.data.user || response.data.admin) as User;
       // Set response user to cookies
       document.cookie = `user=${JSON.stringify(user)}; path=/`;
+
       // Return the validated user
       Router.push('/dashboard');
     } catch (err) {
       logging.error('Error auth: ', { user: authUser, err });
-      setError(err?.response?.data || 'Erro ao autenticar. Entre em contato com o administrador');
+      setError('Erro ao autenticar. Entre em contato com o administrador');
     }
   }, [authUser]);
 
