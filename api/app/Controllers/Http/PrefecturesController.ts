@@ -108,17 +108,6 @@ export default class PrefecturesController {
         }
       }
 
-      for (const place of data.places) {
-        if (
-          place.open &&
-          place.queueStatus !== 'open' &&
-          place.queueUpdatedAt &&
-          Math.abs(place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) >= 50 * 60 * 1000
-        ) {
-          place.queueStatus = 'open';
-        }
-      }
-
       console.log('Adding cache: ', cacheKey);
       Cache.put(cacheKey, data, 30 * 60 * 1000);
     }
@@ -132,8 +121,8 @@ export default class PrefecturesController {
   public async showCoordinates({ response, params }: HttpContextContract) {
     const { latitude, longitude } = params;
     // Arrendondar
-    const lat = Number(latitude).toFixed(3);
-    const lon = Number(longitude).toFixed(3);
+    // const lat = Number(latitude).toFixed(3);
+    // const lon = Number(longitude).toFixed(3);
 
     const data = await PrefectureRepository.findByIdWithPlaces(params.id);
     console.log(latitude, longitude);
