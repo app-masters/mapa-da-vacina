@@ -186,32 +186,30 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Update Open Today with Open Tomorrow field
    */
   public async openOrClosePlaces() {
-    const minutesToCheck = Config.get('app.minutesRangeToCheck');
     // console.log(minutesToCheck);
     if (!this._activeObserver) {
       await this.initPlaces();
     }
-
     const now = new Date();
     const placesToOpen = this.places.filter((p) => {
       const timeDiff = p.openAt ? minutesDiff(now, p.openAt.toDate()) : 0;
       // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
-
       // Only open if opens today and still not open
-      return p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
+      return p.openAt && !p.open && p.openToday && timeDiff === 1;
     });
+    // console.log('Places to open', placesToOpen.length);
 
     const placesToClose = this.places.filter((p) => {
       //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
       const timeDiff = p.closeAt ? minutesDiff(now, p.closeAt.toDate()) : 0;
-      // Only closes if not open
-      return p.closeAt && p.open && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
+      // Only closes if open
+      return p.closeAt && p.open && timeDiff === 1;
     });
 
     for (const place of placesToOpen) {
       if (!place.id) continue;
       RollbarProvider.info(`Opening Place ${place.id}`);
-      console.log(`Opening Place ${place.id}`);
+      console.log(`👉 Opening Place ${place.id}`);
       place.open = true;
       place.queueStatus = 'open';
       //await this.save(place);
@@ -221,11 +219,37 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     for (const place of placesToClose) {
       if (!place.id) continue;
       RollbarProvider.info(`Closing Place ${place.id}`);
-      console.log(`Closing Place ${place.id}`);
+      console.log(`👉 Closing Place ${place.id}`);
       place.open = false;
       place.queueStatus = 'closed';
       // await this.save(place);
       await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, false);
+    }
+  }
+
+  /**
+   * Set back queueStatus to `open` when no updates for a long time
+   */
+  public async setBackQueueStatusOpen() {
+    const minutesToCheck = Config.get('app.minutesRangeToCheck');
+    if (this._activeObserver) {
+      const now = new Date();
+      const placesToSetBackToOpen = this.places.filter((p) => {
+        if (!p.open || p.queueStatus === 'open' || !p.queueUpdatedAt) return;
+        const timeDiff = minutesDiff(p.queueUpdatedAt.toDate(), now);
+        // console.log('p', p.title, p.queueStatus, p.queueUpdatedAt.toDate(), timeDiff); // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+        // Only open if opens today and still not open
+        return p.open && p.queueStatus !== 'open' && p.openToday && timeDiff >= minutesToCheck;
+      });
+      // console.log('Places to set back to open', placesToSetBackToOpen.length);
+
+      for (const place of placesToSetBackToOpen) {
+        if (!place.id) continue;
+        // RollbarProvider.info(`Setting back to queueStatus=open Place ${place.id}`);
+        console.log(`👉 Setting back to queueStatus=open ${place.id}`);
+        place.queueStatus = 'open';
+        await this.save(place, place.prefectureId);
+      }
     }
   }
 
@@ -348,19 +372,22 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     const placesDemo = this.places.filter((p) => {
       return p.prefectureId === prefectureId && p.active && p.open;
     });
-    const randomness = placesDemo.length === 1 ? 0.5 : 0.2;
-    console.log('randomness', randomness);
+    const randomness = placesDemo.length === 1 ? 0.5 : 0.15;
+    // console.log('randomness', randomness);
+    let updated = 0;
     for (const place of placesDemo) {
       const prob = Math.random();
-      console.log('prob', prob);
+      // console.log('prob', prob);
       const minutesSinceLastUpdate = Math.abs(
         (place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) / 60 / 1000
       );
-      console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
+      // console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
       // random update || keep updated
       if (place.id && (prob <= randomness || minutesSinceLastUpdate >= 45)) {
         await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
+        updated++;
       }
+      if (updated) console.log('Updated places: ', updated);
     }
   }
 

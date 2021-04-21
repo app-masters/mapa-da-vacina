@@ -52,7 +52,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
     if (!item.openAt || !item.closeAt) return ''; // Don't have a defined time
     if (item.open) {
       // Place is open
-      return `Fecha às ${closeTime.format('HH:mm')}`;
+      return `Aberto até às ${closeTime.format('HH:mm')}`;
     } else {
       // It's closed, show info with open time
       const openTodayTime = dayjs().set('h', openTime.hour()).set('m', openTime.minute());
@@ -61,7 +61,9 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
         return `Abre hoje às ${openTime.format('HH:mm')}`;
       } else {
         // Already closed
-        if (item.openTomorrow) {
+        if (!item.openToday && !item.openTomorrow) {
+          return `Não abrirá hoje nem amanhã`;
+        } else if (item.openTomorrow) {
           return `Abre amanhã às ${openTime.format('HH:mm')}`;
         } else {
           return `Não abrirá amanhã`;
