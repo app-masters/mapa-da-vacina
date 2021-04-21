@@ -5,6 +5,7 @@ declare module '@ioc:Adonis/Providers/Firebase' {
   export interface FirebaseInterface {
     app: firebase.app.App;
     db: firebase.firestore.Firestore;
+    admin: typeof firebase;
     storage: FirestoreStorage;
   }
 

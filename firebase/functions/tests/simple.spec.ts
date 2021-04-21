@@ -7,7 +7,6 @@ const authSuperAdmin = {
   uid: "super_uid",
   role: "superAdmin",
 };
-
 const authPrefectureAdmin = {
   uid: "super_uid",
   role: "superAdmin",

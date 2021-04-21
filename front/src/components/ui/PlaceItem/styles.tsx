@@ -33,9 +33,20 @@ export const CardItemIconContent = styled(Col)<ColProps & { bgcolor: string }>`
   text-transform: uppercase;
   @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     max-width: 100%;
-    flex-direction: row;
+    div {
+      flex-direction: row;
+    }
     svg {
       margin-right: ${(props) => props.theme.spacing.sm};
+    }
+  }
+  span {
+    text-transform: initial;
+    font-size: 12px;
+    font-weight: initial;
+    svg {
+      font-size: 14px;
+      margin-left: ${(props) => props.theme.spacing.sm};
     }
   }
 `;
@@ -47,10 +58,26 @@ export const CardItemContent = styled(Col)<ColProps>`
   flex-wrap: wrap;
   padding: ${(props) => props.theme.spacing.sm};
   padding-left: ${(props) => props.theme.spacing.default};
+
+  span {
+    display: flex;
+    h1 {
+      margin-right: ${(props) => props.theme.spacing.default};
+    }
+    @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+      flex-direction: column;
+      text-align: center;
+      align-items: center;
+    }
+  }
+
   > div {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    > div {
+      color: ${(props) => props.theme.colors.darkGray};
+    }
   }
   h1,
   p {
@@ -76,6 +103,10 @@ export const CardItemContent = styled(Col)<ColProps>`
     > small {
       font-size: 14px;
     }
+  }
+  .location-label {
+    font-weight: 900;
+    color: ${(props) => props.theme.colors.green1};
   }
 `;
 

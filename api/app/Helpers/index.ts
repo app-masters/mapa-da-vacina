@@ -1,4 +1,5 @@
 import slugify from 'slugify';
+import Cache from 'memory-cache';
 
 /**
  * Returns a slug
@@ -189,4 +190,46 @@ export const parseBoolFromString = (value: string) => {
   if (trues.includes(value)) return true;
   if (falses.includes(value)) return false;
   return false;
+};
+
+/**
+ * Degree to rad
+ * @param num
+ * @returns
+ */
+const toRad = (num: number) => {
+  return (num * Math.PI) / 180;
+};
+
+/**
+ * Calculate distance between points (x1,y1) and (x2,y2)
+ * @param x1
+ * @param y1
+ * @param x2
+ * @param y2
+ * @returns distance
+ */
+export const calculateDistance = (x1: number, y1: number, x2: number, y2: number) => {
+  const R = 6371; // Radius of the earth in km
+  const dLat = toRad(x1 - x2); // Javascript functions in radians
+  const dLon = toRad(y1 - y2);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(x2)) * Math.cos(toRad(x1)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
+};
+
+/**
+ * Delete all keys from cache starting with a prefix string
+ * @param prefix
+ */
+export const deleteCacheByPrefix = (prefix: string) => {
+  const cacheKeys = Cache.keys();
+  const keysToDelete = cacheKeys.filter((key: string) => key.startsWith(prefix));
+
+  for (const key of keysToDelete) {
+    Cache.del(key);
+  }
 };

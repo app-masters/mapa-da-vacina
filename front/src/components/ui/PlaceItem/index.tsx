@@ -1,19 +1,23 @@
+import React from 'react';
 import { placeQueueLabel, placeQueueColor, placeType, placeQueue } from '../../../utils/constraints';
 import { CardItemContent, CardItemExtra, CardItemIconContent, CardItemWrapper } from './styles';
 import { Car, PersonPin, Pin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
-import { Tag, Tooltip } from 'antd';
-import React from 'react';
+import { Space, Tag, Tooltip } from 'antd';
+import { WarningFilled } from '@ant-design/icons';
+import { distanceHumanize } from '../../../utils/geolocation';
+
+type CardItemProps = {
+  item: Place;
+  showQueueUpdatedAt?: boolean;
+  haveWarning: boolean;
+};
 
 /**
  * CardItem
  */
-const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarning: boolean }> = ({
-  item,
-  showQueueUpdatedAt,
-  haveWarning
-}) => {
+const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning }) => {
   /**
    * Render the icon based on status
    */
@@ -41,58 +45,79 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
     return <h1 className="item-place">{item.title}</h1>;
   }, [item]);
 
+  const timeInfoText = React.useMemo(() => {
+    const now = dayjs();
+    const openTime = dayjs(item.openAt._seconds * 1000);
+    const closeTime = dayjs(item.closeAt._seconds * 1000);
+    if (!item.openAt || !item.closeAt) return ''; // Don't have a defined time
+    if (item.open) {
+      // Place is open
+      return `Fecha às ${closeTime.format('HH:mm')}`;
+    } else {
+      // It's closed, show info with open time
+      const openTodayTime = dayjs().set('h', openTime.hour()).set('m', openTime.minute());
+      if (now.isBefore(openTodayTime)) {
+        // Not open yet
+        return `Abre hoje às ${openTime.format('HH:mm')}`;
+      } else {
+        // Already closed
+        if (item.openTomorrow) {
+          return `Abre amanhã às ${openTime.format('HH:mm')}`;
+        } else {
+          return `Não abrirá amanhã`;
+        }
+      }
+    }
+  }, [item]);
+
   return (
     <CardItemWrapper>
-      <CardItemContent lg={12} sm={24}>
+      <CardItemContent md={18} sm={24}>
         <div>
-          {title}
-          <p>
-            {`${item.addressStreet ? item.addressStreet : ''}${
-              item.addressDistrict ? ', ' + item.addressDistrict : ''
-            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
-              item.addressZip ? ', ' + item.addressZip : ''
-            }`}
+          <span>
+            {title}
+            {timeInfoText ? (
+              <CardItemExtra>
+                <Tag color="default">{timeInfoText}</Tag>{' '}
+              </CardItemExtra>
+            ) : null}
+          </span>
+
+          <div>
             {!!item.googleMapsUrl && (
-              <Tooltip title="Veja como chegar no mapa">
+              <Tooltip title="Veja como chegar">
                 <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
                   <Pin width={20} height={16} />
                 </a>
               </Tooltip>
             )}
-          </p>
+            {`${item.addressStreet ? item.addressStreet : ''}${
+              item.addressDistrict ? ', ' + item.addressDistrict : ''
+            }`}
+            {item.distance && (
+              <label
+                className="location-label"
+                style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
+              >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
+            )}
+          </div>
         </div>
       </CardItemContent>
-      <CardItemContent md={10} sm={24}>
-        {item.open && item.closeAt ? (
-          <CardItemExtra>
-            <Tag color="default"> Aberto até {dayjs(item.closeAt._seconds * 1000).format('HH:mm')}</Tag>
-          </CardItemExtra>
-        ) : (
-          <CardItemExtra>
-            <Tag color="default">
-              {item.openTomorrow && item.openAt
-                ? `Abre amanhã às ${dayjs(item.closeAt._seconds * 1000).format('HH:mm')}`
-                : `Não abrirá amanhã`}
-            </Tag>
-          </CardItemExtra>
-        )}
-      </CardItemContent>
-      <CardItemContent md={10} sm={24}>
+      <CardItemIconContent md={6} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
+        <Space>
+          {renderIcon()}
+          {placeQueueLabel[item.queueStatus]}
+        </Space>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&
         item.queueStatus !== placeQueue.open &&
         item.queueStatus !== placeQueue.closed ? (
-          <CardItemExtra>
-            <Tag color={haveWarning ? 'error' : 'default'}>
-              Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}
-            </Tag>
-          </CardItemExtra>
+          <span>
+            Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}
+            {haveWarning ? <WarningFilled /> : null}
+          </span>
         ) : null}
-      </CardItemContent>
-      <CardItemIconContent lg={2} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
-        {renderIcon()}
-        {placeQueueLabel[item.queueStatus]}
       </CardItemIconContent>
     </CardItemWrapper>
   );

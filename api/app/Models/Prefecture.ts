@@ -5,6 +5,7 @@ import PlaceRepository, { PlaceType } from './Place';
 
 import Cache from 'memory-cache';
 import Place from './Place';
+import { deleteCacheByPrefix } from 'App/Helpers';
 
 export interface PrefectureType extends BaseModel {
   name: string;
@@ -15,6 +16,7 @@ export interface PrefectureType extends BaseModel {
   numPlacesOpen: number;
   active: boolean;
   showQueueUpdatedAt?: boolean;
+  enablePublicQueueUpdate?: boolean;
 }
 
 class PrefectureRepository extends BaseRepository<PrefectureType> {
@@ -35,10 +37,13 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
         console.log(`Received doc snapshot user`);
         console.log('Deleting cache: ', 'prefectures-list');
         Cache.del('prefectures-list');
+        docSnapshot.docChanges().forEach((d) => {
+          // deletar cache da prefeitura que mudou somente
+          const cacheKeyPrefix = `prefecture:${d.doc.id}-`;
+          // console.log('Deleting cache: ', cacheKey);
+          deleteCacheByPrefix(cacheKeyPrefix);
+        });
         this.prefectures = docSnapshot.docs.map((d) => {
-          const cacheKey = `prefecture-${d.id}`;
-          console.log('Deleting cache: ', cacheKey);
-          Cache.del(cacheKey);
           return {
             ...this.getObjectFromData(d.data()),
             id: d.id,
@@ -55,6 +60,22 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     );
   }
 
+  /**
+   * Init prefectures
+   */
+  public async initPrefectures() {
+    if (!this._activeObserver) {
+      const docSnapshot = await FirebaseProvider.db.collection('prefecture').get();
+      this.prefectures = docSnapshot.docs.map((d) => {
+        return {
+          ...this.getObjectFromData(d.data()),
+          id: d.id,
+          createdAt: d.createTime.toDate(),
+          updatedAt: d.updateTime.toDate()
+        } as PrefectureType;
+      });
+    }
+  }
   /**
    * Get Object from Firestore DocumentData
    * @param data DocumentData
@@ -121,18 +142,25 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * @returns Active prefectures
    */
   public async listActive() {
+    let documents;
     if (this._activeObserver) {
-      return this.prefectures.filter((pref) => pref.active).sort((p1, p2) => p1.city.localeCompare(p2.city));
+      documents = this.prefectures.filter((pref) => pref.active);
+    } else {
+      documents = await this.query((qb) => {
+        return qb.where('active', '==', true);
+      });
     }
-    return await this.query((qb) => {
-      return qb.where('active', '==', true).orderBy('city', 'asc');
-    });
+
+    return documents.sort((p1, p2) => p1.city.localeCompare(p2.city));
   }
 
   /**
    * Update queue status for demonstration city
    */
   public async updatePlacesForDemonstration() {
+    if (!this._activeObserver) {
+      await this.initPrefectures();
+    }
     if (this._activeObserver) {
       const prefDemonstration = this.prefectures.filter(
         (p) => p.name.includes('Demonstração') || p.city.includes('Demonstração')

@@ -26,4 +26,7 @@ export type Place = {
   closeAt?: {
     _seconds: number;
   };
+  distance: number;
+  latitude?: number;
+  longitude?: number;
 };

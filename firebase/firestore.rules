@@ -1,3 +1,9 @@
+// All data is readable
+// Super admin can Write to everything
+// Prefecture admin can write to prefecture and it's subcollections
+// PlaceAdmin can write to place and subcollections
+// QueueObserver can write to place
+
 rules_version = '2';
 service cloud.firestore {
     match /databases/{database}/documents {

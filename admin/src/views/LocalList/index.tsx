@@ -4,7 +4,7 @@ import { Place } from '../../lib/Place';
 import { Prefecture } from '../../lib/Prefecture';
 import { User } from '../../lib/User';
 import { placeQueue, placeTypeLabel, userRoles } from '../../utils/constraints';
-import { message, Space, Spin, Table, Typography } from 'antd';
+import { message, Space, Spin, Table, Tooltip, Typography } from 'antd';
 import FormPlace from '../../components/elements/formPlace';
 import dayjs from 'dayjs';
 import { CheckOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
@@ -14,6 +14,9 @@ import logging from '../../utils/logging';
 import { createPlace, updatePlace } from '../../utils/firestore';
 import ModalUpload from '../../components/elements/modalUpload';
 import { API } from '../../utils/api';
+import { Pin } from '../../components/ui/Icons';
+import { Coordinate } from '../../components/ui/Icons';
+import { ColumnsType } from 'antd/lib/table';
 
 type ListViewProps = {
   user: User;
@@ -99,7 +102,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
    * formatDate
    */
   const formatDate = ({ seconds }) => dayjs(new Date(seconds * 1000)).format('HH:mm');
-  const columns = [
+  const columns: ColumnsType = [
     {
       title: 'Ponto',
       dataIndex: 'title',
@@ -115,9 +118,45 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       render: (value) => placeTypeLabel[value]
     },
     {
+      title: 'Localização',
+      dataIndex: 'googleMapsUrl',
+      key: 'googleMapsUrl',
+      align: 'center',
+      /**
+       * render
+       */
+      render: (value, record: Place) => (
+        <Space>
+          {value ? (
+            <Tooltip title="Abrir no mapa">
+              <a href={value} target="_blank" rel="noreferrer">
+                <Pin />
+              </a>
+            </Tooltip>
+          ) : null}
+          {!!(record.latitude && record.longitude) ? (
+            <Tooltip
+              title={
+                <div>
+                  {`latitude: ${record.latitude}`}
+                  <br />
+                  {`longitude: ${record.longitude}`}
+                </div>
+              }
+            >
+              <a target="_blank" rel="noreferrer">
+                <Coordinate />
+              </a>
+            </Tooltip>
+          ) : null}
+        </Space>
+      )
+    },
+    {
       title: 'Abre hoje',
       dataIndex: 'openToday',
       key: 'openToday',
+      align: 'center',
       /**
        * render
        */
@@ -127,6 +166,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       title: 'Abre amanhã',
       dataIndex: 'openTomorrow',
       key: 'openTomorrow',
+      align: 'center',
       /**
        * render
        */
