@@ -16,6 +16,7 @@ export interface PrefectureType extends BaseModel {
   numPlacesOpen: number;
   active: boolean;
   showQueueUpdatedAt?: boolean;
+  enablePublicQueueUpdate?: boolean;
 }
 
 class PrefectureRepository extends BaseRepository<PrefectureType> {
