@@ -38,7 +38,7 @@ export default class PrefecturesController {
   public async show({ request, response, params }: HttpContextContract) {
     //const cacheKey = `prefecture-${params.id}`;
     const queryParams = request.get();
-    console.log('Query params', queryParams);
+    // console.log('Query params', queryParams);
 
     let zip = queryParams['zip'];
     const latitude = queryParams['latitude'];
@@ -73,7 +73,7 @@ export default class PrefecturesController {
     // verifica o cache
     let cacheKey = `prefecture:${params.id}-`;
     if (zip) cacheKey += `zip:${zip}`;
-    console.log('Reading cache: ', cacheKey);
+    // console.log('Reading cache: ', cacheKey);
     let data = Cache.get(cacheKey);
 
     // Se não tiver cache, salva
@@ -117,22 +117,7 @@ export default class PrefecturesController {
         ) {
           place.queueStatus = 'open';
         }
-        // If there are coordinates, calculate the distance
-        if (coordinates && place.latitude && place.longitude) {
-          place.distance = calculateDistance(
-            coordinates.latitude,
-            coordinates.longitude,
-            place.latitude,
-            place.longitude
-          );
-        } else {
-          place.distance = Number.MAX_VALUE;
-        }
       }
-      // sort by distance
-      data.places.sort((a, b) => {
-        return a.distance - b.distance;
-      });
 
       console.log('Adding cache: ', cacheKey);
       Cache.put(cacheKey, data, 30 * 60 * 1000);

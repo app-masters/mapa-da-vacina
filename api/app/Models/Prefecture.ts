@@ -50,7 +50,6 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
             updatedAt: d.updateTime.toDate()
           } as PrefectureType;
         });
-        console.log('leng', this.prefectures.length);
         this._activeObserver = true;
       },
       (err) => {
@@ -60,6 +59,22 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     );
   }
 
+  /**
+   * Init prefectures
+   */
+  public async initPrefectures() {
+    if (!this._activeObserver) {
+      const docSnapshot = await FirebaseProvider.db.collection('prefecture').get();
+      this.prefectures = docSnapshot.docs.map((d) => {
+        return {
+          ...this.getObjectFromData(d.data()),
+          id: d.id,
+          createdAt: d.createTime.toDate(),
+          updatedAt: d.updateTime.toDate()
+        } as PrefectureType;
+      });
+    }
+  }
   /**
    * Get Object from Firestore DocumentData
    * @param data DocumentData
@@ -92,6 +107,7 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
     if (!prefecture) throw new Error("Couldn't find Prefecture with id: " + id);
 
     const places = await PlaceRepository.findByPrefectureWithCurrentAgenda(id);
+    console.log('places findByIdWithPlaces ', places.length);
 
     return { ...prefecture, places: places };
   }
@@ -125,18 +141,25 @@ class PrefectureRepository extends BaseRepository<PrefectureType> {
    * @returns Active prefectures
    */
   public async listActive() {
+    let documents;
     if (this._activeObserver) {
-      return this.prefectures.filter((pref) => pref.active).sort((p1, p2) => p1.city.localeCompare(p2.city));
+      documents = this.prefectures.filter((pref) => pref.active);
+    } else {
+      documents = await this.query((qb) => {
+        return qb.where('active', '==', true);
+      });
     }
-    return await this.query((qb) => {
-      return qb.where('active', '==', true).orderBy('city', 'asc');
-    });
+
+    return documents.sort((p1, p2) => p1.city.localeCompare(p2.city));
   }
 
   /**
    * Update queue status for demonstration city
    */
   public async updatePlacesForDemonstration() {
+    if (!this._activeObserver) {
+      await this.initPrefectures();
+    }
     if (this._activeObserver) {
       const prefDemonstration = this.prefectures.filter(
         (p) => p.name.includes('Demonstração') || p.city.includes('Demonstração')

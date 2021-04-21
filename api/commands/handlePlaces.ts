@@ -30,9 +30,6 @@ export default class HandlePlaces extends BaseCommand {
     this.logger.info('Running command...');
     console.log('prefectureId: ' + this.prefectureId);
 
-    // Load all prefectures
-    await Prefecture.list();
-
     // Force open places now, today, tomorrow
     const prefecture = await Prefecture.findByIdWithPlaces(this.prefectureId);
     if (!prefecture) {
@@ -43,11 +40,11 @@ export default class HandlePlaces extends BaseCommand {
     console.log(`Places on ${this.prefectureId}: ${places?.length}`);
     if (places) {
       for (const place of places) {
-        console.log('Updating' + place.id + ' ...');
+        console.log('Updating ' + place.id + ' ...');
         await Place.save(
           {
             ...place,
-            open: true,
+            // open: true,
             openToday: true,
             openTomorrow: true
           },

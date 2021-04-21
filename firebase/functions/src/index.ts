@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 
 import { Client, AddressType } from "@googlemaps/google-maps-services-js";
+
 const client = new Client({});
 
 admin.initializeApp();
@@ -32,7 +33,6 @@ async function returnCoordinates(zip: string) {
 
   if (!googleApiKey) {
     console.log("    👉  No GOOGLE_API_KEY, will not fetch coordinates");
-    //return undefined;
     throw new Error("No GOOGLE_API_KEY credentials.");
   }
 
@@ -42,8 +42,11 @@ async function returnCoordinates(zip: string) {
       key: googleApiKey,
     },
   });
-
-  if (queryData && queryData.statusText === "OK") {
+  if (
+    queryData &&
+    queryData.statusText === "OK" &&
+    queryData.data.results.length > 0
+  ) {
     const geometry = queryData.data.results[0].geometry;
 
     const returnData = {
@@ -53,14 +56,14 @@ async function returnCoordinates(zip: string) {
     };
     await db.collection("zipCoordinate").add({
       zip: zip,
-      latitude: geometry.location.lat.toFixed(3),
-      longitude: geometry.location.lng.toFixed(3),
+      latitude: Number(geometry.location.lat.toFixed(3)),
+      longitude: Number(geometry.location.lng.toFixed(3)),
     });
 
     return returnData;
   } else if (queryData.data) {
     // Show some log if we don't know how to handle this result
-    if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
+    if (!["ZERO_RESULTS"].includes(queryData.data.status)) {
       console.log("  ‼️ unexpected result from Google Maps", queryData);
     }
   }
@@ -92,23 +95,28 @@ async function returnZip(latitude: number, longitude: number) {
     },
   });
 
-  if (queryData && queryData.statusText === "OK") {
+  if (
+    queryData &&
+    queryData.statusText === "OK" &&
+    queryData.data.results.length > 0
+  ) {
     const zip = queryData.data.results[0].address_components.filter((ac) =>
       ac.types.includes(AddressType.postal_code)
     );
     const sanitizedZip = sanitizeZip(zip[0].long_name);
+    if (sanitizedZip && sanitizedZip.length > 0) {
+      const returnData = {
+        zip: sanitizedZip,
+      };
 
-    const returnData = {
-      zip: sanitizedZip,
-    };
+      await db.collection("zipCoordinate").add({
+        zip: sanitizedZip,
+        latitude: Number(Number(latitude).toFixed(3)),
+        longitude: Number(Number(longitude).toFixed(3)),
+      });
 
-    await db.collection("zipCoordinate").add({
-      zip: sanitizedZip,
-      latitude: Number(latitude).toFixed(3),
-      longitude: Number(longitude).toFixed(3),
-    });
-
-    return returnData;
+      return returnData;
+    }
   } else if (queryData.data) {
     // Show some log if we don't know how to handle this result
     if (!["ZERO_RESULTS"].includes(queryData.statusText)) {
@@ -140,7 +148,7 @@ export const createQueueUpdate = functions.firestore
 
 export const totalizeOpenPlacesCount = functions.firestore
   .document("prefecture/{prefectureId}/place/{placeId}")
-  .onWrite((change, context) => {
+  .onWrite(async (change, context) => {
     console.log(
       `Prefecture: ${context.params.prefectureId}, Place: ${context.params.placeId}`
     );
@@ -154,23 +162,39 @@ export const totalizeOpenPlacesCount = functions.firestore
         beforeValue &&
         afterValue.addressZip !== beforeValue.addressZip)
     ) {
-      returnCoordinates(afterValue?.addressZip)
-        .then((data) => {
-          if (data) {
-            db.collection("prefecture")
-              .doc(context.params.prefectureId)
-              .collection("place")
-              .doc(context.params.placeId)
-              .update({
-                latitude: data.latitude,
-                longitude: data.longitude,
-                addressZip: data.zip,
-              });
-          }
-        })
-        .catch((err) => {
+      console.log("Updating coordinates", afterValue?.addressZip);
+      let coordinates = await returnCoordinates(afterValue?.addressZip).catch(
+        (err) => {
           console.log("Error setting coordinates ", err);
-        });
+          return undefined;
+        }
+      );
+
+      if (!coordinates) {
+        // get from string
+        const url: string = afterValue?.googleMapsUrl;
+        const lon_lat_match = url.match(new RegExp("@(.*),(.*),"));
+        if (lon_lat_match && lon_lat_match?.length > 0) {
+          coordinates = {
+            latitude: lon_lat_match[1],
+            longitude: lon_lat_match[2],
+            zip: afterValue?.addressZip,
+          };
+        }
+      }
+
+      if (coordinates) {
+        await db
+          .collection("prefecture")
+          .doc(context.params.prefectureId)
+          .collection("place")
+          .doc(context.params.placeId)
+          .update({
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            addressZip: coordinates.zip,
+          });
+      }
     }
 
     if (
@@ -186,7 +210,7 @@ export const totalizeOpenPlacesCount = functions.firestore
       const placeRef = change.after.ref;
       const prefectureRef = placeRef.parent.parent;
 
-      return db
+      return await db
         .collection("prefecture")
         .doc(context.params.prefectureId)
         .collection("place")
@@ -216,7 +240,7 @@ export const getCoordinates = functions.https.onRequest(async (req, res) => {
     res.json(coordinates);
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).send("Couldn't fetch coordinates.");
   }
 });
 
@@ -229,6 +253,6 @@ export const getZip = functions.https.onRequest(async (req, res) => {
     res.json(zip);
   } catch (err) {
     console.log(err);
-    res.status(500).json(err);
+    res.status(500).send("Couldn't fetch zip.");
   }
 });
