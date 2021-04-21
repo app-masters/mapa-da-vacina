@@ -1,6 +1,7 @@
 import { BaseCommand, args } from '@adonisjs/core/build/standalone';
 import Prefecture from 'App/Models/Prefecture';
 import Place from 'App/Models/Place';
+import { minutesDiff } from 'App/Helpers';
 
 export default class HandlePlaces extends BaseCommand {
   /**
@@ -56,27 +57,40 @@ export default class HandlePlaces extends BaseCommand {
     // }
     // return;
 
-    // Force open places now, today, tomorrow
-    const prefecture = await Prefecture.findByIdWithPlaces(this.prefectureId);
-    if (!prefecture) {
-      console.error("Couldn't find prefecture ");
-      return;
-    }
-    const places = prefecture.places;
-    console.log(`Places on ${this.prefectureId}: ${places?.length}`);
-    if (places) {
-      for (const place of places) {
-        console.log('Updating ' + place.id + ' ...');
-        await Place.save(
-          {
-            ...place,
-            // open: true,
-            openToday: true,
-            openTomorrow: true
-          },
-          this.prefectureId
-        );
-      }
-    }
+    //   // Force open places now, today, tomorrow
+    //   const prefecture = await Prefecture.findByIdWithPlaces(this.prefectureId);
+    //   if (!prefecture) {
+    //     console.error("Couldn't find prefecture ");
+    //     return;
+    //   }
+    //   const places = prefecture.places;
+    //   console.log(`Places on ${this.prefectureId}: ${places?.length}`);
+    //   if (places) {
+    //     for (const place of places) {
+    //       console.log('Updating ' + place.id + ' ...');
+    //       // const zip = place.addressZip?.startsWith('3') ? place.addressZip?.substr(1) : '3' + place.addressZip;
+    //       // console.log('zip', zip);
+    //       await Place.save(
+    //         {
+    //           ...place
+    //           // addressZip: zip
+    //           // open: true,
+    //           // queueStatus: 'open',
+    //           // openToday: true,
+    //           // openTomorrow: true
+    //         },
+    //         this.prefectureId
+    //       );
+    //     }
+    //   }
+
+    // Simualte open and close
+    // const prefecture = await Prefecture.findByIdWithPlaces(this.prefectureId);
+    // if (!prefecture) {
+    //   console.error("Couldn't find prefecture ");
+    //   return;
+    // }
+    // // console.log('prefecture', prefecture);
+    // await Place.updateQueueStatusForDemonstration(prefecture.id);
   }
 }

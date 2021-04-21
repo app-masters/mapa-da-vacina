@@ -65,7 +65,7 @@ const CardItem: React.FC<{ item: Place; showQueueUpdatedAt?: boolean; haveWarnin
       <CardItemContent md={10} sm={24}>
         {item.open && item.closeAt ? (
           <CardItemExtra>
-            <Tag color="default"> Fecha às {dayjs(item.closeAt._seconds * 1000).format('HH:mm')}</Tag>
+            <Tag color="default"> Aberto até {dayjs(item.closeAt._seconds * 1000).format('HH:mm')}</Tag>
           </CardItemExtra>
         ) : (
           <CardItemExtra>
