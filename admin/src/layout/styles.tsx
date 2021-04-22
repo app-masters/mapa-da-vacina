@@ -9,6 +9,24 @@ export const LayoutWrapper = styled(Layout)`
     justify-content: center;
     align-items: center;
   }
+  .user-info {
+    h4,
+    h5 {
+      font-size: 16px;
+      margin: 0;
+    }
+    h4 {
+      font-weight: 500;
+    }
+    h5 {
+      font-weight: 300;
+      color: ${(props) => props.theme.colors.darkGray};
+    }
+    text-align: center;
+    border-top: 1px solid #00000012;
+    border-bottom: 1px solid #00000012;
+    padding: ${(props) => props.theme.spacing.sm};
+  }
 `;
 
 export const LayoutContentWrapper = styled(Layout)`

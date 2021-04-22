@@ -9,6 +9,8 @@ import { userRoles, userRolesLabel } from '../../utils/constraints';
 import { disableUser } from '../../utils/firestore';
 import { Prefecture } from '../../lib/Prefecture';
 import { Place } from '../../lib/Place';
+import { formatPhone } from '../../utils/phone';
+import { WhatsAppOutlined } from '@ant-design/icons';
 
 type UsersViewProps = {
   users: User[];
@@ -37,7 +39,27 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
         key: 'name'
       },
       {
-        title: 'Cargo',
+        title: 'Contato',
+        dataIndex: 'phone',
+        key: 'phone',
+        /**
+         * render
+         */
+        render: (text) => (
+          <>
+            <a
+              href={`https://api.whatsapp.com/send?phone=${text.replace('+', '')}&text=Oi`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <WhatsAppOutlined style={{ marginRight: 8 }} />
+            </a>
+            {formatPhone(text)}
+          </>
+        )
+      },
+      {
+        title: 'Função',
         dataIndex: 'role',
         key: 'role',
         /**
@@ -135,7 +157,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
                     dataSource={listUsers.filter((f) => f.active && f.prefectureId === prefecture.id)}
                   />
                   <div className="subtitle-container">
-                    <Typography.Title level={4}>Convidar Usuários</Typography.Title>
+                    <Typography.Title level={4}>Usuários convidados</Typography.Title>
                     <FormInvitation
                       prefectures={[prefecture]}
                       places={places.filter((f) => f.prefectureId === prefecture.id)}
