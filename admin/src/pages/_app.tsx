@@ -28,7 +28,7 @@ const App = ({ Component, pageProps }: AppProps) => {
   useEffect(() => {
     (async () => {
       // Setting Authorization on reload
-      if (authUser) {
+      if (authUser && authUser.firebaseUser) {
         const token = await authUser.getIdToken();
         API.defaults.headers['Authorization'] = token;
       }
