@@ -113,7 +113,7 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
    * @param placeId
    */
   public async addRandomUpdate(prefectureId: string, placeId: string) {
-    const status = ['noQueue', 'smallQueue', 'mediumQueue', 'longQueue'];
+    const status = ['noQueue', 'smallQueue', 'smallQueue', 'mediumQueue', 'longQueue'];
     console.log('Update placeId: ' + placeId);
     await this.save(
       {
@@ -139,8 +139,24 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
       .reduce((acc, val) => {
         return acc + val;
       }, 0);
-
+    console.log(Math.round(sum / status.length), sum, status.length);
     return Math.round(sum / status.length);
+  }
+
+  /**
+   * Math to calculate mean status
+   * @param status
+   * @returns
+   */
+  public weightedStatusAverage(lastStatus: QueueUpdateType, newStatus: string) {
+    const now = new Date();
+    const meanRange = Config.get('app.queueStatusMeanInterval');
+    const weight =
+      Math.max(0, meanRange - (now.getTime() - lastStatus.queueUpdatedAt.getTime()) / (60 * 1000)) / meanRange;
+
+    return Math.round(
+      (QueueUpdateValues[newStatus] + weight * QueueUpdateValues[lastStatus.queueStatus]) / (1 + weight)
+    );
   }
 
   /**
@@ -153,21 +169,25 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
   public async insertMeanQueueUpdate(prefectureId: string, placeId: string, status: string, ip: string) {
     if (!this._activeObserver) await this.init();
 
-    const meanRange = Config.get('app.queueStatusMeanInterval');
-    const minutesAgo = new Date(Date.now() - 1000 * 60 * meanRange);
+    //const meanRange = Config.get('app.queueStatusMeanInterval');
+    //const minutesAgo = new Date(Date.now() - 1000 * 60 * meanRange);
     // get latest for place, discarding open and closed
-    const latestUpdates = this.queueUpdates
+    const latestUpdate = this.queueUpdates
       .filter(
         (qu) =>
           qu.placeId === placeId &&
-          qu.queueUpdatedAt >= minutesAgo &&
           qu.queueStatus !== QueueUpdateConstraint.open &&
           qu.queueStatus !== QueueUpdateConstraint.closed
       )
-      .map((qu) => qu.queueStatus);
-    console.log('latest', latestUpdates);
+      .sort((a, b) => {
+        return b.queueUpdatedAt.getTime() - a.queueUpdatedAt.getTime();
+      })[0];
 
-    const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
+    //.map((qu) => qu.queueStatus);
+
+    //const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
+    const meanStatusIndex = this.weightedStatusAverage(latestUpdate, status);
+
     const newStatus = {
       userId: ip,
       placeId: placeId,
