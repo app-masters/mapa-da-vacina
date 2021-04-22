@@ -3,6 +3,8 @@ import * as admin from "firebase-admin";
 
 import { Client, AddressType } from "@googlemaps/google-maps-services-js";
 
+import { tall } from "tall";
+
 const client = new Client({});
 
 admin.initializeApp();
@@ -18,6 +20,41 @@ function sanitizeZip(zip: string): string {
   const zipCode = match.join("");
   if (zipCode.length !== 8) return "";
   return zipCode;
+}
+
+async function getCoordinatesByUrl(googleMapsUrl: string) {
+  try {
+    if (!googleMapsUrl || !(googleMapsUrl.length > 0)) return undefined;
+    const unshortenedUrl = await tall(googleMapsUrl);
+    // console.log("Tall url", unshortenedUrl);
+    /*const lon_lat_match = unshortenedUrl.match(new RegExp("@(.*),(.*),"));
+
+    if (lon_lat_match && lon_lat_match?.length > 0) {
+      return {
+        latitude: Number(lon_lat_match[1]),
+        longitude: Number(lon_lat_match[2]),
+      };
+    }*/
+    const splitUrl = unshortenedUrl.split("!3d");
+    const latLong = splitUrl[splitUrl.length - 1].split("!4d");
+
+    const latitude = latLong[0];
+    let longitude = latLong[1];
+    if (longitude.indexOf("?") !== -1) {
+      longitude = longitude.split("?")[0];
+    }
+
+    if (latitude && longitude) {
+      return {
+        latitude: Number(latitude),
+        longitude: Number(longitude),
+      };
+    }
+  } catch (err) {
+    console.error("Error unshortening URL", err);
+  }
+
+  return {};
 }
 
 async function returnCoordinates(zip: string) {
@@ -127,19 +164,54 @@ async function returnZip(latitude: number, longitude: number) {
   throw new Error("No results found.");
 }
 
+function isIpAddress(value: string) {
+  // If string contains '.', it's an ip address
+  return value.indexOf(".") !== -1;
+}
+
 export const createQueueUpdate = functions.firestore
   .document(
     "prefecture/{prefectureId}/place/{placeId}/queueUpdate/{queueUpdateId}"
   )
-  .onCreate((snap, context) => {
+  .onCreate(async (snap, context) => {
     console.log(
       `Prefecture: ${context.params.prefectureId}, Place: ${context.params.placeId}, QueueUpdate: ${context.params.queueUpdateId}`
     );
     const queueRef = snap.ref;
     const newValue = snap.data();
 
+    // If new value is from an unauthenticated user
+    if (isIpAddress(newValue.userId)) {
+      // date 20 minutes go
+      const minutesAgo = new Date(new Date().getTime() - 20 * 60 * 1000);
+      const lastUpdates = await db
+        .collection("prefecture")
+        .doc(context.params.prefectureId)
+        .collection("place")
+        .doc(context.params.placeId)
+        .collection("queueUpdate")
+        .where("queueUpdatedAt", ">=", minutesAgo)
+        .orderBy("queueUpdatedAt", "desc")
+        .get();
+      console.log("Updates in last 20 minutes: ", lastUpdates.docs.length);
+      let lastUpdate;
+      for (const update of lastUpdates.docs) {
+        if (!isIpAddress(update.data().userId)) {
+          lastUpdate = update;
+          break;
+        }
+      }
+      // If there is an update made by an real user in the last 20 minutes and the current isn't, ignore the new one
+      if (lastUpdate) {
+        console.log(
+          "Not updating queue... Keeping latest update from auth user."
+        );
+        return;
+      }
+    }
+
     const placeRef = queueRef.parent.parent;
-    return placeRef?.update({
+    return await placeRef?.update({
       queueStatus: newValue.queueStatus,
       open: newValue.open,
       queueUpdatedAt: new Date(),
@@ -156,45 +228,52 @@ export const totalizeOpenPlacesCount = functions.firestore
     const afterValue = change.after.data();
     const beforeValue = change.before.data();
     //If was created OR zip changed
+    let coordinates;
+
+    // Try to find coordinates by googleMapsUrl first
+    // if created/updated and there is a googleMapsUrl
     if (
       (!change.before.exists && change.after.exists) ||
       (afterValue &&
         beforeValue &&
+        afterValue.googleMapsUrl &&
+        afterValue.googleMapsUrl !== beforeValue.googleMapsUrl)
+    ) {
+      // get from googleMapsUrl
+      coordinates = await getCoordinatesByUrl(afterValue?.googleMapsUrl);
+    }
+
+    // if created/updated and there is a addressZip
+    // Query coordinates to save addressZip and possibly update coordinates
+    if (
+      (!change.before.exists && change.after.exists) ||
+      (afterValue &&
+        beforeValue &&
+        afterValue.addressZip &&
         afterValue.addressZip !== beforeValue.addressZip)
     ) {
-      console.log("Updating coordinates", afterValue?.addressZip);
-      let coordinates = await returnCoordinates(afterValue?.addressZip).catch(
-        (err) => {
-          console.log("Error setting coordinates ", err);
-          return undefined;
-        }
-      );
+      console.log("Updating coordinates ", afterValue?.addressZip);
+      const zipCoordinates = await returnCoordinates(
+        afterValue?.addressZip
+      ).catch((err) => {
+        console.log("Error setting coordinates ", err);
+        return undefined;
+      });
+      // Only use this coordinates if none was found with URL and there isn't longitude/latitude already set
+      if (!coordinates && !afterValue?.longitude && !afterValue?.latitude)
+        coordinates = zipCoordinates;
+    }
 
-      if (!coordinates) {
-        // get from string
-        const url: string = afterValue?.googleMapsUrl;
-        const lon_lat_match = url.match(new RegExp("@(.*),(.*),"));
-        if (lon_lat_match && lon_lat_match?.length > 0) {
-          coordinates = {
-            latitude: lon_lat_match[1],
-            longitude: lon_lat_match[2],
-            zip: afterValue?.addressZip,
-          };
-        }
-      }
-
-      if (coordinates) {
-        await db
-          .collection("prefecture")
-          .doc(context.params.prefectureId)
-          .collection("place")
-          .doc(context.params.placeId)
-          .update({
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-            addressZip: coordinates.zip,
-          });
-      }
+    if (coordinates) {
+      await db
+        .collection("prefecture")
+        .doc(context.params.prefectureId)
+        .collection("place")
+        .doc(context.params.placeId)
+        .update({
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+        });
     }
 
     if (

@@ -64,7 +64,7 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
           id: d.id,
           createdAt: d.createTime.toDate(),
           updatedAt: d.updateTime.toDate()
-        } as PlaceType;
+        } as QueueUpdateType;
       });
     }
   }
@@ -160,6 +160,33 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
   }
 
   /**
+   * Get latest update via query
+   * @param prefectureId
+   * @param placeId
+   * @returns
+   */
+  public async getLatestPlaceUpdate(prefectureId: string, placeId: string) {
+    const latestUpdate = await this.query(
+      (qb) => {
+        return qb.where('queueStatus', 'in', [
+          QueueUpdateConstraint.noQueue,
+          QueueUpdateConstraint.smallQueue,
+          QueueUpdateConstraint.mediumQueue,
+          QueueUpdateConstraint.longQueue
+        ]);
+      },
+      prefectureId,
+      placeId
+    );
+
+    latestUpdate.sort((a, b) => {
+      return b.queueUpdatedAt.getTime() - a.queueUpdatedAt.getTime();
+    })[0];
+
+    return latestUpdate;
+  }
+
+  /**
    * Calculate mean queue update and insert into table
    * @param prefectureId
    * @param placeId
@@ -169,9 +196,8 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
   public async insertMeanQueueUpdate(prefectureId: string, placeId: string, status: string, ip: string) {
     if (!this._activeObserver) await this.init();
 
-    //const meanRange = Config.get('app.queueStatusMeanInterval');
-    //const minutesAgo = new Date(Date.now() - 1000 * 60 * meanRange);
     // get latest for place, discarding open and closed
+    // ? placeId should be unique through prefectures
     const latestUpdate = this.queueUpdates
       .filter(
         (qu) =>
@@ -183,10 +209,11 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
         return b.queueUpdatedAt.getTime() - a.queueUpdatedAt.getTime();
       })[0];
 
-    //.map((qu) => qu.queueStatus);
-
-    //const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
-    const meanStatusIndex = this.weightedStatusAverage(latestUpdate, status);
+    let meanStatusIndex = QueueUpdateValues[status];
+    if (latestUpdate) {
+      //const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
+      meanStatusIndex = this.weightedStatusAverage(latestUpdate, status);
+    }
 
     const newStatus = {
       userId: ip,
@@ -197,6 +224,28 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
     };
     await this.save(newStatus, prefectureId, placeId);
     return newStatus;
+  }
+
+  /**
+   * Calculate mean queue update and insert into table
+   * @param prefectureId
+   * @param placeId
+   * @param status
+   * @param ip
+   */
+  public async getUpdatesByIp(placeId: string, ip: string) {
+    if (!this._activeObserver) await this.init();
+    const now = new Date();
+    // Minutes to accept new request
+    const minutesToAccept = 2;
+    const minutesAgo = new Date(now.getTime() - minutesToAccept * 60 * 1000);
+
+    // get latest for place, discarding open and closed
+    const latestUpdates = this.queueUpdates.filter(
+      (qu) => qu.placeId === placeId && qu.userId === ip && qu.queueUpdatedAt.getTime() >= minutesAgo.getTime()
+    );
+
+    return latestUpdates;
   }
 
   /**

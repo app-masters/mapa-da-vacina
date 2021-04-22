@@ -9,7 +9,7 @@ const authSuperAdmin = {
 };
 const authPrefectureAdmin = {
   uid: "super_uid",
-  role: "superAdmin",
+  role: "prefectureAdmin",
   prefectureId: "test_pref",
 };
 const authPlaceAdmin = {
@@ -72,6 +72,17 @@ describe("Mapa da Vacina", () => {
     await firebase.assertFails(pref_2.set({ name: "Test" }));
   });
 
+  it("Prefecture Admin can write to a place", async () => {
+    const db = getFirestore(authPrefectureAdmin);
+    const place = db
+      .collection("prefecture")
+      .doc("test_pref")
+      .collection("place")
+      .doc("test_place");
+
+    await firebase.assertSucceeds(place.update({ name: "Test" }));
+  });
+
   it("Non-logged can't write to a prefecture", async () => {
     const db = getFirestore({ uid: "nonlogged" });
     const pref = db.collection("prefecture").doc("test_pref");
@@ -90,7 +101,7 @@ describe("Mapa da Vacina", () => {
     await firebase.assertFails(pref.set({ name: "Test" }));
   });
 
-  it("Only Place Admin can write to a place", async () => {
+  it("Place Admin can write to a place", async () => {
     const db = getFirestore(authPlaceAdmin);
     const pref = db
       .collection("prefecture")
