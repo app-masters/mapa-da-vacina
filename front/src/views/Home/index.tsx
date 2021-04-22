@@ -154,11 +154,13 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
       <div className="page-body">
         <HomeHeaderWrapper>
           <div className="logo">
-            <Image src={'/images/logo-mapa.svg'} width={280} height={80} alt="app-logo" />
+            <a href="https://www.mapadavacina.com.br" target="_blank" rel="noreferrer">
+              <Image src={'/images/logo-mapa.svg'} width={280} height={80} alt="mapa-da-vacina-logo" />
+            </a>
           </div>
           {data.primaryLogo ? (
             <div className="logo">
-              <Image className="logo" src={data.primaryLogo} width={240} height={80} />
+              <Image className="logo" src={data.primaryLogo} width={240} height={80} alt={data.name + ' logomarca'} />
             </div>
           ) : (
             <div className="logo-text">
@@ -172,7 +174,7 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
           {data.secondaryLogo ? (
             <div className="logo">
               <div className="card-logo">
-                <Image src={data.secondaryLogo} width={240} height={80} />
+                <Image src={data.secondaryLogo} width={240} height={80} alt={data.name + ' evento'} />
               </div>
             </div>
           ) : null}
@@ -235,7 +237,7 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
           </a>
           <a className="appmasters-a" href="http://appmasters.io/pt" target="_blank" rel="noreferrer">
             Desenvolvido pela
-            <Image src={'/images/app-masters-logo.svg'} width={170} height={50} alt="appmasters-logo" />
+            <Image src={'/images/app-masters-logo.svg'} width={170} height={50} alt="App Masters" />
           </a>
         </div>
       </HomeFooterWrapper>
