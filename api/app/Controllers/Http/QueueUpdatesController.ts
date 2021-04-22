@@ -14,17 +14,25 @@ export default class QueueUpdatesController {
     const data = await request.validate(QueueUpdateValidator);
     const ip = request.ip();
     console.log(data, ip);
+    const postsLastMinutes = await QueueUpdate.getUpdatesByIp(data.placeId, ip);
+
+    if (postsLastMinutes && postsLastMinutes.length > 0) {
+      console.log("Can't update queue again before 2 minutes " + data.placeId + ' ' + ip);
+      return response
+        .status(401)
+        .send({ message: "Can't update queue again before 2 minutes " + data.placeId + ' ' + ip });
+    }
 
     const prefecture = await Prefecture.findById(data.prefectureId);
     if (!prefecture) {
       console.log("Couldn't find prefecture ", data.prefectureId);
-      return response.status(401).send({ message: "Couldn't find prefecture " + data.prefectureId });
+      return response.status(404).send({ message: "Couldn't find prefecture " + data.prefectureId });
     }
 
     const place = await Place.findById(data.prefectureId, data.placeId);
     if (!place) {
       console.log("Couldn't find place ", data.placeId);
-      return response.status(401).send({ message: "Couldn't find place " + data.placeId });
+      return response.status(404).send({ message: "Couldn't find place " + data.placeId });
     } else if (!place.open) {
       console.log("Can't update status on closed place ", data.placeId);
       return response.status(401).send({ message: "Can't update status on closed place " + data.placeId });
