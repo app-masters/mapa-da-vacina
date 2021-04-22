@@ -44,9 +44,11 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
         )}
         <Spin spinning={loading} indicator={<Loading spin />} size="large" style={{ marginTop: 28 }}>
           {data.map((item) => {
-            const value = item.type === placeType.driveThru ? 1000 : 400;
+            const value = item.type === placeType.driveThru ? 1000 : 200;
             const formattedDate = new Date(item.queueUpdatedAt?._seconds * 1000);
-            const canUpdate = item.distance ? item.distance <= value : !enablePublicQueueUpdate;
+            const canUpdate =
+              enablePublicQueueUpdate && !item.distance ? !!(item.latitude && item.longitude) : item.distance <= value;
+
             const haveWarning = !item.open
               ? false
               : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());

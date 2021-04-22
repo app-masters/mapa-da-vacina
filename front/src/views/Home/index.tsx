@@ -8,7 +8,7 @@ import {
 } from './style';
 import Image from 'next/image';
 import Card from '../../components/ui/Card';
-import { Row, Col, Typography, Space, Modal } from 'antd';
+import { Row, Col, Typography, Space, Modal, message } from 'antd';
 import PlaceList from '../../components/elements/PlaceList';
 import Button from '../../components/ui/Button';
 import Github from '../../components/ui/Icons/Github';
@@ -21,6 +21,7 @@ import { calcDistance } from '../../utils/geolocation';
 import { placeType } from '../../utils/constraints';
 import QueueModal from '../../components/elements/queueModal';
 import { API } from '../../utils/api';
+import dayjs from 'dayjs';
 
 type HomeProps = {
   data: Prefecture;
@@ -92,9 +93,18 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
    */
   const handlePublicUpdate = (item: Place, geo?: GeolocationPosition) => {
     const proximity = calcDistance(geo ? geo : coordinate.position, item);
-    const value = item.type === placeType.driveThru ? 1000 : 400;
+    const value = item.type === placeType.driveThru ? 1000 : 200;
+
+    const lastUpdate = JSON.parse(localStorage.getItem('last_queue_update') || 'null');
+    if (lastUpdate) {
+      if (dayjs().isBefore(dayjs(lastUpdate).add(1, 'minutes'))) {
+        message.error('É preciso aguardar pelo ao menos dois minutos para informar novamente o tamanho da fila');
+        return;
+      }
+    }
+
     if (proximity >= value) {
-      alert('Você precisa estar próximo de um dos pontos de vacinação para informar a fila.');
+      message.error('Você precisa estar próximo de um dos pontos de vacinação para informar a fila.');
     } else {
       setModalUpdate(true);
     }
@@ -106,15 +116,18 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
   const submitPublicUpdate = async (option: string) => {
     setLoadingUpdate(true);
     try {
-      console.log(publicUpdate);
       await API.post('/update-queue-status', {
         prefectureId: publicUpdate.prefectureId,
         placeId: publicUpdate.id,
         status: option
       });
+      setModalUpdate(false);
+      localStorage.setItem('last_queue_update', JSON.stringify(new Date()));
+      message.success('Alteração de estado enviada com sucesso');
       setLoadingUpdate(false);
     } catch (err) {
       console.log(err);
+      message.success('Ocorreu um erro ao enviar alteração');
       setLoadingUpdate(false);
     }
   };
