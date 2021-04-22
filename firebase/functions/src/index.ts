@@ -181,7 +181,7 @@ export const createQueueUpdate = functions.firestore
     const newValue = snap.data();
 
     // If new value is from an unauthenticated user
-    if (isIpAddress(newValue.userId) || newValue.ip !== undefined) {
+    if (isIpAddress(newValue.userId)) {
       // date 20 minutes go
       const minutesAgo = new Date(new Date().getTime() - 20 * 60 * 1000);
       const lastUpdates = await db
@@ -196,10 +196,7 @@ export const createQueueUpdate = functions.firestore
       console.log("Updates in last 20 minutes: ", lastUpdates.docs.length);
       let lastUpdate;
       for (const update of lastUpdates.docs) {
-        if (
-          !isIpAddress(update.data().userId) ||
-          update.data().ip === undefined
-        ) {
+        if (!isIpAddress(update.data().userId)) {
           lastUpdate = update;
           break;
         }
@@ -232,30 +229,39 @@ export const totalizeOpenPlacesCount = functions.firestore
     const beforeValue = change.before.data();
     //If was created OR zip changed
     let coordinates;
+
+    // Try to find coordinates by googleMapsUrl first
+    // if created/updated and there is a googleMapsUrl
     if (
       (!change.before.exists && change.after.exists) ||
       (afterValue &&
         beforeValue &&
-        afterValue.addressZip !== beforeValue.addressZip)
-    ) {
-      console.log("Updating coordinates", afterValue?.addressZip);
-      coordinates = await returnCoordinates(afterValue?.addressZip).catch(
-        (err) => {
-          console.log("Error setting coordinates ", err);
-          return undefined;
-        }
-      );
-    }
-    // if there are no coordinates found, and no coordinates on object, try to find by url
-    if (
-      !coordinates &&
-      change.after.exists &&
-      !afterValue?.latitude &&
-      !afterValue?.longitude &&
-      afterValue?.googleMapsUrl
+        afterValue.googleMapsUrl &&
+        afterValue.googleMapsUrl !== beforeValue.googleMapsUrl)
     ) {
       // get from googleMapsUrl
       coordinates = await getCoordinatesByUrl(afterValue?.googleMapsUrl);
+    }
+
+    // if created/updated and there is a addressZip
+    // Query coordinates to save addressZip and possibly update coordinates
+    if (
+      (!change.before.exists && change.after.exists) ||
+      (afterValue &&
+        beforeValue &&
+        afterValue.addressZip &&
+        afterValue.addressZip !== beforeValue.addressZip)
+    ) {
+      console.log("Updating coordinates ", afterValue?.addressZip);
+      const zipCoordinates = await returnCoordinates(
+        afterValue?.addressZip
+      ).catch((err) => {
+        console.log("Error setting coordinates ", err);
+        return undefined;
+      });
+      // Only use this coordinates if none was found with URL and there isn't longitude/latitude already set
+      if (!coordinates && !afterValue?.longitude && !afterValue?.latitude)
+        coordinates = zipCoordinates;
     }
 
     if (coordinates) {

@@ -209,8 +209,11 @@ export class QueueUpdateRepository extends BaseRepository<QueueUpdateType> {
         return b.queueUpdatedAt.getTime() - a.queueUpdatedAt.getTime();
       })[0];
 
-    //const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
-    const meanStatusIndex = this.weightedStatusAverage(latestUpdate, status);
+    let meanStatusIndex = QueueUpdateValues[status];
+    if (latestUpdate) {
+      //const meanStatusIndex = this.getMeanStatus([...latestUpdates, status]);
+      meanStatusIndex = this.weightedStatusAverage(latestUpdate, status);
+    }
 
     const newStatus = {
       userId: ip,
