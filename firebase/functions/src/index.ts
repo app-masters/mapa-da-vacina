@@ -183,7 +183,7 @@ export const createQueueUpdate = functions.firestore
       for (const update of lastUpdates.docs) {
         if (
           !isIpAddress(update.data().userId) ||
-          update.data().ip !== undefined
+          update.data().ip === undefined
         ) {
           lastUpdate = update;
           break;
