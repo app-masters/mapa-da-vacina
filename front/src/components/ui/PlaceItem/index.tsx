@@ -4,19 +4,23 @@ import { CardItemContent, CardItemExtra, CardItemIconContent, CardItemWrapper } 
 import { Car, PersonPin, Pin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
-import { Tag, Tooltip } from 'antd';
+import { Space, Tag, Tooltip } from 'antd';
+import { distanceHumanize } from '../../../utils/geolocation';
+import Button from '../Button';
 
 type CardItemProps = {
   item: Place;
   showQueueUpdatedAt?: boolean;
   haveWarning: boolean;
-  distance: string | null;
+  canUpdate?: boolean;
+  coordinate?: GeolocationPosition;
+  publicUpdate: () => void;
 };
 
 /**
  * CardItem
  */
-const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarning, distance }) => {
+const CardItem: React.FC<CardItemProps> = ({ item, coordinate, showQueueUpdatedAt, canUpdate, publicUpdate }) => {
   /**
    * Render the icon based on status
    */
@@ -25,7 +29,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
       case placeType.driveThru:
         return <Car width={31} height={30} />;
       case placeType.fixed:
-        return <PersonPin width={31} height={30} />;
+        return <PersonPin width={26} height={30} />;
     }
   };
 
@@ -48,10 +52,10 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
     const now = dayjs();
     const openTime = dayjs(item.openAt._seconds * 1000);
     const closeTime = dayjs(item.closeAt._seconds * 1000);
+    if (!item.openAt || !item.closeAt) return ''; // Don't have a defined time
     if (item.open) {
-      if (item.closeAt) {
-        return `Fecha às ${closeTime.format('HH:mm')}`;
-      }
+      // Place is open
+      return `Aberto até às ${closeTime.format('HH:mm')}`;
     } else {
       // It's closed, show info with open time
       const openTodayTime = dayjs().set('h', openTime.hour()).set('m', openTime.minute());
@@ -59,62 +63,81 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, haveWarni
         // Not open yet
         return `Abre hoje às ${openTime.format('HH:mm')}`;
       } else {
-        if (item.openTomorrow) {
-          if (item.openAt) {
-            return `Abre amanhã às ${openTime.format('HH:mm')}`;
-          }
+        // Already closed
+        if (!item.openToday && !item.openTomorrow) {
+          return `Não abrirá hoje nem amanhã`;
+        } else if (item.openTomorrow) {
+          return `Abre amanhã às ${openTime.format('HH:mm')}`;
         } else {
           return `Não abrirá amanhã`;
         }
       }
     }
-    return '';
   }, [item]);
+
+  const url = React.useMemo(() => {
+    if (coordinate && item.addressStreet) {
+      return `http://maps.google.com/?mode=walking&daddr=${coordinate.coords.latitude},${coordinate.coords.longitude}&saddr=${item.addressStreet}`;
+    } else if (item.googleMapsUrl) {
+      return item.googleMapsUrl;
+    } else {
+      return undefined;
+    }
+  }, [coordinate, item.googleMapsUrl, item.addressStreet]);
 
   return (
     <CardItemWrapper>
-      <CardItemContent md={12} lg={14} sm={24}>
-        <div>
-          {title}
+      <CardItemContent md={12} sm={24}>
+        <div style={{ flex: 1 }}>
+          <span>
+            {title}
+            {timeInfoText ? (
+              <CardItemExtra>
+                <Tag color="default" style={{ marginRight: 0 }}>
+                  {timeInfoText}
+                </Tag>
+              </CardItemExtra>
+            ) : null}
+          </span>
           <div>
-            {`${item.addressStreet ? item.addressStreet : ''}`}
-            {/* {`${item.addressStreet ? item.addressStreet : ''}${
-              item.addressDistrict ? ', ' + item.addressDistrict : ''
-            }${item.addressCityState ? ' - ' + item.addressCityState : ''}${
-              item.addressZip ? ', ' + item.addressZip : ''
-            }`} */}
-            {!!item.googleMapsUrl && (
+            {!!url && (
               <Tooltip title="Veja como chegar">
-                <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
+                <a href={url} target="_blank" rel="noreferrer">
                   <Pin width={20} height={16} />
                 </a>
               </Tooltip>
             )}
-            {!!(distance && item.latitude && item.longitude) && (
-              <strong style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}>{`- ${distance}`}</strong>
+            {`${item.addressStreet ? item.addressStreet : ''}${
+              item.addressDistrict ? ', ' + item.addressDistrict : ''
+            }`}
+            {item.distance && (
+              <label
+                className="location-label"
+                style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
+              >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
             )}
           </div>
         </div>
       </CardItemContent>
-      <CardItemContent md={5} sm={24}>
-        <CardItemExtra>{timeInfoText ? <Tag color="default">{timeInfoText}</Tag> : null}</CardItemExtra>
+      <CardItemContent align="center" justify="center" md={6} sm={24}>
+        {item.open && canUpdate && (
+          <Button className="queue-button" type="action" size="large" onClick={publicUpdate}>
+            Informar fila
+          </Button>
+        )}
       </CardItemContent>
-      <CardItemContent md={5} sm={24}>
+      <CardItemIconContent md={6} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
+        <Space>
+          {renderIcon()}
+          {placeQueueLabel[item.queueStatus]}
+        </Space>
         {item.queueUpdatedAt &&
         item.open &&
         showQueueUpdatedAt &&
         item.queueStatus !== placeQueue.open &&
         item.queueStatus !== placeQueue.closed ? (
-          <CardItemExtra>
-            <Tag color={haveWarning ? 'error' : 'default'}>
-              Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}
-            </Tag>
-          </CardItemExtra>
+          <span>Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}</span>
         ) : null}
-      </CardItemContent>
-      <CardItemIconContent lg={2} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
-        {renderIcon()}
-        {placeQueueLabel[item.queueStatus]}
       </CardItemIconContent>
     </CardItemWrapper>
   );

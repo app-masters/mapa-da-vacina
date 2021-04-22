@@ -1,6 +1,6 @@
 import Layout from '../../layout';
 import { TableWrapper, Section } from './styles';
-import { Popconfirm, Typography, Collapse, Spin } from 'antd';
+import { Popconfirm, Typography, Collapse, Spin, Space } from 'antd';
 import Button from '../../components/ui/Button';
 import React from 'react';
 import FormInvitation from '../../components/elements/formInvitation';
@@ -9,6 +9,8 @@ import { userRoles, userRolesLabel } from '../../utils/constraints';
 import { disableUser } from '../../utils/firestore';
 import { Prefecture } from '../../lib/Prefecture';
 import { Place } from '../../lib/Place';
+import { formatPhone } from '../../utils/phone';
+import { PhoneOutlined, WhatsAppOutlined } from '@ant-design/icons';
 
 type UsersViewProps = {
   users: User[];
@@ -37,7 +39,28 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
         key: 'name'
       },
       {
-        title: 'Cargo',
+        title: 'Contato',
+        dataIndex: 'phone',
+        key: 'phone',
+        /**
+         * render
+         */
+        render: (text) => (
+          <Space>
+            <a
+              href={`https://api.whatsapp.com/send?phone=${text.replace('+', '')}&text=Oi`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <WhatsAppOutlined />
+            </a>
+            <PhoneOutlined />
+            {formatPhone(text)}
+          </Space>
+        )
+      },
+      {
+        title: 'Função',
         dataIndex: 'role',
         key: 'role',
         /**
@@ -135,7 +158,7 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
                     dataSource={listUsers.filter((f) => f.active && f.prefectureId === prefecture.id)}
                   />
                   <div className="subtitle-container">
-                    <Typography.Title level={4}>Convidar Usuários</Typography.Title>
+                    <Typography.Title level={4}>Usuários convidados</Typography.Title>
                     <FormInvitation
                       prefectures={[prefecture]}
                       places={places.filter((f) => f.prefectureId === prefecture.id)}

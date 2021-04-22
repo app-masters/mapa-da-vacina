@@ -39,5 +39,8 @@ Route.post('/contact', 'ContactsController.sendContact');
 // Places
 Route.post('/import-places', 'PlacesController.importPlacesFromCSV').middleware(['authActive']);
 
+// Queue Updates
+Route.post('/update-queue-status', 'QueueUpdatesController.updateQueueStatus');
+
 //Test
 // Route.get('/test/sms', 'TestController.testSms');

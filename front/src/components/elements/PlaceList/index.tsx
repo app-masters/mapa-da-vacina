@@ -7,7 +7,7 @@ import { ButtonIconWrapper, HeaderCard } from './styles';
 import { Place } from '../../../lib/Place';
 import { placeQueue, placeType } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
-import { Coordinates } from '../../../lib/Coordinates';
+import { Coordinate } from '../../../lib/Location';
 
 type IconButtonProps = {
   onPress?: (value: string) => void;
@@ -33,13 +33,14 @@ const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, titl
 type PlaceListProps = {
   prefecture: Prefecture;
   loading: boolean;
-  coordinates?: Coordinates;
+  coordinate: Coordinate;
+  publicUpdate: (item: Place) => void;
 };
 
 /**
  * PlaceList
  */
-const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, coordinates }) => {
+const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate, coordinate }) => {
   const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
     age: undefined,
     zip: undefined,
@@ -95,48 +96,14 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, coordinates 
         </HeaderCard>
       }
       data={data}
+      currentCoordinate={coordinate?.position}
+      enablePublicQueueUpdate={prefecture.enablePublicQueueUpdate}
       showQueueUpdatedAt={prefecture.showQueueUpdatedAt !== false}
       sampleMode={prefecture.sampleMode}
       city={prefecture.city}
       loading={loading}
       shouldShowFeaturesBanner={shouldShowFeaturesBanner}
-      coordinates={coordinates}
-      // header={
-      //   <Space wrap>
-      //     <p>Encontre seu ponto</p>
-      //     <div>
-      //       <Input
-      //         style={{ marginRight: 8 }}
-      //         placeholder="Minha idade"
-      //         prefix={<Person />}
-      //         value={search.age}
-      //         maxLength={3}
-      //         onChange={(e) => {
-      //           const { value } = e.target;
-      //           const reg = /^-?\d*(\.\d*)?$/;
-      //           if ((!isNaN(Number(value)) && reg.test(value)) || value === '' || value === '-') {
-      //             setSearch({ ...search, age: e.target.value });
-      //           }
-      //         }}
-      //       />
-      //       <Input
-      //         placeholder="CEP"
-      //         prefix={<Pin />}
-      //         value={search.zip}
-      //         maxLength={8}
-      //         onChange={(e) => setSearch({ ...search, zip: e.target.value })}
-      //       />
-      //     </div>
-      //     <Button
-      //       icon={<Search />}
-      //       type="primary"
-      //       size="large"
-      //       onClick={() => alert('Ainda não implementado nesta versão')}
-      //     >
-      //       Buscar
-      //     </Button>
-      //   </Space>
-      // }
+      publicUpdate={publicUpdate}
     />
   );
 };

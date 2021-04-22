@@ -72,6 +72,10 @@ export const HomeContainerWrapper = styled.div`
   @media (max-width: ${(props) => props.theme.breakpoints.lg}) {
     margin-top: ${(props) => props.theme.spacing.sm};
   }
+  .location-button {
+    display: grid;
+    justify-content: flex-end;
+  }
 `;
 
 export const HomeContentWrapper = styled(HomeContainerWrapper)`

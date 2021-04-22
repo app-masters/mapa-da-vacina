@@ -94,7 +94,7 @@ const FormInvitationTemplate: React.FC<FormInvitationTemplateProps> = ({
           >
             <MaskedInput disabled={loading} mask="(11) 11111-1111" />
           </Form.Item>
-          <Form.Item label="Cargo" name="role" rules={[{ required: true, message: 'Por favor informe um cargo' }]}>
+          <Form.Item label="Função" name="role" rules={[{ required: true, message: 'Por favor informe uma função' }]}>
             <Select disabled={loading} onChange={(value) => setSelectedRole(value as string)}>
               {selectOptions.map((option) => (
                 <Select.Option key={option.value} value={option.value}>

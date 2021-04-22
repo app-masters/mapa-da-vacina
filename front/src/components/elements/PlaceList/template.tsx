@@ -1,11 +1,9 @@
 import { Alert, Spin } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
-import { Place } from '../../../lib/Place';
+import { placeDistances } from '../../../utils/constraints';
 import CardItem from '../../ui/PlaceItem';
 import { PlaceListWrapper, PlaceListTemplateProps, PlaceListSearchWrapper, Loading, WarningBox } from './styles';
-import { getDistance } from 'geolib';
-import { Coordinates } from '../../../lib/Coordinates';
 
 const minutesUntilWarning = process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING
   ? Number(process.env.NEXT_PUBLIC_MINUTES_UNTIL_WARNING)
@@ -27,22 +25,12 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
   sampleMode,
   city,
   shouldShowFeaturesBanner,
-  coordinates,
+  enablePublicQueueUpdate,
+  currentCoordinate,
+  publicUpdate,
   ...props
 }) => {
   const isDemonstration = city && city.includes('Demonstração');
-
-  /**
-   * calcDistance
-   */
-  const calcDistance = (coordinates: Coordinates, item: Place): string => {
-    const distance = getDistance(coordinates, { latitude: item.latitude, longitude: item.longitude });
-    const metersAway = distance / 1000;
-    if (metersAway > 1) {
-      return `${metersAway.toFixed(1)}km`.replace('.', ',');
-    }
-    return `${metersAway * 1000}m`;
-  };
 
   return (
     <React.Fragment>
@@ -57,8 +45,10 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
         )}
         <Spin spinning={loading} indicator={<Loading spin />} size="large" style={{ marginTop: 28 }}>
           {data.map((item) => {
+            const value = placeDistances[item.type];
             const formattedDate = new Date(item.queueUpdatedAt?._seconds * 1000);
-            const distance = coordinates && item.latitude && item.longitude ? calcDistance(coordinates, item) : null;
+            const canUpdate = enablePublicQueueUpdate && item.distance && item.distance <= value;
+
             const haveWarning = !item.open
               ? false
               : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());
@@ -68,7 +58,9 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
                 showQueueUpdatedAt={showQueueUpdatedAt}
                 haveWarning={haveWarning}
                 item={item}
-                distance={distance}
+                coordinate={currentCoordinate}
+                canUpdate={canUpdate}
+                publicUpdate={() => publicUpdate(item)}
               />
             );
           })}

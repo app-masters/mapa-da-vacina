@@ -8,7 +8,9 @@ import ResponsiveProvider from '../providers/ResponsiveProvider';
 import * as dayjs from 'dayjs';
 import 'dayjs/locale/pt-br';
 import ErrorBoundary from '../components/elements/errorBoundary';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useAuthUser, withAuthUser } from 'next-firebase-auth';
+import { API } from '../utils/api';
 
 const relativeTime = require('dayjs/plugin/relativeTime');
 dayjs.extend(relativeTime);
@@ -21,6 +23,18 @@ initAuth();
  * @params AppProps
  */
 const App = ({ Component, pageProps }: AppProps) => {
+  const authUser = useAuthUser();
+
+  useEffect(() => {
+    (async () => {
+      // Setting Authorization on reload
+      if (authUser && authUser.firebaseUser) {
+        const token = await authUser.getIdToken();
+        API.defaults.headers['Authorization'] = token;
+      }
+    })();
+  }, [authUser]);
+
   useEffect(() => {
     if (process.env.NODE_ENV === 'production' && window.location.host.indexOf('localhost') < 0) {
       const httpTokens = /^http:\/\/(.*)$/.exec(window.location.href);
@@ -43,4 +57,4 @@ const App = ({ Component, pageProps }: AppProps) => {
   );
 };
 
-export default App;
+export default withAuthUser()(App as React.FC);

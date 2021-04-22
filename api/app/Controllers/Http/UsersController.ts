@@ -55,7 +55,7 @@ export default class UsersController {
       { ...data, id: phoneId, active: false, invitedAt: new Date() },
       data.prefectureId
     );
-    // Todo: get data from listener instead of querying again
+
     const prefecture = await Prefecture.findById(data.prefectureId);
     let placeTitle: string | undefined = '';
     if (newUser.role === 'placeAdmin' && data.placeId) {
@@ -63,6 +63,7 @@ export default class UsersController {
       console.log(place);
       placeTitle = place?.title;
     }
+
     await SmsMessages.sendInviteSms(newUser, prefecture?.name, placeTitle);
     return response.status(200).send(newUser);
   }

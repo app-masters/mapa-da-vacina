@@ -18,6 +18,15 @@ export const placeQueue: { [key: string]: placeQueueStatusType } = {
   longQueue: 'longQueue'
 };
 
+export const placeQueueHelp = {
+  open: undefined,
+  closed: undefined,
+  noQueue: 'menos de 5 minutos de espera',
+  smallQueue: 'até 10 minutos de espera',
+  mediumQueue: 'até 20 minutos de espera',
+  longQueue: 'além de 20 minutos de espera'
+};
+
 export const placeType = {
   fixed: 'fixed',
   driveThru: 'driveThru'
@@ -35,4 +44,9 @@ export const placeQueueColor = {
   smallQueue: '#E3C153',
   mediumQueue: '#ED902C',
   longQueue: '#A71319'
+};
+
+export const placeDistances = {
+  fixed: 200,
+  driveThru: 1000
 };
