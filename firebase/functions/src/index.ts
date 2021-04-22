@@ -27,12 +27,27 @@ async function getCoordinatesByUrl(googleMapsUrl: string) {
     if (!googleMapsUrl || !(googleMapsUrl.length > 0)) return undefined;
     const unshortenedUrl = await tall(googleMapsUrl);
     // console.log("Tall url", unshortenedUrl);
-    const lon_lat_match = unshortenedUrl.match(new RegExp("@(.*),(.*),"));
+    /*const lon_lat_match = unshortenedUrl.match(new RegExp("@(.*),(.*),"));
 
     if (lon_lat_match && lon_lat_match?.length > 0) {
       return {
         latitude: Number(lon_lat_match[1]),
         longitude: Number(lon_lat_match[2]),
+      };
+    }*/
+    const splitUrl = unshortenedUrl.split("!3d");
+    const latLong = splitUrl[splitUrl.length - 1].split("!4d");
+
+    const latitude = latLong[0];
+    let longitude = latLong[1];
+    if (longitude.indexOf("?") !== -1) {
+      longitude = longitude.split("?")[0];
+    }
+
+    if (latitude && longitude) {
+      return {
+        latitude: Number(latitude),
+        longitude: Number(longitude),
       };
     }
   } catch (err) {
