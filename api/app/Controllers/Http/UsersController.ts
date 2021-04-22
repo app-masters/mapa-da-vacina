@@ -63,7 +63,7 @@ export default class UsersController {
       console.log(place);
       placeTitle = place?.title;
     }
-    console.log('Invite... Send sms?');
+
     await SmsMessages.sendInviteSms(newUser, prefecture?.name, placeTitle);
     return response.status(200).send(newUser);
   }

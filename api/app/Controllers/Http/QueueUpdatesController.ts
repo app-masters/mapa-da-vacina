@@ -3,6 +3,7 @@ import Place from 'App/Models/Place';
 import Prefecture from 'App/Models/Prefecture';
 import QueueUpdate from 'App/Models/QueueUpdate';
 import QueueUpdateValidator from 'App/Validators/QueueUpdateValidator';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 export default class QueueUpdatesController {
   /**
@@ -13,7 +14,9 @@ export default class QueueUpdatesController {
   public async updateQueueStatus({ request, response }: HttpContextContract) {
     const data = await request.validate(QueueUpdateValidator);
     const ip = request.ip();
-    console.log(data, ip);
+    // Log provisório para identificar erros no inicio
+    // RollbarProvider.info('Updating queue Status', { data, ip });
+
     const postsLastMinutes = await QueueUpdate.getUpdatesByIp(data.placeId, ip);
 
     if (postsLastMinutes && postsLastMinutes.length > 0) {

@@ -23,7 +23,6 @@ export default class SmsMessages {
     const result = await AwsProvider.dispatchSMS(user.phone, message);
     if (!result) {
       RollbarProvider.info('Failed to send SMS', { sent: result, error: AwsProvider.lastError().message });
-      console.log(AwsProvider.lastError().message);
     } else {
       RollbarProvider.info('Finished sending SMS', { sent: result });
     }
