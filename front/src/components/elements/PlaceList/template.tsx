@@ -1,6 +1,7 @@
 import { Alert, Spin } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
+import { placeType } from '../../../utils/constraints';
 import CardItem from '../../ui/PlaceItem';
 import { PlaceListWrapper, PlaceListTemplateProps, PlaceListSearchWrapper, Loading, WarningBox } from './styles';
 
@@ -24,6 +25,8 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
   sampleMode,
   city,
   shouldShowFeaturesBanner,
+  enablePublicQueueUpdate,
+  publicUpdate,
   ...props
 }) => {
   const isDemonstration = city && city.includes('Demonstração');
@@ -41,12 +44,23 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
         )}
         <Spin spinning={loading} indicator={<Loading spin />} size="large" style={{ marginTop: 28 }}>
           {data.map((item) => {
+            const value = item.type === placeType.driveThru ? 1000 : 200;
             const formattedDate = new Date(item.queueUpdatedAt?._seconds * 1000);
+            const canUpdate =
+              enablePublicQueueUpdate && !item.distance ? !!(item.latitude && item.longitude) : item.distance <= value;
+
             const haveWarning = !item.open
               ? false
               : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());
             return (
-              <CardItem key={item.id} showQueueUpdatedAt={showQueueUpdatedAt} haveWarning={haveWarning} item={item} />
+              <CardItem
+                key={item.id}
+                showQueueUpdatedAt={showQueueUpdatedAt}
+                haveWarning={haveWarning}
+                item={item}
+                canUpdate={canUpdate}
+                publicUpdate={() => publicUpdate(item)}
+              />
             );
           })}
         </Spin>

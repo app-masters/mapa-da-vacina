@@ -10,6 +10,7 @@ export type Prefecture = {
   createdAt: Date;
   updatedAt: Date;
   showQueueUpdatedAt?: boolean;
+  enablePublicQueueUpdate?: boolean;
   primaryLogo?: string;
   secondaryLogo?: string;
   sampleMode?: boolean;
