@@ -19,9 +19,11 @@ export default class SmsMessages {
       'app.urlFrontAdmin'
     )}`;
     RollbarProvider.info('Sending SMS', { sms: { phone: user.phone, message: message } });
+
     const result = await AwsProvider.dispatchSMS(user.phone, message);
     if (!result) {
-      RollbarProvider.info('Finished sending SMS', { sent: result, error: AwsProvider.lastError() });
+      RollbarProvider.info('Failed to send SMS', { sent: result, error: AwsProvider.lastError().message });
+      console.log(AwsProvider.lastError().message);
     } else {
       RollbarProvider.info('Finished sending SMS', { sent: result });
     }

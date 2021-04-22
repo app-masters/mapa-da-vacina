@@ -3,6 +3,8 @@ import * as admin from "firebase-admin";
 
 import { Client, AddressType } from "@googlemaps/google-maps-services-js";
 
+import { tall } from "tall";
+
 const client = new Client({});
 
 admin.initializeApp();
@@ -20,16 +22,23 @@ function sanitizeZip(zip: string): string {
   return zipCode;
 }
 
-function getCoordinatesByUrl(googleMapsUrl: string) {
-  if (!googleMapsUrl || !(googleMapsUrl.length > 0)) return undefined;
-  const lon_lat_match = googleMapsUrl.match(new RegExp("@(.*),(.*),"));
+async function getCoordinatesByUrl(googleMapsUrl: string) {
+  try {
+    if (!googleMapsUrl || !(googleMapsUrl.length > 0)) return undefined;
+    const unshortenedUrl = await tall(googleMapsUrl);
+    // console.log("Tall url", unshortenedUrl);
+    const lon_lat_match = unshortenedUrl.match(new RegExp("@(.*),(.*),"));
 
-  if (lon_lat_match && lon_lat_match?.length > 0) {
-    return {
-      latitude: lon_lat_match[1],
-      longitude: lon_lat_match[2],
-    };
+    if (lon_lat_match && lon_lat_match?.length > 0) {
+      return {
+        latitude: Number(lon_lat_match[1]),
+        longitude: Number(lon_lat_match[2]),
+      };
+    }
+  } catch (err) {
+    console.error("Error unshortening URL", err);
   }
+
   return {};
 }
 
@@ -222,10 +231,16 @@ export const totalizeOpenPlacesCount = functions.firestore
         }
       );
     }
-
-    if (!coordinates && change.after.exists && afterValue?.googleMapsUrl) {
+    // if there are no coordinates found, and no coordinates on object, try to find by url
+    if (
+      !coordinates &&
+      change.after.exists &&
+      !afterValue?.latitude &&
+      !afterValue?.longitude &&
+      afterValue?.googleMapsUrl
+    ) {
       // get from googleMapsUrl
-      coordinates = getCoordinatesByUrl(afterValue?.googleMapsUrl);
+      coordinates = await getCoordinatesByUrl(afterValue?.googleMapsUrl);
     }
 
     if (coordinates) {

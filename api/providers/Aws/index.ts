@@ -47,10 +47,10 @@ export default class Aws {
 
     // Check if the content size is less than 140bytes long
     // see: https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html
-    if (Buffer.byteLength(content) > 140) {
+    /*if (Buffer.byteLength(content) > 140) {
       this._lastError = new Error(`Message content exceeds the maximum of 140 bytes`);
       return false;
-    }
+    }*/
 
     const SNSParams: PublishCommandInput = {
       PhoneNumber: formatPhoneToE164(phoneNumber),
@@ -59,7 +59,6 @@ export default class Aws {
 
     try {
       console.log('Sending real SMS - to: ' + SNSParams.PhoneNumber + ' - message: ' + SNSParams.Message);
-
       await this._sns.send(new PublishCommand(SNSParams));
       return true;
     } catch (err) {
