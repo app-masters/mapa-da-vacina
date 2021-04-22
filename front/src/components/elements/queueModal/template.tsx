@@ -18,7 +18,10 @@ const statusToIgnore = ['closed', 'open'];
 const QueueModal: React.FC<QueueModalProps> = ({ open, loading, handleCloseModal, onSubmitForm }) => {
   const [clickedOption, setClickedOption] = React.useState<string>(undefined);
   return (
-    <ModalQueue title="Alterar estado da fila" destroyOnClose visible={open} footer={null} onCancel={handleCloseModal}>
+    <ModalQueue title="Tamanho da fila" destroyOnClose visible={open} footer={null} onCancel={handleCloseModal}>
+      <div className="info">
+        A ferramenta irá comparar sua informação com as de outros usuários, para determinar qual tamanho será mantido.
+      </div>
       <ModalQueueContent wrap direction="vertical">
         {Object.keys(placeQueueLabel).map((option: placeQueueStatusType) => {
           if (statusToIgnore.includes(option)) return;

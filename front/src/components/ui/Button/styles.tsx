@@ -4,7 +4,7 @@ import { ButtonProps as ButtonStyledProps, ButtonType } from 'antd/lib/button';
 import { colors, spacing } from '../../../styles/theme';
 
 export type ButtonProps = Omit<ButtonStyledProps, 'type'> & {
-  type?: ButtonType | 'outline';
+  type?: ButtonType | 'outline' | 'action';
 };
 
 export const ButtonStyled: React.FC<ButtonProps> = styled(Button)<ButtonProps>`
@@ -30,6 +30,13 @@ export const ButtonStyled: React.FC<ButtonProps> = styled(Button)<ButtonProps>`
         color: ${colors.primary} !important;
         border-color: ${colors.primary} !important;
         box-shadow: none;
+      `;
+    }
+    if ((props.type as ButtonType | 'action') === 'action') {
+      return `
+        color: ${colors.white} !important;
+        background: ${colors.green1} !important;
+        border-color: ${colors.green1} !important;
       `;
     }
     if (props.type === 'default') {

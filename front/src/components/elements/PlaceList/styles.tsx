@@ -12,6 +12,7 @@ export type PlaceListTemplateProps = CardProps & {
   city?: string;
   header?: React.ReactNode;
   loading: boolean;
+  currentCoordinate?: GeolocationPosition;
   publicUpdate?: (item: Place) => void;
   enablePublicQueueUpdate?: boolean;
   shouldShowFeaturesBanner?: boolean;

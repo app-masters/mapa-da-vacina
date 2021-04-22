@@ -40,7 +40,7 @@ type PlaceListProps = {
 /**
  * PlaceList
  */
-const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate }) => {
+const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate, coordinate }) => {
   const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
     age: undefined,
     zip: undefined,
@@ -96,6 +96,7 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate
         </HeaderCard>
       }
       data={data}
+      currentCoordinate={coordinate?.position}
       enablePublicQueueUpdate={prefecture.enablePublicQueueUpdate}
       showQueueUpdatedAt={prefecture.showQueueUpdatedAt !== false}
       sampleMode={prefecture.sampleMode}

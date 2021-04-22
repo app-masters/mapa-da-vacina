@@ -32,11 +32,13 @@ export type ColorsList = {
   alert: string;
   green1: string;
   disabled: string;
+  white: string;
 };
 
 export const colors: ColorsList = {
   background: '#f0f2f5',
   primary: '#55B4C8',
+  white: '#FFFFFF',
   alert: '#FFDDDD',
   darkGray: '#747474',
   disabled: '#00000010',

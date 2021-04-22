@@ -1,7 +1,11 @@
 import { Modal, Space } from 'antd';
 import styled from 'styled-components';
 
-export const ModalQueue = styled(Modal)``;
+export const ModalQueue = styled(Modal)`
+  .info {
+    text-align: center;
+  }
+`;
 
 export const ModalQueueContent = styled(Space)`
   align-items: center;
@@ -10,6 +14,7 @@ export const ModalQueueContent = styled(Space)`
   width: 75%;
   margin-left: auto;
   margin-right: auto;
+  margin-top: 16px;
   .ant-space-item {
     width: 100%;
   }
