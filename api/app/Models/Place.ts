@@ -3,7 +3,6 @@ import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import QueueUpdate from 'App/Models/QueueUpdate';
 
-import Cache from 'memory-cache';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Config from '@ioc:Adonis/Core/Config';
 
@@ -48,7 +47,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   private static instance: PlaceRepository;
 
   private places: PlaceType[];
-  private _snapshotObserver: FirebaseFirestore.CollectionGroup;
+  private _snapshotObserver;
   private _activeObserver: boolean = false;
   /**
    * Construtor
@@ -56,8 +55,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   constructor() {
     super(FirebaseProvider.storage, errorFactory);
     console.log('INIT PLACES');
-    this._snapshotObserver = FirebaseProvider.db.collectionGroup('place');
-    this._snapshotObserver.onSnapshot(
+
+    this._snapshotObserver = FirebaseProvider.db.collectionGroup('place').onSnapshot(
       (docSnapshot) => {
         console.log(`Received doc snapshot place`);
         docSnapshot.docChanges().forEach((d) => {
@@ -81,6 +80,23 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         console.log(`Encountered error: ${err}`);
       }
     );
+  }
+
+  /**
+   * Init places
+   */
+  public async initPlaces() {
+    if (!this._activeObserver) {
+      const docSnapshot = await FirebaseProvider.db.collectionGroup('place').get();
+      this.places = docSnapshot.docs.map((d) => {
+        return {
+          ...this.getObjectFromData(d.data()),
+          id: d.id,
+          createdAt: d.createTime.toDate(),
+          updatedAt: d.updateTime.toDate()
+        } as PlaceType;
+      });
+    }
   }
 
   /**
@@ -115,6 +131,15 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       //document.agendas = await AgendaRepository.listAgendaTodayAndTomorrow(prefId, document.id);
     }
 
+    documents.sort((a, b) => {
+      return (
+        +b.open - +a.open ||
+        +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
+        b.type.localeCompare(a.type) ||
+        a.title.localeCompare(b.title)
+      );
+    });
+
     return documents;
   }
 
@@ -123,26 +148,10 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * @returns Active places
    */
   public async listActive(prefectureId: string) {
-    if (this._activeObserver) {
-      return this.places
-        .filter((place) => place.active && place.prefectureId === prefectureId)
-        .sort((a, b) => {
-          return (
-            +b.open - +a.open ||
-            +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
-            b.type.localeCompare(a.type) ||
-            a.title.localeCompare(b.title)
-          );
-        });
+    if (!this._activeObserver) {
+      await this.initPlaces();
     }
-    return await this.query((qb) => {
-      return qb
-        .where('active', '==', true)
-        .orderBy('open', 'desc')
-        .orderBy('openToday', 'desc')
-        .orderBy('type', 'desc')
-        .orderBy('title', 'asc');
-    }, prefectureId);
+    return this.places.filter((place) => place.active && place.prefectureId === prefectureId);
   }
 
   /**
@@ -161,17 +170,14 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Update Open Today with Open Tomorrow field
    */
   public async updateOpenTodayField() {
-    if (this._activeObserver) {
-      for (const place of this.places) {
-        if (
-          place.openToday !== undefined &&
-          place.openTomorrow !== undefined &&
-          place.openToday !== place.openTomorrow
-        ) {
-          RollbarProvider.info(`Updating Place ${place.id} openToday from ${place.openToday} to ${place.openTomorrow}`);
-          place.openToday = place.openTomorrow;
-          await this.save(place, place.prefectureId);
-        }
+    if (!this._activeObserver) {
+      await this.initPlaces();
+    }
+    for (const place of this.places) {
+      if (place.openToday !== undefined && place.openTomorrow !== undefined && place.openToday !== place.openTomorrow) {
+        RollbarProvider.info(`Updating Place ${place.id} openToday from ${place.openToday} to ${place.openTomorrow}`);
+        place.openToday = place.openTomorrow;
+        await this.save(place, place.prefectureId);
       }
     }
   }
@@ -180,41 +186,69 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Update Open Today with Open Tomorrow field
    */
   public async openOrClosePlaces() {
-    const minutesToCheck = Config.get('app.minutesRangeToCheck');
     // console.log(minutesToCheck);
+    if (!this._activeObserver) {
+      await this.initPlaces();
+    }
+    const now = new Date();
+    const placesToOpen = this.places.filter((p) => {
+      const timeDiff = p.openAt ? minutesDiff(now, p.openAt.toDate()) : 0;
+      // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+      // Only open if opens today and still not open
+      return p.openAt && !p.open && p.openToday && timeDiff === 1;
+    });
+    // console.log('Places to open', placesToOpen.length);
+
+    const placesToClose = this.places.filter((p) => {
+      //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
+      const timeDiff = p.closeAt ? minutesDiff(now, p.closeAt.toDate()) : 0;
+      // Only closes if open
+      return p.closeAt && p.open && timeDiff === 1;
+    });
+
+    for (const place of placesToOpen) {
+      if (!place.id) continue;
+      RollbarProvider.info(`Opening Place ${place.id}`);
+      console.log(`👉 Opening Place ${place.id}`);
+      place.open = true;
+      place.queueStatus = 'open';
+      //await this.save(place);
+      await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, true);
+    }
+
+    for (const place of placesToClose) {
+      if (!place.id) continue;
+      RollbarProvider.info(`Closing Place ${place.id}`);
+      console.log(`👉 Closing Place ${place.id}`);
+      place.open = false;
+      place.queueStatus = 'closed';
+      // await this.save(place);
+      await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, false);
+    }
+  }
+
+  /**
+   * Set back queueStatus to `open` when no updates for a long time
+   */
+  public async setBackQueueStatusOpen() {
+    const minutesToCheck = Config.get('app.minutesRangeToCheck');
     if (this._activeObserver) {
       const now = new Date();
-      const placesToOpen = this.places.filter((p) => {
-        const timeDiff = p.openAt ? minutesDiff(now, p.openAt.toDate()) : 0;
-        // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
-
+      const placesToSetBackToOpen = this.places.filter((p) => {
+        if (!p.open || p.queueStatus === 'open' || !p.queueUpdatedAt) return;
+        const timeDiff = minutesDiff(p.queueUpdatedAt.toDate(), now);
+        // console.log('p', p.title, p.queueStatus, p.queueUpdatedAt.toDate(), timeDiff); // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
         // Only open if opens today and still not open
-        return p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
+        return p.open && p.queueStatus !== 'open' && p.openToday && timeDiff >= minutesToCheck;
       });
+      // console.log('Places to set back to open', placesToSetBackToOpen.length);
 
-      const placesToClose = this.places.filter((p) => {
-        //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
-        const timeDiff = p.closeAt ? minutesDiff(now, p.closeAt.toDate()) : 0;
-        // Only closes if not open
-        return p.closeAt && p.open && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck;
-      });
-
-      for (const place of placesToOpen) {
+      for (const place of placesToSetBackToOpen) {
         if (!place.id) continue;
-        RollbarProvider.info(`Opening Place ${place.id}`);
-        console.log(`Opening Place ${place.id}`);
-        place.open = true;
-        //await this.save(place);
-        await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, true);
-      }
-
-      for (const place of placesToClose) {
-        if (!place.id) continue;
-        RollbarProvider.info(`Closing Place ${place.id}`);
-        console.log(`Closing Place ${place.id}`);
-        place.open = false;
-        // await this.save(place);
-        await QueueUpdate.openOrClosePlace(place.prefectureId, place.id, false);
+        // RollbarProvider.info(`Setting back to queueStatus=open Place ${place.id}`);
+        console.log(`👉 Setting back to queueStatus=open ${place.id}`);
+        place.queueStatus = 'open';
+        await this.save(place, place.prefectureId);
       }
     }
   }
@@ -268,8 +302,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       if (addressZip && addressZip.length > 0) result.addressZip = addressZip;
       if (googleMapsUrl && googleMapsUrl.length > 0) result.googleMapsUrl = googleMapsUrl;
 
-      if (json.openToday !== undefined) result.openToday = json.openToday;
-      if (json.openTomorrow !== undefined) result.openTomorrow = json.openTomorrow;
+      if (json.openToday !== undefined) result.openToday = parseBoolFromString(json.openToday);
+      if (json.openTomorrow !== undefined) result.openTomorrow = parseBoolFromString(json.openTomorrow);
 
       if (openAt) result.openAt = openAt;
       if (closeAt) result.closeAt = closeAt;
@@ -293,7 +327,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
     if (deactivateMissing) {
       // First deactivate every place, then defaults to true when present in file
-      await this._snapshotObserver
+      await FirebaseProvider.db
+        .collectionGroup('place')
         .where('prefectureId', '==', prefectureId)
         .get()
         .then(async (docs) => {
@@ -330,24 +365,29 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    * Update queue status for demonstration city
    */
   public async updateQueueStatusForDemonstration(prefectureId: string) {
-    if (this._activeObserver) {
-      const placesDemo = this.places.filter((p) => {
-        return p.prefectureId === prefectureId && p.active && p.open;
-      });
-      const randomness = placesDemo.length === 1 ? 0.5 : 0.2;
-      console.log('randomness', randomness);
-      for (const place of placesDemo) {
-        const prob = Math.random();
-        console.log('prob', prob);
-        const minutesSinceLastUpdate = Math.abs(
-          (place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) / 60 / 1000
-        );
-        console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
-        // random update || keep updated
-        if (place.id && (prob <= randomness || minutesSinceLastUpdate >= 45)) {
-          await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
-        }
+    if (!this._activeObserver) {
+      await this.initPlaces();
+    }
+
+    const placesDemo = this.places.filter((p) => {
+      return p.prefectureId === prefectureId && p.active && p.open;
+    });
+    const randomness = placesDemo.length === 1 ? 0.5 : 0.15;
+    // console.log('randomness', randomness);
+    let updated = 0;
+    for (const place of placesDemo) {
+      const prob = Math.random();
+      // console.log('prob', prob);
+      const minutesSinceLastUpdate = Math.abs(
+        (place.queueUpdatedAt.toDate().getTime() - new Date().getTime()) / 60 / 1000
+      );
+      // console.log('minutesSinceLastUpdate', minutesSinceLastUpdate);
+      // random update || keep updated
+      if (place.id && (prob <= randomness || minutesSinceLastUpdate >= 45)) {
+        await QueueUpdate.addRandomUpdate(place.prefectureId, place.id);
+        updated++;
       }
+      if (updated) console.log('Updated places: ', updated);
     }
   }
 
