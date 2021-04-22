@@ -8,18 +8,31 @@ import {
 } from './style';
 import Image from 'next/image';
 import Card from '../../components/ui/Card';
-import { Row, Col, Typography, Space, Modal } from 'antd';
+import { Row, Col, Typography, Space, Modal, message } from 'antd';
 import PlaceList from '../../components/elements/PlaceList';
 import Button from '../../components/ui/Button';
 import Github from '../../components/ui/Icons/Github';
 import { Prefecture } from '../../lib/Prefecture';
 import Link from 'next/link';
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
+import { Coordinate } from '../../lib/Location';
+import { Place } from '../../lib/Place';
+import { calcDistance } from '../../utils/geolocation';
+import { placeType } from '../../utils/constraints';
+import QueueModal from '../../components/elements/queueModal';
+import { API } from '../../utils/api';
+import dayjs from 'dayjs';
 
 type HomeProps = {
   data: Prefecture;
   loading: boolean;
-  filterByPosition: (coords: GeolocationPosition) => void;
+  coordinate?: Coordinate;
+  setCoordinate: Dispatch<
+    SetStateAction<{
+      permission?: string;
+      position?: GeolocationPosition;
+    }>
+  >;
 };
 
 const geolocationConfig = { timeout: 10 * 1000 };
@@ -27,33 +40,97 @@ const geolocationConfig = { timeout: 10 * 1000 };
 /**
  * CardItem
  */
-const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
+const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate }) => {
+  const [publicUpdate, setPublicUpdate] = React.useState<Place | null>(null);
+  const [modalUpdate, setModalUpdate] = React.useState<boolean>(false);
+  const [loadingUpdate, setLoadingUpdate] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<boolean>(false);
-  const [permission, setPermission] = React.useState<string>(undefined);
 
   /**
    * geoError
    */
-  const geoError = React.useCallback((error) => {
-    if (error.code === 1) {
-      setPermission('denied');
-    }
-  }, []);
+  const geoError = React.useCallback(
+    (error) => {
+      if (error.code === 1) {
+        setCoordinate({ permission: 'denied' });
+      }
+    },
+    [setCoordinate]
+  );
 
   /**
    * geolocation
    */
-  const geolocation = React.useCallback(() => {
-    /**
-     * geoSuccess
-     */
-    const geoSuccess = (position) => {
-      setModal(false);
-      setPermission('allowed');
-      filterByPosition(position);
-    };
-    navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geolocationConfig);
-  }, [filterByPosition, geoError]);
+  const geolocation = React.useCallback(
+    (callback?: (position: GeolocationPosition) => void) => {
+      /**
+       * geoSuccess
+       */
+      const geoSuccess = (position) => {
+        setModal(false);
+        setCoordinate({ position, permission: 'granted' });
+        if (callback) callback(position);
+      };
+      navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geolocationConfig);
+    },
+    [setCoordinate, geoError]
+  );
+
+  /**
+   * onPublicUpdate
+   */
+  const onPublicUpdate = (item: Place) => {
+    setPublicUpdate(item);
+    if (!coordinate.position) {
+      setModal(true);
+    } else {
+      handlePublicUpdate(item);
+    }
+  };
+
+  /**
+   * handlePublicUpdate
+   */
+  const handlePublicUpdate = (item: Place, geo?: GeolocationPosition) => {
+    const proximity = calcDistance(geo ? geo : coordinate.position, item);
+    const value = item.type === placeType.driveThru ? 1000 : 200;
+
+    const lastUpdate = JSON.parse(localStorage.getItem('last_queue_update') || 'null');
+    if (lastUpdate) {
+      if (dayjs().isBefore(dayjs(lastUpdate).add(1, 'minutes'))) {
+        message.error('É preciso aguardar pelo ao menos dois minutos para informar novamente o tamanho da fila');
+        return;
+      }
+    }
+
+    if (proximity >= value) {
+      message.error('Você precisa estar próximo de um dos pontos de vacinação para informar a fila.');
+    } else {
+      setModalUpdate(true);
+    }
+  };
+
+  /**
+   * submitPublicUpdate
+   */
+  const submitPublicUpdate = async (option: string) => {
+    setLoadingUpdate(true);
+    try {
+      await API.post('/update-queue-status', {
+        prefectureId: publicUpdate.prefectureId,
+        placeId: publicUpdate.id,
+        status: option
+      });
+      setModalUpdate(false);
+      localStorage.setItem('last_queue_update', JSON.stringify(new Date()));
+      message.success('Alteração de estado enviada com sucesso');
+      setLoadingUpdate(false);
+    } catch (err) {
+      console.log(err);
+      message.success('Ocorreu um erro ao enviar alteração');
+      setLoadingUpdate(false);
+    }
+  };
 
   return (
     <HomeWrapper>
@@ -107,23 +184,20 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
             </Row>
           </HomeContentWrapper>
         ) : null}
-
         <HomeContainerWrapper>
-          <div style={{ display: 'grid', justifyContent: 'flex-end' }}>
-            <Button
-              type="default"
-              onClick={() => {
-                if (permission === 'granted' || permission === 'allowed') {
-                  geolocation();
-                } else {
+          {coordinate?.permission !== 'granted' && coordinate?.permission !== 'allowed' && (
+            <div className="location-button">
+              <Button
+                type="default"
+                onClick={() => {
                   setModal(true);
-                }
-              }}
-            >
-              Pontos mais próximos
-            </Button>
-          </div>
-          <PlaceList prefecture={data} loading={loading} />
+                }}
+              >
+                Pontos mais próximos
+              </Button>
+            </div>
+          )}
+          <PlaceList prefecture={data} loading={loading} coordinate={coordinate} publicUpdate={onPublicUpdate} />
         </HomeContainerWrapper>
       </div>
       <HomeFooterWrapper>
@@ -148,14 +222,14 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
       </HomeFooterWrapper>
       <Modal
         visible={modal}
-        onOk={() => geolocation()}
+        onOk={() => geolocation(publicUpdate ? (test) => handlePublicUpdate(publicUpdate, test) : null)}
         onCancel={() => setModal(false)}
-        okButtonProps={{ style: { display: permission === 'denied' ? 'none' : 'inline-block' } }}
+        okButtonProps={{ style: { display: coordinate?.permission === 'denied' ? 'none' : 'inline-block' } }}
         okText="Permitir"
         cancelText="Fechar"
       >
         <ModalContainerWrapper>
-          {permission === 'denied' ? (
+          {coordinate?.permission === 'denied' ? (
             <p>
               O acesso a localização está bloqueado para este navegador, por favor acesse
               <a
@@ -172,6 +246,12 @@ const Home: React.FC<HomeProps> = ({ data, loading, filterByPosition }) => {
           )}
         </ModalContainerWrapper>
       </Modal>
+      <QueueModal
+        open={modalUpdate}
+        loading={loadingUpdate}
+        handleCloseModal={() => setModalUpdate(false)}
+        onSubmitForm={submitPublicUpdate}
+      />
     </HomeWrapper>
   );
 };
