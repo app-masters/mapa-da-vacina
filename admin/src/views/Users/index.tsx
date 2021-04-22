@@ -1,6 +1,6 @@
 import Layout from '../../layout';
 import { TableWrapper, Section } from './styles';
-import { Popconfirm, Typography, Collapse, Spin } from 'antd';
+import { Popconfirm, Typography, Collapse, Spin, Space } from 'antd';
 import Button from '../../components/ui/Button';
 import React from 'react';
 import FormInvitation from '../../components/elements/formInvitation';
@@ -10,7 +10,7 @@ import { disableUser } from '../../utils/firestore';
 import { Prefecture } from '../../lib/Prefecture';
 import { Place } from '../../lib/Place';
 import { formatPhone } from '../../utils/phone';
-import { WhatsAppOutlined } from '@ant-design/icons';
+import { PhoneOutlined, WhatsAppOutlined } from '@ant-design/icons';
 
 type UsersViewProps = {
   users: User[];
@@ -46,16 +46,17 @@ const Users: React.FC<UsersViewProps> = ({ users, prefectures, places, user, loa
          * render
          */
         render: (text) => (
-          <>
+          <Space>
             <a
               href={`https://api.whatsapp.com/send?phone=${text.replace('+', '')}&text=Oi`}
               target="_blank"
               rel="noreferrer"
             >
-              <WhatsAppOutlined style={{ marginRight: 8 }} />
+              <WhatsAppOutlined />
             </a>
+            <PhoneOutlined />
             {formatPhone(text)}
-          </>
+          </Space>
         )
       },
       {

@@ -45,3 +45,8 @@ export const placeQueueColor = {
   mediumQueue: '#ED902C',
   longQueue: '#A71319'
 };
+
+export const placeDistances = {
+  fixed: 200,
+  driveThru: 1000
+};

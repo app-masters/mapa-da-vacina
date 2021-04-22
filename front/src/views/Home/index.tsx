@@ -18,7 +18,7 @@ import React, { Dispatch, SetStateAction } from 'react';
 import { Coordinate } from '../../lib/Location';
 import { Place } from '../../lib/Place';
 import { calcDistance } from '../../utils/geolocation';
-import { placeType } from '../../utils/constraints';
+import { placeDistances } from '../../utils/constraints';
 import QueueModal from '../../components/elements/queueModal';
 import { API } from '../../utils/api';
 import dayjs from 'dayjs';
@@ -41,7 +41,7 @@ const geolocationConfig = { timeout: 10 * 1000 };
  * CardItem
  */
 const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate }) => {
-  const [publicUpdate, setPublicUpdate] = React.useState<Place | null>(null);
+  const [publicUpdate, setPublicUpdate] = React.useState<Place[] | null>(null);
   const [modalUpdate, setModalUpdate] = React.useState<boolean>(false);
   const [loadingUpdate, setLoadingUpdate] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<boolean>(false);
@@ -79,34 +79,48 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
   /**
    * onPublicUpdate
    */
-  const onPublicUpdate = (item: Place) => {
-    setPublicUpdate(item);
+  const onPublicUpdate = (item: Place | 'all') => {
+    if (item === 'all') setPublicUpdate(data.places);
+    else if (item) setPublicUpdate([item as Place]);
     if (!coordinate.position) {
       setModal(true);
     } else {
-      handlePublicUpdate(item);
+      handlePublicUpdate([item as Place]);
     }
   };
 
   /**
    * handlePublicUpdate
    */
-  const handlePublicUpdate = (item: Place, geo?: GeolocationPosition) => {
-    const proximity = calcDistance(geo ? geo : coordinate.position, item);
-    const value = item.type === placeType.driveThru ? 1000 : 200;
-
+  const handlePublicUpdate = (items: Place[], geo?: GeolocationPosition) => {
     const lastUpdate = JSON.parse(localStorage.getItem('last_queue_update') || 'null');
     if (lastUpdate) {
       if (dayjs().isBefore(dayjs(lastUpdate).add(1, 'minutes'))) {
-        message.error('É preciso aguardar pelo ao menos dois minutos para informar novamente o tamanho da fila');
+        Modal.error({
+          content: 'É preciso aguardar pelo ao menos dois minutos para informar novamente o tamanho da fila.'
+        });
         return;
       }
     }
 
-    if (proximity >= value) {
-      message.error('Você precisa estar próximo de um dos pontos de vacinação para informar a fila.');
+    const haveProximity = items.find((place) => {
+      const proximity = calcDistance(geo ? geo : coordinate.position, place);
+      const value = placeDistances[place.type];
+      if (proximity && proximity <= value) {
+        return place;
+      }
+    });
+    if (!haveProximity) {
+      Modal.error({
+        content: 'Você precisa estar próximo de um dos pontos de vacinação para informar a fila.'
+      });
+      setPublicUpdate(null);
     } else {
-      setModalUpdate(true);
+      if (items.length === 1) {
+        setModalUpdate(true);
+      } else {
+        setPublicUpdate(null);
+      }
     }
   };
 
@@ -117,8 +131,8 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
     setLoadingUpdate(true);
     try {
       await API.post('/update-queue-status', {
-        prefectureId: publicUpdate.prefectureId,
-        placeId: publicUpdate.id,
+        prefectureId: publicUpdate[0].prefectureId,
+        placeId: publicUpdate[0].id,
         status: option
       });
       setModalUpdate(false);
@@ -187,14 +201,16 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
         <HomeContainerWrapper>
           {coordinate?.permission !== 'granted' && coordinate?.permission !== 'allowed' && (
             <div className="location-button">
-              <Button
-                type="default"
-                onClick={() => {
-                  setModal(true);
-                }}
-              >
-                Pontos mais próximos
-              </Button>
+              <Space>
+                {data.enablePublicQueueUpdate && (
+                  <Button type="default" onClick={() => onPublicUpdate('all')}>
+                    Informar fila
+                  </Button>
+                )}
+                <Button type="default" onClick={() => setModal(true)}>
+                  Pontos mais próximos
+                </Button>
+              </Space>
             </div>
           )}
           <PlaceList prefecture={data} loading={loading} coordinate={coordinate} publicUpdate={onPublicUpdate} />

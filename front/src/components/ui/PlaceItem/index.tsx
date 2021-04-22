@@ -14,13 +14,21 @@ type CardItemProps = {
   showQueueUpdatedAt?: boolean;
   haveWarning: boolean;
   canUpdate?: boolean;
+  coordinate?: GeolocationPosition;
   publicUpdate: () => void;
 };
 
 /**
  * CardItem
  */
-const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, canUpdate, haveWarning, publicUpdate }) => {
+const CardItem: React.FC<CardItemProps> = ({
+  item,
+  coordinate,
+  showQueueUpdatedAt,
+  canUpdate,
+  haveWarning,
+  publicUpdate
+}) => {
   /**
    * Render the icon based on status
    */
@@ -75,6 +83,16 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, canUpdate
     }
   }, [item]);
 
+  const url = React.useMemo(() => {
+    if (coordinate && item.addressStreet) {
+      return `http://maps.google.com/?mode=walking&daddr=${coordinate.coords.latitude},${coordinate.coords.longitude}&saddr=${item.addressStreet}`;
+    } else if (item.googleMapsUrl) {
+      return item.googleMapsUrl;
+    } else {
+      return undefined;
+    }
+  }, [coordinate, item.googleMapsUrl, item.addressStreet]);
+
   return (
     <CardItemWrapper>
       <CardItemContent md={18} sm={24}>
@@ -89,9 +107,9 @@ const CardItem: React.FC<CardItemProps> = ({ item, showQueueUpdatedAt, canUpdate
           </span>
 
           <div>
-            {!!item.googleMapsUrl && (
+            {!!url && (
               <Tooltip title="Veja como chegar">
-                <a href={item.googleMapsUrl} target="_blank" rel="noreferrer">
+                <a href={url} target="_blank" rel="noreferrer">
                   <Pin width={20} height={16} />
                 </a>
               </Tooltip>
