@@ -36,9 +36,6 @@ export const CardItemIconContent = styled(Col)<ColProps & { bgcolor: string }>`
     div {
       flex-direction: row;
     }
-    svg {
-      margin-right: ${(props) => props.theme.spacing.sm};
-    }
   }
   span {
     text-transform: initial;
@@ -51,20 +48,31 @@ export const CardItemIconContent = styled(Col)<ColProps & { bgcolor: string }>`
   }
 `;
 
-export const CardItemContent = styled(Col)<ColProps>`
+export const CardItemContent = styled(Col)<ColProps & { align?: string; justify?: string }>`
   flex: 1;
   display: flex;
   flex-direction: row;
+  align-items: ${(props) => props.align || 'initial'};
+  justify-content: ${(props) => props.justify || 'initial'};
   flex-wrap: wrap;
   padding: ${(props) => props.theme.spacing.sm};
   padding-left: ${(props) => props.theme.spacing.default};
+  @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+    padding-left: ${(props) => props.theme.spacing.sm};
 
+    .queue-button {
+      margin-bottom: ${(props) => props.theme.spacing.sm};
+    }
+  }
   span {
     display: flex;
     h1 {
       margin-right: ${(props) => props.theme.spacing.default};
     }
     @media (max-width: ${(props) => props.theme.breakpoints.md}) {
+      h1 {
+        margin-right: 0;
+      }
       flex-direction: column;
       text-align: center;
       align-items: center;

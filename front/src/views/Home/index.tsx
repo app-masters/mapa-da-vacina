@@ -137,11 +137,14 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
       });
       setModalUpdate(false);
       localStorage.setItem('last_queue_update', JSON.stringify(new Date()));
-      message.success('Alteração de estado enviada com sucesso');
+      Modal.success({
+        content: 'Alteração de estado enviada com sucesso.'
+      });
+
       setLoadingUpdate(false);
     } catch (err) {
       console.log(err);
-      message.success('Ocorreu um erro ao enviar alteração');
+      message.error('Ocorreu um erro ao enviar alteração');
       setLoadingUpdate(false);
     }
   };

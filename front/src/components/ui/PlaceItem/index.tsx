@@ -5,7 +5,6 @@ import { Car, PersonPin, Pin } from '../Icons';
 import { Place } from '../../../lib/Place';
 import dayjs from 'dayjs';
 import { Space, Tag, Tooltip } from 'antd';
-import { WarningFilled } from '@ant-design/icons';
 import { distanceHumanize } from '../../../utils/geolocation';
 import Button from '../Button';
 
@@ -21,14 +20,7 @@ type CardItemProps = {
 /**
  * CardItem
  */
-const CardItem: React.FC<CardItemProps> = ({
-  item,
-  coordinate,
-  showQueueUpdatedAt,
-  canUpdate,
-  haveWarning,
-  publicUpdate
-}) => {
+const CardItem: React.FC<CardItemProps> = ({ item, coordinate, showQueueUpdatedAt, canUpdate, publicUpdate }) => {
   /**
    * Render the icon based on status
    */
@@ -37,7 +29,7 @@ const CardItem: React.FC<CardItemProps> = ({
       case placeType.driveThru:
         return <Car width={31} height={30} />;
       case placeType.fixed:
-        return <PersonPin width={31} height={30} />;
+        return <PersonPin width={26} height={30} />;
     }
   };
 
@@ -95,17 +87,18 @@ const CardItem: React.FC<CardItemProps> = ({
 
   return (
     <CardItemWrapper>
-      <CardItemContent md={18} sm={24}>
-        <div>
+      <CardItemContent md={12} sm={24}>
+        <div style={{ flex: 1 }}>
           <span>
             {title}
             {timeInfoText ? (
               <CardItemExtra>
-                <Tag color="default">{timeInfoText}</Tag>{' '}
+                <Tag color="default" style={{ marginRight: 0 }}>
+                  {timeInfoText}
+                </Tag>
               </CardItemExtra>
             ) : null}
           </span>
-
           <div>
             {!!url && (
               <Tooltip title="Veja como chegar">
@@ -123,13 +116,15 @@ const CardItem: React.FC<CardItemProps> = ({
                 style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
               >{`- Distância: ${distanceHumanize(item.distance)}`}</label>
             )}
-            {item.open && canUpdate && (
-              <Button size="small" onClick={publicUpdate} style={{ marginLeft: 4 }}>
-                Informar fila
-              </Button>
-            )}
           </div>
         </div>
+      </CardItemContent>
+      <CardItemContent align="center" justify="center" md={6} sm={24}>
+        {item.open && canUpdate && (
+          <Button className="queue-button" type="action" size="large" onClick={publicUpdate}>
+            Informar fila
+          </Button>
+        )}
       </CardItemContent>
       <CardItemIconContent md={6} sm={24} bgcolor={placeQueueColor[item.queueStatus]}>
         <Space>
@@ -141,10 +136,7 @@ const CardItem: React.FC<CardItemProps> = ({
         showQueueUpdatedAt &&
         item.queueStatus !== placeQueue.open &&
         item.queueStatus !== placeQueue.closed ? (
-          <span>
-            Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}
-            {haveWarning ? <WarningFilled /> : null}
-          </span>
+          <span>Atualizado {dayjs(new Date(item.queueUpdatedAt?._seconds * 1000)).fromNow()}</span>
         ) : null}
       </CardItemIconContent>
     </CardItemWrapper>
