@@ -110,7 +110,7 @@ const init = async () => {
     console.log('cronJob - Crons started');
     cron.schedule('1 0 */1 * *', () => updateOpensTodayJob()).start();
     cron.schedule('*/1 * * * *', () => openOrClosePlaceJob()).start();
-    cron.schedule('*/1 * * * *', () => setBackQueueStatusOpenPlaceJob()).start();
+    cron.schedule('*/5 * * * *', () => setBackQueueStatusOpenPlaceJob()).start();
     cron.schedule('*/6 * * * *', () => updateRandomQueueStatusJob()).start();
   } catch (error) {
     RollbarProvider.error('Failed to execute crons', { error });
@@ -118,7 +118,7 @@ const init = async () => {
 };
 
 try {
-  const shouldRun = true; //Config.get('app.nodeEnv') !== 'development';
+  const shouldRun = Config.get('app.nodeEnv') !== 'development';
   console.log('cronJob - Should run: ', shouldRun);
   if (shouldRun) {
     init();

@@ -35,6 +35,7 @@ export const getPrefectureData = async (id?: string, coordinates?: GeolocationPo
       return (
         +b.open - +a.open ||
         +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
+        +(b.openTomorrow ? b.openTomorrow : 0) - +(a.openTomorrow ? a.openTomorrow : 0) ||
         b.type.localeCompare(a.type) ||
         a.title.localeCompare(b.title)
       );
