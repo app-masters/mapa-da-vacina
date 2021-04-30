@@ -7,6 +7,7 @@ import { FirestoreStorage } from 'firestore-storage';
 export default class Firebase implements FirebaseInterface {
   public app: firebase.app.App;
   public db: firebase.firestore.Firestore;
+  public admin: typeof firebase;
   public storage: FirestoreStorage;
   /**
    * Constructor

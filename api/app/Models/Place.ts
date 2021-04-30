@@ -392,6 +392,18 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
   }
 
   /**
+   * Update Open Today with Open Tomorrow field
+   */
+  public async findWithoutMapsUrl(prefectureId: string) {
+    if (!this._activeObserver) {
+      await this.initPlaces();
+    }
+    return this.places.filter(
+      (p) => p.prefectureId === prefectureId && (!p.googleMapsUrl || p.googleMapsUrl.length === 0)
+    );
+  }
+
+  /**
    * Collection path
    * @param documentIds
    * @returns Place collection path
