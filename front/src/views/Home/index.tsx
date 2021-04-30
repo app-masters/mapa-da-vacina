@@ -54,6 +54,9 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
       if (error.code === 1) {
         setCoordinate({ permission: 'denied' });
       }
+      if (error.code === 3) {
+        setCoordinate({ permission: 'timeout' });
+      }
     },
     [setCoordinate]
   );
@@ -244,9 +247,12 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
       <Modal
         visible={modal}
         onOk={() => geolocation(publicUpdate ? (test) => handlePublicUpdate(publicUpdate, test) : null)}
-        onCancel={() => setModal(false)}
+        onCancel={() => {
+          setModal(false);
+          setCoordinate({});
+        }}
         okButtonProps={{ style: { display: coordinate?.permission === 'denied' ? 'none' : 'inline-block' } }}
-        okText="Permitir"
+        okText={coordinate?.permission === 'timeout' ? 'Tentar novamente' : 'Permitir'}
         cancelText="Fechar"
       >
         <ModalContainerWrapper>
@@ -262,6 +268,8 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
               </a>
               para saber mais.
             </p>
+          ) : coordinate?.permission === 'timeout' ? (
+            <p>Ocorreu um erro ao tentar obter sua localização. Tente novamente mais tarde.</p>
           ) : (
             <p>É necessário permitir que o navegador acesse a sua localização para continuar.</p>
           )}
