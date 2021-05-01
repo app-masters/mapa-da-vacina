@@ -18,15 +18,11 @@
     "./start/kernel",
     {
       "file": "./start/validationRules",
-      "environment": [
-        "web"
-      ]
+      "environment": ["web"]
     },
     {
       "file": "./start/cronjob",
-      "environment": [
-        "web"
-      ]
+      "environment": ["web"]
     }
   ],
   "providers": [
@@ -36,11 +32,10 @@
     "./providers/Aws/AwsProvider",
     "./providers/Rollbar/RollbarProvider",
     "@adonisjs/view",
-    "@adonisjs/mail"
+    "@adonisjs/mail",
+    "./providers/Google/GoogleProvider"
   ],
-  "aceProviders": [
-    "@adonisjs/repl"
-  ],
+  "aceProviders": ["@adonisjs/repl"],
   "metaFiles": [
     {
       "pattern": "resources/views/**/*.edge",
