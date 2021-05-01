@@ -69,7 +69,7 @@ const setBackQueueStatusOpenPlaceJob = async () => {
 
   try {
     openOrClosePlaceJobRunning = true;
-    // console.log('cronJob - Setting Back Queue Status Open Places ...');
+    console.log('cronJob - Setting Back Queue Status Open Places ...');
     await Place.setBackQueueStatusOpen();
     // console.log('cronJob - Set Back Queue Status Open Job ended ✔');
     openOrClosePlaceJobRunning = false;
@@ -118,7 +118,7 @@ const init = async () => {
 };
 
 try {
-  const shouldRun = Config.get('app.nodeEnv') !== 'development';
+  const shouldRun = true; //Config.get('app.nodeEnv') !== 'development';
   console.log('cronJob - Should run: ', shouldRun);
   if (shouldRun) {
     init();
