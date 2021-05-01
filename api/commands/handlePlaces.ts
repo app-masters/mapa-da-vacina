@@ -68,17 +68,19 @@ export default class HandlePlaces extends BaseCommand {
     console.log(`Places on ${this.prefectureId}: ${places.length}`);
     if (places) {
       for (const place of places) {
-        console.log('Updating ' + place.id + ' ...');
-        // const zip = place.addressZip?.startsWith('3') ? place.addressZip?.substr(1) : '3' + place.addressZip;
+        // if (!place.addressZip) continue;
+        console.log('Updating ' + place.id + ' ...', place.addressZip);
+        // const zip = place.addressZip.startsWith('3') ? place.addressZip.substr(1) : '3' + place.addressZip;
         // console.log('zip', zip);
         await Place.save(
           {
-            ...place,
+            ...place
             // addressZip: zip
-            open: false,
-            queueStatus: 'closed',
-            openToday: false,
-            openTomorrow: false
+            // addressStreet: place.addressStreet + ' '
+            // open: false,
+            // queueStatus: 'closed',
+            // openToday: false,
+            // openTomorrow: false
           },
           this.prefectureId
         );
