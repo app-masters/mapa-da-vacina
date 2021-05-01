@@ -25,23 +25,27 @@ function sanitizeZip(zip: string): string {
 async function getCoordinatesByUrl(googleMapsUrl: string) {
   try {
     if (!googleMapsUrl || !(googleMapsUrl.length > 0)) return undefined;
-    const unshortenedUrl = await tall(googleMapsUrl);
-    // console.log("Tall url", unshortenedUrl);
-    /*const lon_lat_match = unshortenedUrl.match(new RegExp("@(.*),(.*),"));
+    let latitude, longitude;
+    const indexQuery = googleMapsUrl.indexOf("query=");
 
-    if (lon_lat_match && lon_lat_match?.length > 0) {
-      return {
-        latitude: Number(lon_lat_match[1]),
-        longitude: Number(lon_lat_match[2]),
-      };
-    }*/
-    const splitUrl = unshortenedUrl.split("!3d");
-    const latLong = splitUrl[splitUrl.length - 1].split("!4d");
+    if (indexQuery > -1) {
+      // get latlang from string
+      const substr = googleMapsUrl.substr(indexQuery + 6);
+      const latlng = substr.split("&")[0].split(",");
 
-    const latitude = latLong[0];
-    let longitude = latLong[1];
-    if (longitude.indexOf("?") !== -1) {
-      longitude = longitude.split("?")[0];
+      latitude = latlng[0];
+      longitude = latlng[1];
+    } else {
+      const unshortenedUrl = await tall(googleMapsUrl);
+
+      const splitUrl = unshortenedUrl.split("!3d");
+      const latLong = splitUrl[splitUrl.length - 1].split("!4d");
+
+      latitude = latLong[0];
+      longitude = latLong[1];
+      if (longitude.indexOf("?") !== -1) {
+        longitude = longitude.split("?")[0];
+      }
     }
 
     if (latitude && longitude) {

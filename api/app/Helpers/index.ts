@@ -233,3 +233,11 @@ export const deleteCacheByPrefix = (prefix: string) => {
     Cache.del(key);
   }
 };
+
+/**
+ * Calculate how much % two strings are similar
+ */
+export const similarity = (s1, s2): number => {
+  const stringSimilarity = require('string-similarity');
+  return stringSimilarity.compareTwoStrings(s1, s2);
+};
