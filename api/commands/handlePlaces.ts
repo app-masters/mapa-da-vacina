@@ -57,6 +57,7 @@ export default class HandlePlaces extends BaseCommand {
     // }
     // return;
     //
+
     // Force open places now, today, tomorrow
     const prefecture = await Prefecture.findByIdWithPlaces(this.prefectureId);
     if (!prefecture) {
@@ -74,9 +75,9 @@ export default class HandlePlaces extends BaseCommand {
           {
             ...place,
             // addressZip: zip
-            // open: true,
-            // queueStatus: 'open',
-            // openToday: true,
+            open: false,
+            queueStatus: 'closed',
+            openToday: false,
             openTomorrow: false
           },
           this.prefectureId

@@ -236,12 +236,12 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       const now = new Date();
       const placesToSetBackToOpen = this.places.filter((p) => {
         if (!p.open || p.queueStatus === 'open' || !p.queueUpdatedAt) return;
-        const timeDiff = minutesDiff(p.queueUpdatedAt.toDate(), now);
-        // console.log('p', p.title, p.queueStatus, p.queueUpdatedAt.toDate(), timeDiff); // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+        const timeDiff = Math.abs(minutesDiff(p.queueUpdatedAt.toDate(), now));
+        console.log('p', p.title, p.queueStatus, p.queueUpdatedAt.toDate(), timeDiff); // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
         // Only open if opens today and still not open
         return p.open && p.queueStatus !== 'open' && p.openToday && timeDiff >= minutesToCheck;
       });
-      // console.log('Places to set back to open', placesToSetBackToOpen.length);
+      console.log('Places to set back to open', placesToSetBackToOpen.length);
 
       for (const place of placesToSetBackToOpen) {
         if (!place.id) continue;
