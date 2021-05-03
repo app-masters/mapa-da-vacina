@@ -38,6 +38,10 @@ export interface PlaceType extends BaseModel {
   openAt?: Timestamp;
   closeAt?: Timestamp;
 
+  openWeek?: boolean[];
+  openAtWeek?: string[];
+  closeAtWeek?: string[];
+
   latitude?: number;
   longitude?: number;
   distance?: number;
