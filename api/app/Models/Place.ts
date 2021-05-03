@@ -1,10 +1,10 @@
 import { BaseRepository, BaseModel, ReadModel, Timestamp } from 'firestore-storage';
-import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import { errorFactory } from 'App/Exceptions/ErrorFactory';
 import QueueUpdate from 'App/Models/QueueUpdate';
 
-import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Config from '@ioc:Adonis/Core/Config';
+import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
+import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 import {
   deleteCacheByPrefix,
