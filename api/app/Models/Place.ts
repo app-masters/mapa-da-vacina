@@ -42,8 +42,8 @@ export interface PlaceType extends BaseModel {
   closeAt?: firestore.Timestamp;
 
   openWeek?: boolean[];
-  openAtWeek?: string[];
-  closeAtWeek?: string[];
+  openAtWeek?: firestore.Timestamp[];
+  closeAtWeek?: firestore.Timestamp[];
 
   latitude?: number;
   longitude?: number;
@@ -190,12 +190,8 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
         place.openToday = place.openWeek[day];
         place.openTomorrow = place.openWeek[tomorrow];
 
-        place.openAt = FirebaseProvider.admin.firestore.Timestamp.fromDate(
-          DateTime.fromISO(place.openAtWeek[day]).toJSDate()
-        );
-        place.closeAt = FirebaseProvider.admin.firestore.Timestamp.fromDate(
-          DateTime.fromISO(place.closeAtWeek[day]).toJSDate()
-        );
+        place.openAt = place.openAtWeek[day];
+        place.closeAt = place.closeAtWeek[day];
         // else, check as it was before, by openToday and openTomorrow
       } else if (
         place.openToday !== undefined &&
