@@ -18,6 +18,9 @@ assignees: ''
 ## Descrever o bug
 Explique o que aconteceu, como o bug é percebido.
 
+## Issues relacionadas
+- Issue #44 "Criar novo ponto de vacinação"
+
 ## Como reproduzir
 Passos para acontecer o bug:
 1. Vá até '...'
