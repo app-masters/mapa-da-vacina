@@ -51,7 +51,7 @@ export const getPrefectureData = async (id?: string, coordinates?: GeolocationPo
 
     return { ...data, places };
   } catch (error) {
-    logging.error(error);
+    console.error(error);
     return {} as Prefecture;
   }
 };

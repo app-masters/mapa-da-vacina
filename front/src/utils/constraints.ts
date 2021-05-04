@@ -47,6 +47,6 @@ export const placeQueueColor = {
 };
 
 export const placeDistances = {
-  fixed: 200,
+  fixed: 2000,
   driveThru: 1000
 };

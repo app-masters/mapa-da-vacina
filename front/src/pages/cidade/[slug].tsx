@@ -34,30 +34,6 @@ const Home: NextPage<{ data: Prefecture }> = (props) => {
     }
   }, [filter]);
 
-  // Fetching prefecture data
-  useEffect(() => {
-    /**
-     * initData
-     */
-    const initData = async () => {
-      const permission = await navigator.permissions.query({ name: 'geolocation' });
-      if (permission.state === 'granted') {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            setFilter({ position, permission: permission.state });
-          },
-          null,
-          { timeout: 10 * 10000 }
-        );
-      } else {
-        setFilter({ permission: permission.state });
-      }
-    };
-    if (process.browser && 'navigator' in window) {
-      initData();
-    }
-  }, []);
-
   const siteName = `Mapa da Vacina | Vacinas de COVID-19 em ${props.data?.city || 'sua cidade'}`;
   const siteUrl = `https://${props.data?.id}.mapadavacina.com.br`;
   const siteDescription = `Descubra onde se vacinar em ${
