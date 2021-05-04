@@ -1,13 +1,13 @@
-import { Space } from 'antd';
 import PlaceListTemplate from './template';
-import Car from '../../ui/Icons/Car';
-import PersonPin from '../../ui/Icons/PersonPin';
+import Pin from '../../ui/Icons/Pin';
+import Sort from '../../ui/Icons/Sort';
 import React from 'react';
-import { ButtonIconWrapper, HeaderCard } from './styles';
+import { BlockIcon, ButtonIconWrapper, HeaderCard, StyledSpace } from './styles';
 import { Place } from '../../../lib/Place';
-import { placeQueue, placeType } from '../../../utils/constraints';
+import { placeQueue } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
 import { Coordinate } from '../../../lib/Location';
+import { sortPlacesByDistance, sortPlacesDefaultByName } from '../../../utils/sort';
 
 type IconButtonProps = {
   onPress?: (value: string) => void;
@@ -23,7 +23,7 @@ type IconButtonProps = {
 const IconButton: React.FC<IconButtonProps> = ({ onPress, id, activeFilter, title, icon }) => {
   return (
     <ButtonIconWrapper active={activeFilter === id} onClick={() => onPress(activeFilter === id ? undefined : id)}>
-      <div style={{ width: 20 }}>{icon}</div>
+      <div style={{}}>{icon}</div>
       <div />
       <p>{title}</p>
     </ButtonIconWrapper>
@@ -41,23 +41,23 @@ type PlaceListProps = {
  * PlaceList
  */
 const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate, coordinate }) => {
-  const [filter, setFilter] = React.useState<{ age: string; zip: string; placeType: string }>({
-    age: undefined,
-    zip: undefined,
+  const [filter, setFilter] = React.useState<{ order: string; placeType: string }>({
+    order: undefined,
     placeType: undefined
   });
 
   const data: Place[] = React.useMemo(() => {
     let listPlaces = prefecture.places || [];
-    // TODO: implement age filter
-    if (filter.age) {
-      // listPlaces = listPlaces.filter((f) => f.age === filter.age);
-    }
-    if (filter.zip) {
-      listPlaces = listPlaces.filter((f) => f.addressZip === filter.zip);
-    }
     if (filter.placeType) {
-      listPlaces = listPlaces.filter((f) => f.type === filter.placeType);
+      listPlaces = listPlaces.filter((f) => f.open === (filter.placeType === 'open'));
+    }
+    if (filter.order) {
+      if (filter.order === 'name') {
+        listPlaces = sortPlacesDefaultByName(listPlaces);
+      }
+      if (filter.order === 'distance') {
+        listPlaces = sortPlacesByDistance(listPlaces);
+      }
     }
     return listPlaces;
   }, [prefecture.places, filter]);
@@ -77,23 +77,41 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate
       title={
         <HeaderCard>
           <div>Locais de vacinação</div>
-          <Space wrap size={[16, 0]}>
+          <StyledSpace wrap size={[16, 0]}>
             <IconButton
-              id={placeType.driveThru}
-              title="Drive thru"
+              id={'open'}
+              title="Aberto"
               activeFilter={filter.placeType}
-              icon={<Car />}
+              icon={<BlockIcon $open />}
               onPress={(value) => setFilter({ ...filter, placeType: value })}
             />
             <IconButton
-              id={placeType.fixed}
-              title="Ponto fixo"
+              id={'closed'}
+              title="Fechado"
               activeFilter={filter.placeType}
-              icon={<PersonPin />}
+              icon={<BlockIcon />}
               onPress={(value) => setFilter({ ...filter, placeType: value })}
             />
-          </Space>
+          </StyledSpace>
         </HeaderCard>
+      }
+      filter={
+        <StyledSpace style={{ paddingBottom: 8 }} wrap size={[16, 0]}>
+          <IconButton
+            id={'name'}
+            title="Nome"
+            activeFilter={filter.order}
+            icon={<Sort />}
+            onPress={(value) => setFilter({ ...filter, order: value })}
+          />
+          <IconButton
+            id={'distance'}
+            title="Distância"
+            activeFilter={filter.order}
+            icon={<Pin />}
+            onPress={(value) => setFilter({ ...filter, order: value })}
+          />
+        </StyledSpace>
       }
       data={data}
       currentCoordinate={coordinate?.position}
