@@ -1,6 +1,5 @@
 import { Prefecture } from '../lib/Prefecture';
 import { calcDistance } from './geolocation';
-import logging from './logging';
 
 /**
  * Get prefecture Data
