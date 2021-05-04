@@ -104,13 +104,15 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate
             icon={<Sort />}
             onPress={(value) => setFilter({ ...filter, order: value })}
           />
-          <IconButton
-            id={'distance'}
-            title="Distância"
-            activeFilter={filter.order}
-            icon={<Pin />}
-            onPress={(value) => setFilter({ ...filter, order: value })}
-          />
+          {coordinate?.position && (
+            <IconButton
+              id={'distance'}
+              title="Distância"
+              activeFilter={filter.order}
+              icon={<Pin />}
+              onPress={(value) => setFilter({ ...filter, order: value })}
+            />
+          )}
         </StyledSpace>
       }
       data={data}
