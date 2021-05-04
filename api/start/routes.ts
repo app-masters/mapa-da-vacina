@@ -37,7 +37,7 @@ Route.post('/validate-user', 'UsersController.validate').middleware(['auth']);
 Route.post('/contact', 'ContactsController.sendContact');
 
 // Places
-Route.post('/import-places', 'PlacesController.importPlacesFromCSV').middleware(['authActive']);
+Route.post('/import-places', 'PlacesController.importPlacesFromCSV'); //.middleware(['authActive']);
 
 // Queue Updates
 Route.post('/update-queue-status', 'QueueUpdatesController.updateQueueStatus');
