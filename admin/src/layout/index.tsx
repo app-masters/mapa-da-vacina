@@ -32,11 +32,11 @@ const viewKeys: MenuProps[] = [
     icon: <DesktopOutlined />
   },
   {
-    key: 'users',
-    route: '/users',
-    title: 'Usuários',
-    roles: ['superAdmin', 'prefectureAdmin', 'placeAdmin'],
-    icon: <UserOutlined />
+    key: 'update',
+    route: '/update',
+    title: 'Atualização de Pontos',
+    roles: ['superAdmin', 'prefectureAdmin'],
+    icon: <ControlOutlined />
   },
   {
     key: 'place',
@@ -46,11 +46,11 @@ const viewKeys: MenuProps[] = [
     icon: <ProfileOutlined />
   },
   {
-    key: 'update',
-    route: '/update',
-    title: 'Atualização de Pontos',
-    roles: ['superAdmin', 'prefectureAdmin'],
-    icon: <ControlOutlined />
+    key: 'users',
+    route: '/users',
+    title: 'Usuários',
+    roles: ['superAdmin', 'prefectureAdmin', 'placeAdmin'],
+    icon: <UserOutlined />
   }
 ];
 
