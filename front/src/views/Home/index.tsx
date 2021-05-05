@@ -44,7 +44,33 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
   const [publicUpdate, setPublicUpdate] = React.useState<Place[] | null>(null);
   const [modalUpdate, setModalUpdate] = React.useState<boolean>(false);
   const [loadingUpdate, setLoadingUpdate] = React.useState<boolean>(false);
-  const [modal, setModal] = React.useState<boolean>(false);
+
+  /**
+   * ModalAskLocation
+   */
+  const ModalAskLocation = () => {
+    return (
+      <ModalContainerWrapper>
+        {coordinate?.permission === 'denied' ? (
+          <p>
+            O acesso a localização está bloqueado para este navegador, por favor acesse
+            <a
+              href="https://support.google.com/chrome/answer/142065?co=GENIE.Platform%3DDesktop&hl=pt"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {` este link `}
+            </a>
+            para saber mais.
+          </p>
+        ) : coordinate?.permission === 'timeout' ? (
+          <p>Ocorreu um erro ao tentar obter sua localização. Tente novamente mais tarde.</p>
+        ) : (
+          <p>É necessário permitir que o navegador acesse a sua localização para continuar.</p>
+        )}
+      </ModalContainerWrapper>
+    );
+  };
 
   /**
    * geoError
@@ -62,34 +88,12 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
   );
 
   /**
-   * geolocation
-   */
-  const geolocation = React.useCallback(
-    (callback?: (position: GeolocationPosition) => void) => {
-      /**
-       * geoSuccess
-       */
-      const geoSuccess = (position) => {
-        setModal(false);
-        setCoordinate({ position, permission: 'granted' });
-        if (callback) callback(position);
-      };
-      navigator.geolocation.getCurrentPosition(geoSuccess, geoError, geolocationConfig);
-    },
-    [setCoordinate, geoError]
-  );
-
-  /**
    * onPublicUpdate
    */
   const onPublicUpdate = (item: Place | 'all') => {
     if (item === 'all') setPublicUpdate(data.places);
     else if (item) setPublicUpdate([item as Place]);
-    if (!coordinate.position) {
-      setModal(true);
-    } else {
-      handlePublicUpdate([item as Place]);
-    }
+    handlePublicUpdate([item as Place]);
   };
 
   /**
@@ -113,6 +117,7 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
         return place;
       }
     });
+
     if (!haveProximity) {
       Modal.error({
         content: 'Você precisa estar próximo de um dos pontos de vacinação para informar a fila.'
@@ -149,6 +154,48 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
       console.log(err);
       message.error('Ocorreu um erro ao enviar alteração');
       setLoadingUpdate(false);
+    }
+  };
+
+  /**
+   * handleCurrentPosition
+   */
+  const handleCurrentPosition = (callback?: (GeolocationPosition) => void) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoordinate({ position, permission: 'granted' });
+        callback ? callback(position) : undefined;
+      },
+      geoError,
+      geolocationConfig
+    );
+  };
+
+  /**
+   * handlePosition
+   */
+  const handlePosition = async (action: 'distance' | 'queue') => {
+    const permission = await navigator.permissions.query({ name: 'geolocation' });
+    if (permission.state !== 'granted') {
+      Modal.confirm({
+        /**
+         * onOk
+         */
+        onOk: () => {
+          handleCurrentPosition((position) => {
+            if (action === 'queue') {
+              handlePublicUpdate(data.places, position);
+            }
+          });
+        },
+        content: <ModalAskLocation />,
+        cancelText: 'Fechar',
+        okButtonProps: { style: { display: coordinate?.permission === 'denied' ? 'none' : 'inline-block' } },
+        okText: coordinate?.permission === 'timeout' ? 'Tentar novamente' : 'Permitir'
+      });
+    }
+    if (permission.state === 'granted') {
+      handleCurrentPosition();
     }
   };
 
@@ -211,11 +258,11 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
             <div className="location-button">
               <Space>
                 {data.enablePublicQueueUpdate && (
-                  <Button type="default" onClick={() => onPublicUpdate('all')}>
+                  <Button type="default" onClick={() => handlePosition('queue')}>
                     Informar fila
                   </Button>
                 )}
-                <Button type="default" onClick={() => setModal(true)}>
+                <Button type="default" onClick={() => handlePosition('distance')}>
                   Pontos mais próximos
                 </Button>
               </Space>
@@ -244,37 +291,6 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
           </a>
         </div>
       </HomeFooterWrapper>
-      <Modal
-        visible={modal}
-        onOk={() => geolocation(publicUpdate ? (test) => handlePublicUpdate(publicUpdate, test) : null)}
-        onCancel={() => {
-          setModal(false);
-          setCoordinate({});
-        }}
-        okButtonProps={{ style: { display: coordinate?.permission === 'denied' ? 'none' : 'inline-block' } }}
-        okText={coordinate?.permission === 'timeout' ? 'Tentar novamente' : 'Permitir'}
-        cancelText="Fechar"
-      >
-        <ModalContainerWrapper>
-          {coordinate?.permission === 'denied' ? (
-            <p>
-              O acesso a localização está bloqueado para este navegador, por favor acesse
-              <a
-                href="https://support.google.com/chrome/answer/142065?co=GENIE.Platform%3DDesktop&hl=pt"
-                target="_blank"
-                rel="noreferrer"
-              >
-                {` este link `}
-              </a>
-              para saber mais.
-            </p>
-          ) : coordinate?.permission === 'timeout' ? (
-            <p>Ocorreu um erro ao tentar obter sua localização. Tente novamente mais tarde.</p>
-          ) : (
-            <p>É necessário permitir que o navegador acesse a sua localização para continuar.</p>
-          )}
-        </ModalContainerWrapper>
-      </Modal>
       <QueueModal
         open={modalUpdate}
         loading={loadingUpdate}
