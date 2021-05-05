@@ -12,6 +12,7 @@ import { createPlace, updatePlace } from '../../utils/firestore';
 import ModalUpload from '../../components/elements/modalUpload';
 import { API } from '../../utils/api';
 import PrefectureItem from '../../components/elements/prefectureItem';
+import ModalSchedule from '../../components/elements/modalSchedule';
 
 type ListViewProps = {
   user: User;
@@ -28,6 +29,9 @@ type ListViewProps = {
 const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({ open: false });
+  const [modalSchedule, setModalSchedule] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({
+    open: false
+  });
   const [modalUpload, setModalUpload] = React.useState<{ open: boolean; prefecture?: Prefecture }>({ open: false });
 
   /**
@@ -113,6 +117,13 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         onSubmit={onSubmitUpload}
         prefecture={modalUpload.prefecture}
       />
+      <ModalSchedule
+        loading={loading}
+        open={modalSchedule.open}
+        onSubmit={onSubmitForm}
+        setOpen={setModalSchedule}
+        place={modal.place}
+      />
       <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {(prefectures || []).map((prefecture) => (
           <PrefectureItem
@@ -122,6 +133,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
             prefecture={prefecture}
             setModal={setModal}
             setModalUpload={setModalUpload}
+            setModalSchedule={setModalSchedule}
           />
         ))}
       </Spin>

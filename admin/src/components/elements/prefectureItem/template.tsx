@@ -1,4 +1,4 @@
-import { CheckOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
+import { CheckOutlined, EditOutlined, UploadOutlined, ScheduleOutlined } from '@ant-design/icons';
 import { Button, Input, Space, Table, Tooltip, Typography } from 'antd';
 import { ColumnsType } from 'antd/lib/table';
 import dayjs from 'dayjs';
@@ -21,6 +21,7 @@ export type PrefectureItemTemplateProps = {
   user: User;
   setModal: ({ open, prefecture, place }: ModalProps) => void;
   setModalUpload: ({ open: boolean, prefecture: Prefecture }) => void;
+  setModalSchedule: ({ open, prefecture, place }: ModalProps) => void;
   places: Place[];
 };
 
@@ -32,7 +33,8 @@ const PrefectureItemTemplate: React.FC<PrefectureItemTemplateProps> = ({
   user,
   places,
   setModal,
-  setModalUpload
+  setModalUpload,
+  setModalSchedule
 }) => {
   const [data, setData] = useState<Place[]>(places);
   const [filter, setFilter] = useState<{ query: string }>({ query: undefined });
@@ -100,6 +102,22 @@ const PrefectureItemTemplate: React.FC<PrefectureItemTemplateProps> = ({
       )
     },
     {
+      title: 'Agenda',
+      dataIndex: '',
+      key: '',
+      /**
+       * render
+       */
+      render: (_, record: Place) => (
+        <Space size="middle">
+          <a onClick={() => setModalSchedule({ open: true, prefecture, place: record })}>
+            <ScheduleOutlined style={{ marginRight: 8 }} />
+            Editar
+          </a>
+        </Space>
+      )
+    },
+    {
       title: 'Abre hoje',
       dataIndex: 'openToday',
       key: 'openToday',
@@ -147,7 +165,7 @@ const PrefectureItemTemplate: React.FC<PrefectureItemTemplateProps> = ({
        */
       render: (_, record: Place) => (
         <Space size="middle">
-          <a onClick={() => setModal({ open: true, prefecture, place: record })}>
+          <a onClick={() => console.log(JSON.stringify(record, null, 2))}>
             <EditOutlined style={{ marginRight: 8 }} />
             Editar
           </a>

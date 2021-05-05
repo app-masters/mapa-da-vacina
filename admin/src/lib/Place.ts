@@ -12,6 +12,13 @@ export type Place = {
   open?: boolean;
   openToday?: boolean;
   openTomorrow?: boolean;
+  openWeek?: boolean[];
+  openAtWeek?: {
+    seconds: number;
+  }[];
+  closeAtWeek?: {
+    seconds: number;
+  }[];
   active?: boolean;
   openAt?: {
     seconds: number;

@@ -55,7 +55,13 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
   }, [place]);
 
   return (
-    <Modal title="Novo Ponto de Vacinação" visible={open} destroyOnClose onCancel={closeModal} footer={null}>
+    <Modal
+      title={place?.title ? place.title : 'Novo Ponto de Vacinação'}
+      visible={open}
+      destroyOnClose
+      onCancel={closeModal}
+      footer={null}
+    >
       <Form
         layout="vertical"
         size="large"
