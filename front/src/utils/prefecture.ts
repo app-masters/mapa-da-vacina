@@ -1,6 +1,5 @@
 import { Prefecture } from '../lib/Prefecture';
 import { calcDistance } from './geolocation';
-import logging from './logging';
 
 /**
  * Get prefecture Data
@@ -51,7 +50,7 @@ export const getPrefectureData = async (id?: string, coordinates?: GeolocationPo
 
     return { ...data, places };
   } catch (error) {
-    logging.error(error);
+    console.error(error);
     return {} as Prefecture;
   }
 };
