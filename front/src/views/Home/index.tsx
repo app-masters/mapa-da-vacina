@@ -269,7 +269,7 @@ const Home: React.FC<HomeProps> = ({ coordinate, data, loading, setCoordinate })
               para saber mais.
             </p>
           ) : coordinate?.permission === 'timeout' ? (
-            <p>Ocorreu um erro ao tentar acessar a sua localização. Tente novamente mais tarde.</p>
+            <p>Ocorreu um erro ao tentar obter sua localização. Tente novamente mais tarde.</p>
           ) : (
             <p>É necessário permitir que o navegador acesse a sua localização para continuar.</p>
           )}

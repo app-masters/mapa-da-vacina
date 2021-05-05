@@ -38,5 +38,6 @@ export default Env.rules({
   MINUTES_RANGE_TO_CHECK: Env.schema.number.optional(),
   GET_COORDINATES_URL: Env.schema.string(),
   GET_ZIP_URL: Env.schema.string(),
-  QUEUE_STATUS_MEAN_INTERVAL: Env.schema.number.optional()
+  QUEUE_STATUS_MEAN_INTERVAL: Env.schema.number.optional(),
+  GOOGLE_API_KEY: Env.schema.string.optional()
 });

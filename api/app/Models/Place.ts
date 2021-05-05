@@ -1,10 +1,12 @@
-import { BaseRepository, BaseModel, ReadModel, Timestamp } from 'firestore-storage';
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
-import { errorFactory } from 'App/Exceptions/ErrorFactory';
-import QueueUpdate from 'App/Models/QueueUpdate';
-
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Config from '@ioc:Adonis/Core/Config';
+
+import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
+import { firestore } from 'firebase-admin';
+
+import { errorFactory } from 'App/Exceptions/ErrorFactory';
+import QueueUpdate from 'App/Models/QueueUpdate';
 
 import {
   deleteCacheByPrefix,
@@ -32,11 +34,16 @@ export interface PlaceType extends BaseModel {
   active: boolean;
   open: boolean;
   queueStatus: string;
-  queueUpdatedAt: Timestamp;
   openToday?: boolean;
   openTomorrow?: boolean;
-  openAt?: Timestamp;
-  closeAt?: Timestamp;
+
+  queueUpdatedAt: firestore.Timestamp;
+  openAt?: firestore.Timestamp;
+  closeAt?: firestore.Timestamp;
+
+  openWeek?: boolean[];
+  openAtWeek?: firestore.Timestamp[];
+  closeAtWeek?: firestore.Timestamp[];
 
   latitude?: number;
   longitude?: number;
@@ -173,8 +180,24 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     if (!this._activeObserver) {
       await this.initPlaces();
     }
+    // Will check the open, openAt and CloseAt arrays.
     for (const place of this.places) {
-      if (place.openToday !== undefined && place.openTomorrow !== undefined && place.openToday !== place.openTomorrow) {
+      // 0 - Sunday, 1 - Monday, ... , 6 - Saturday
+      const day = new Date().getDay();
+      const tomorrow = (day + 1) % 7;
+      // If the arrays are set, use them
+      if (place.openWeek && place.openAtWeek && place.closeAtWeek) {
+        place.openToday = place.openWeek[day];
+        place.openTomorrow = place.openWeek[tomorrow];
+
+        place.openAt = place.openAtWeek[day];
+        place.closeAt = place.closeAtWeek[day];
+        // else, check as it was before, by openToday and openTomorrow
+      } else if (
+        place.openToday !== undefined &&
+        place.openTomorrow !== undefined &&
+        place.openToday !== place.openTomorrow
+      ) {
         RollbarProvider.info(`Updating Place ${place.id} openToday from ${place.openToday} to ${place.openTomorrow}`);
         place.openToday = place.openTomorrow;
         await this.save(place, place.prefectureId);
@@ -194,6 +217,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     const placesToOpen = this.places.filter((p) => {
       const timeDiff = p.openAt ? minutesDiff(now, p.openAt.toDate()) : 0;
       // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+
       // Only open if opens today and still not open
       return p.openAt && !p.open && p.openToday && timeDiff === 1;
     });
@@ -236,12 +260,12 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       const now = new Date();
       const placesToSetBackToOpen = this.places.filter((p) => {
         if (!p.open || p.queueStatus === 'open' || !p.queueUpdatedAt) return;
-        const timeDiff = minutesDiff(p.queueUpdatedAt.toDate(), now);
-        // console.log('p', p.title, p.queueStatus, p.queueUpdatedAt.toDate(), timeDiff); // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
+        const timeDiff = Math.abs(minutesDiff(p.queueUpdatedAt.toDate(), now));
+        console.log('p', p.title, p.queueStatus, p.queueUpdatedAt.toDate(), timeDiff); // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
         // Only open if opens today and still not open
         return p.open && p.queueStatus !== 'open' && p.openToday && timeDiff >= minutesToCheck;
       });
-      // console.log('Places to set back to open', placesToSetBackToOpen.length);
+      console.log('Places to set back to open', placesToSetBackToOpen.length);
 
       for (const place of placesToSetBackToOpen) {
         if (!place.id) continue;
@@ -389,6 +413,18 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       }
       if (updated) console.log('Updated places: ', updated);
     }
+  }
+
+  /**
+   * Update Open Today with Open Tomorrow field
+   */
+  public async findWithoutMapsUrl(prefectureId: string) {
+    if (!this._activeObserver) {
+      await this.initPlaces();
+    }
+    return this.places.filter(
+      (p) => p.prefectureId === prefectureId && (!p.googleMapsUrl || p.googleMapsUrl.length === 0)
+    );
   }
 
   /**
