@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Card } from 'antd';
+import { Card, Space } from 'antd';
 import { CardProps } from 'antd/lib/card';
 import { InputStyled } from '../../ui/Input/styles';
 import { Place } from '../../../lib/Place';
@@ -11,6 +11,7 @@ export type PlaceListTemplateProps = CardProps & {
   sampleMode?: boolean;
   city?: string;
   header?: React.ReactNode;
+  filter?: React.ReactNode;
   loading: boolean;
   currentCoordinate?: GeolocationPosition;
   publicUpdate?: (item: Place) => void;
@@ -28,6 +29,14 @@ export const PlaceListWrapper = styled(Card)`
   }
   .ant-card-body {
     min-height: 100px;
+    padding-top: ${(props) => props.theme.spacing.sm};
+  }
+`;
+
+export const StyledSpace = styled(Space)`
+  @media (max-width: ${(props) => props.theme.breakpoints.sm}) {
+    width: 100%;
+    justify-content: space-between;
   }
 `;
 
@@ -62,7 +71,6 @@ export const ButtonIconWrapper = styled.div<{ active?: boolean }>`
   align-items: center;
   user-select: none;
   color: ${(props) => props.theme.colors[props.active ? 'primary' : 'darkGray']};
-  border-bottom: 2px solid ${(props) => (props.active ? props.theme.colors.primary : 'transparent')};
   padding: ${(props) => props.theme.spacing.sm};
   cursor: pointer;
   > div:nth-child(2) {
@@ -77,9 +85,6 @@ export const ButtonIconWrapper = styled.div<{ active?: boolean }>`
     font-weight: 900;
     text-transform: uppercase;
     font-size: 16px;
-  }
-  :hover {
-    border-bottom: 2px solid ${(props) => props.theme.colors.primary};
   }
 `;
 
@@ -113,6 +118,13 @@ export const PlaceListSearchWrapper = styled.div`
 export const Loading = styled(LoadingOutlined)`
   font-size: 24px;
   color: ${(props) => props.theme.colors.primary};
+`;
+
+export const BlockIcon = styled.div<{ $open?: boolean }>`
+  width: 20px;
+  height: 20px;
+  background-color: ${(props) => (props.$open ? props.theme.colors.green1 : '#879395')};
+  border-radius: 4px;
 `;
 
 export const HeaderCard = styled.div`
