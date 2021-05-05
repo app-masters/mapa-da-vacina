@@ -7,7 +7,7 @@ import { Place } from '../../../lib/Place';
 import { placeQueue } from '../../../utils/constraints';
 import { Prefecture } from '../../../lib/Prefecture';
 import { Coordinate } from '../../../lib/Location';
-import { sortPlacesByDistance, sortPlacesDefaultByName } from '../../../utils/sort';
+import { sortPlacesByDistance, sortPlacesDefault, sortPlacesDefaultByName } from '../../../utils/sort';
 
 type IconButtonProps = {
   onPress?: (value: string) => void;
@@ -51,12 +51,15 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate
     if (filter.placeType) {
       listPlaces = listPlaces.filter((f) => f.open === (filter.placeType === 'open'));
     }
-    if (filter.order) {
-      if (filter.order === 'name') {
-        listPlaces = sortPlacesDefaultByName(listPlaces);
-      }
-      if (filter.order === 'distance') {
-        listPlaces = sortPlacesByDistance(listPlaces);
+    if (listPlaces.length > 0) {
+      if (filter.order) {
+        if (filter.order === 'name') {
+          listPlaces = sortPlacesDefaultByName(listPlaces);
+        } else if (filter.order === 'distance') {
+          listPlaces = sortPlacesByDistance(listPlaces);
+        }
+      } else {
+        listPlaces = sortPlacesDefault(listPlaces);
       }
     }
     return listPlaces;

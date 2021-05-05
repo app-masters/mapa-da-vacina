@@ -1,7 +1,7 @@
 import { Prefecture } from '../lib/Prefecture';
 import { calcDistance } from './geolocation';
 import logging from './logging';
-import { sortPlacesByDistance } from './sort';
+import { sortPlacesByDistance, sortPlacesDefault } from './sort';
 
 /**
  * Get prefecture Data
@@ -32,15 +32,7 @@ export const getPrefectureData = async (id?: string, coordinates?: GeolocationPo
       distance: calcDistance(coordinates, place)
     }));
 
-    places = places.sort((a, b) => {
-      return (
-        +b.open - +a.open ||
-        +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
-        +(b.openTomorrow ? b.openTomorrow : 0) - +(a.openTomorrow ? a.openTomorrow : 0) ||
-        b.type.localeCompare(a.type) ||
-        a.title.localeCompare(b.title)
-      );
-    });
+    places = sortPlacesDefault(places);
 
     if (coordinates) {
       places = sortPlacesByDistance(places);

@@ -29,3 +29,20 @@ export const sortPlacesDefaultByName = (places: Place[]) => {
     });
   }
 };
+
+/**
+ * sortPlacesDefault
+ */
+export const sortPlacesDefault = (places: Place[]) => {
+  if (places.length > 0) {
+    return places.sort((a, b) => {
+      return (
+        +b.open - +a.open ||
+        +(b.openToday ? b.openToday : 0) - +(a.openToday ? a.openToday : 0) ||
+        +(b.openTomorrow ? b.openTomorrow : 0) - +(a.openTomorrow ? a.openTomorrow : 0) ||
+        b.type.localeCompare(a.type) ||
+        a.title.localeCompare(b.title)
+      );
+    });
+  }
+};
