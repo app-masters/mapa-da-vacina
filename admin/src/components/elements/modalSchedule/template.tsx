@@ -80,7 +80,7 @@ const ModalScheduleTemplate: React.FC<ModalScheduleTemplateProps> = ({ open, set
           initialValue={place?.open || false}
           valuePropName="checked"
         >
-          <Checkbox style={{ width: '30%' }} disabled={loading}>
+          <Checkbox style={{ width: '100%' }} disabled={loading}>
             Aberto agora
           </Checkbox>
         </Form.Item>
@@ -142,7 +142,7 @@ const ModalScheduleTemplate: React.FC<ModalScheduleTemplateProps> = ({ open, set
                         const convertedSelectedTime = selectedTime.hour() * 60 * 60 + selectedTime.minute() * 60;
                         const convertedOpenAt = openAt.hour() * 60 * 60 + openAt.minute() * 60;
                         if (value && convertedSelectedTime <= convertedOpenAt) {
-                          return Promise.reject(new Error('Fechamento deve ser depois do de abertura'));
+                          return Promise.reject(new Error('Fechamento deve ser depois da abertura'));
                         }
                         return Promise.resolve();
                       }

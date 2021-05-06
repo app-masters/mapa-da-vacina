@@ -98,33 +98,6 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
           </Select>
         </Form.Item>
         <Input.Group compact>
-          <Form.Item name="open" style={{ width: '33%' }} initialValue={place?.open || false} valuePropName="checked">
-            <Checkbox style={{ width: '100%' }} disabled={loading}>
-              Aberto agora
-            </Checkbox>
-          </Form.Item>
-          <Form.Item
-            name="openToday"
-            style={{ width: '33%' }}
-            initialValue={place?.openToday || false}
-            valuePropName="checked"
-          >
-            <Checkbox style={{ width: '100%' }} disabled={loading}>
-              Abre hoje
-            </Checkbox>
-          </Form.Item>
-          <Form.Item
-            name="openTomorrow"
-            style={{ width: '33%' }}
-            initialValue={place?.openTomorrow || false}
-            valuePropName="checked"
-          >
-            <Checkbox style={{ width: '100%' }} disabled={loading}>
-              Abre Amanhã
-            </Checkbox>
-          </Form.Item>
-        </Input.Group>
-        <Input.Group compact>
           <Form.Item
             name="openAt"
             label="Abertura"
