@@ -21,6 +21,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
   data,
   showQueueUpdatedAt,
   header,
+  filter,
   loading,
   sampleMode,
   city,
@@ -43,6 +44,7 @@ const PlaceListTemplate: React.FC<PlaceListTemplateProps> = ({
             type="success"
           />
         )}
+        {filter}
         <Spin spinning={loading} indicator={<Loading spin />} size="large" style={{ marginTop: 28 }}>
           {data.map((item) => {
             const value = placeDistances[item.type];
