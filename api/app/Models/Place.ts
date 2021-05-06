@@ -1,15 +1,6 @@
-<<<<<<< HEAD
 import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
-=======
-import { BaseRepository, BaseModel, ReadModel, Timestamp } from 'firestore-storage';
-import { errorFactory } from 'App/Exceptions/ErrorFactory';
-import QueueUpdate from 'App/Models/QueueUpdate';
-
->>>>>>> 96109c55bb56637b8408fbbf1982231ba1a89d83
 import Config from '@ioc:Adonis/Core/Config';
-import FirebaseProvider from '@ioc:Adonis/Providers/Firebase';
-import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 
 import { BaseRepository, BaseModel, ReadModel } from 'firestore-storage';
 import { firestore } from 'firebase-admin';
@@ -196,7 +187,14 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     const tomorrow = (day + 1) % 7;
     for (const place of this.places) {
       // If the arrays are set, use them
-      if (place.openWeek && place.openAtWeek && place.closeAtWeek) {
+      if (
+        place.openWeek &&
+        place.openAtWeek &&
+        place.closeAtWeek &&
+        place.openWeek.length === 7 &&
+        place.openAtWeek.length === 7 &&
+        place.closeAtWeek.length === 7
+      ) {
         updates.push({
           prefectureId: place.prefectureId,
           placeId: place.id,
@@ -228,7 +226,6 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     }
     RollbarProvider.info('Update Open Today/Tomorrow', updates);
   }
-
 
   /**
    * Update Open Today with Open Tomorrow field
