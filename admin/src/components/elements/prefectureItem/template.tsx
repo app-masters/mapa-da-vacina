@@ -165,7 +165,7 @@ const PrefectureItemTemplate: React.FC<PrefectureItemTemplateProps> = ({
        */
       render: (_, record: Place) => (
         <Space size="middle">
-          <a onClick={() => console.log(JSON.stringify(record, null, 2))}>
+          <a onClick={() => setModal({ open: true, prefecture, place: record })}>
             <EditOutlined style={{ marginRight: 8 }} />
             Editar
           </a>
@@ -199,7 +199,7 @@ const PrefectureItemTemplate: React.FC<PrefectureItemTemplateProps> = ({
           columns={columns}
           dataSource={data}
           rowClassName={(record: Place) =>
-            !record.googleMapsUrl || (!record.longitude && !record.latitude) ? 'warning-item' : ''
+            !record.googleMapsUrl || !record.longitude || !record.latitude ? 'warning-item' : ''
           }
           scroll={{ x: 1280 }}
         />

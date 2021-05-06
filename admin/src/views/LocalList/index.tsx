@@ -8,7 +8,7 @@ import { message, Spin } from 'antd';
 import FormPlace from '../../components/elements/formPlace';
 import dayjs from 'dayjs';
 import logging from '../../utils/logging';
-import { createPlace, updatePlace } from '../../utils/firestore';
+import { createPlace, createQueueUpdate, updatePlace } from '../../utils/firestore';
 import ModalUpload from '../../components/elements/modalUpload';
 import { API } from '../../utils/api';
 import PrefectureItem from '../../components/elements/prefectureItem';
@@ -20,6 +20,22 @@ type ListViewProps = {
   places: Place[];
   pageLoading: boolean;
   prefectures: Prefecture[];
+};
+
+type DayProps = {
+  open: boolean;
+  openAt: Date;
+  closeAt: Date;
+};
+
+type WeekDaysProps = {
+  sunday?: DayProps;
+  monday?: DayProps;
+  tuesday?: DayProps;
+  wednesday?: DayProps;
+  thursday?: DayProps;
+  friday?: DayProps;
+  saturday?: DayProps;
 };
 
 /**
@@ -64,6 +80,71 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
     } catch (err) {
       setLoading(false);
       message.error(`Falha ao ${modal.place ? 'atualizar' : 'inserir'} ponto de vacinação`);
+      logging.error('Error submitting place', { err, data });
+    }
+  };
+
+  /**
+   * onSubmitSchedule
+   */
+  const onSubmitSchedule = async (data) => {
+    setLoading(true);
+    try {
+      let days: WeekDaysProps = {};
+      for (const attr in data) {
+        const currentDate = attr.split('-');
+        days[currentDate[1]] = { ...days[currentDate[1]], [currentDate[0]]: data[attr] };
+      }
+
+      const updateData = {
+        openWeek: [],
+        openAtWeek: [],
+        closeAtWeek: []
+      };
+      let isOpen = false;
+
+      days = {
+        sunday: days.sunday,
+        monday: days.monday,
+        tuesday: days.tuesday,
+        wednesday: days.wednesday,
+        thursday: days.thursday,
+        friday: days.friday,
+        saturday: days.saturday
+      };
+
+      for (const day in days) {
+        if (day !== 'now') {
+          updateData.openWeek.push(days[day]['open']);
+          updateData.openAtWeek.push(dayjs(days[day]['openAt']).toDate());
+          updateData.closeAtWeek.push(dayjs(days[day]['closeAt']).toDate());
+        } else {
+          isOpen = days[day]['open'];
+        }
+      }
+      const placeQueueStatus = isOpen ? placeQueue.open : placeQueue.closed;
+
+      if (isOpen !== modalSchedule.place.open) {
+        await createQueueUpdate(
+          modalSchedule.place.id,
+          modalSchedule.place.prefectureId,
+          isOpen,
+          placeQueueStatus,
+          user.id
+        );
+      }
+
+      await updatePlace(modalSchedule.place.id, modalSchedule.place.prefectureId, {
+        ...modalSchedule.place,
+        ...updateData
+      });
+
+      setModalSchedule({ open: false });
+      message.success(`Agenda atualizada com sucesso`);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      message.error(`Falha ao atualizar agenda`);
       logging.error('Error submitting place', { err, data });
     }
   };
@@ -120,9 +201,9 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       <ModalSchedule
         loading={loading}
         open={modalSchedule.open}
-        onSubmit={onSubmitForm}
+        onSubmit={onSubmitSchedule}
         setOpen={setModalSchedule}
-        place={modal.place}
+        place={modalSchedule.place}
       />
       <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {(prefectures || []).map((prefecture) => (
