@@ -1,4 +1,4 @@
-import { Space, Form as AntForm } from 'antd';
+import { Space } from 'antd';
 import styled from 'styled-components';
 
 export const FormPlaceWrapper = styled.div`
@@ -12,10 +12,17 @@ export const FormActionWrapper = styled(Space)`
   justify-content: flex-end;
 `;
 
-export const Form = styled(AntForm)`
-  > div {
-    /* display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 5px; */
-  }
+export const DayWrapper = styled.div``;
+
+export const DayTitle = styled.h3`
+  width: 20%;
+  margin: 0;
+  margin-right: 5px;
+`;
+
+export const FormHoursWrapper = styled.div`
+  width: 60%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 `;

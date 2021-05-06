@@ -1,9 +1,9 @@
-import { Checkbox, Divider, Input, Modal, TimePicker } from 'antd';
+import { Checkbox, Divider, Input, Modal, TimePicker, Form } from 'antd';
 import dayjs from 'dayjs';
 import React from 'react';
 import { Place } from '../../../lib/Place';
 import Button from '../../ui/Button';
-import { FormActionWrapper, Form } from './styles';
+import { FormActionWrapper, FormHoursWrapper, DayWrapper, DayTitle } from './styles';
 
 export type ModalScheduleTemplateProps = {
   loading: boolean;
@@ -85,9 +85,9 @@ const ModalScheduleTemplate: React.FC<ModalScheduleTemplateProps> = ({ open, set
           </Checkbox>
         </Form.Item>
         {weekDays.map((day, index) => (
-          <div key={day.key}>
+          <DayWrapper key={day.key}>
             <Input.Group style={{ display: 'flex', alignItems: 'center' }}>
-              <h3 style={{ width: '20%', margin: 0, marginRight: 5 }}>{day.name}</h3>
+              <DayTitle>{day.name}</DayTitle>
               <Form.Item
                 name={`open-${day.key}`}
                 style={{ width: '20%', marginBottom: 0 }}
@@ -98,23 +98,25 @@ const ModalScheduleTemplate: React.FC<ModalScheduleTemplateProps> = ({ open, set
                   Abrirá
                 </Checkbox>
               </Form.Item>
-              <div style={{ width: '60%', display: 'flex', justifyContent: 'space-evenly', alignItems: 'center' }}>
+              <FormHoursWrapper>
                 <Form.Item
                   name={`openAt-${day.key}`}
                   label="Abertura"
-                  style={{ marginBottom: 0, maxWidth: '50%' }}
+                  style={{ marginBottom: 0, width: '50%' }}
                   initialValue={day.openAt}
                   rules={[
-                    { required: true, message: 'Por favor informe o horário de abertura' },
+                    { type: 'object' as const, required: true, message: 'Informar horário' },
                     ({ getFieldValue }) => ({
                       /**
                        * validator
                        */
                       validator(_, value) {
-                        const closeAt = dayjs(getFieldValue(`closeAt-${day.key}`));
                         const selectedTime = dayjs(value);
-                        if (value && (dayjs(selectedTime).isSame(closeAt) || dayjs(selectedTime).isAfter(closeAt))) {
-                          return Promise.reject(new Error('O horário de abertura deve ser antes do de fechamento'));
+                        const closeAt = dayjs(getFieldValue(`closeAt-${day.key}`));
+                        const convertedSelectedTime = selectedTime.hour() * 60 * 60 + selectedTime.minute() * 60;
+                        const convertedCloseAt = closeAt.hour() * 60 * 60 + closeAt.minute() * 60;
+                        if (value && convertedSelectedTime >= convertedCloseAt) {
+                          return Promise.reject(new Error('Abertura deve ser antes do fechamento'));
                         }
                         return Promise.resolve();
                       }
@@ -126,19 +128,21 @@ const ModalScheduleTemplate: React.FC<ModalScheduleTemplateProps> = ({ open, set
                 <Form.Item
                   name={`closeAt-${day.key}`}
                   label="Fechamento"
-                  style={{ marginBottom: 0, marginLeft: 10, maxWidth: '50%' }}
+                  style={{ marginBottom: 0, marginLeft: 10, width: '55%' }}
                   initialValue={day.closeAt}
                   rules={[
-                    { type: 'object' as const, required: true, message: 'Por favor informe o horário de fechamento' },
+                    { type: 'object' as const, required: true, message: 'Informar horário' },
                     ({ getFieldValue }) => ({
                       /**
                        * validator
                        */
                       validator(_, value) {
-                        const openAt = dayjs(getFieldValue(`openAt-${day.key}`));
                         const selectedTime = dayjs(value);
-                        if (value && (dayjs(selectedTime).isSame(openAt) || dayjs(selectedTime).isBefore(openAt))) {
-                          return Promise.reject(new Error('O horário de fechamento deve ser depois do de abertura'));
+                        const openAt = dayjs(getFieldValue(`openAt-${day.key}`));
+                        const convertedSelectedTime = selectedTime.hour() * 60 * 60 + selectedTime.minute() * 60;
+                        const convertedOpenAt = openAt.hour() * 60 * 60 + openAt.minute() * 60;
+                        if (value && convertedSelectedTime <= convertedOpenAt) {
+                          return Promise.reject(new Error('Fechamento deve ser depois do de abertura'));
                         }
                         return Promise.resolve();
                       }
@@ -147,10 +151,10 @@ const ModalScheduleTemplate: React.FC<ModalScheduleTemplateProps> = ({ open, set
                 >
                   <TimePicker style={{ width: '100%' }} format="HH:mm" disabled={loading} placeholder="HH:MM" />
                 </Form.Item>
-              </div>
+              </FormHoursWrapper>
             </Input.Group>
             {index !== weekDays.length - 1 && <Divider style={{ margin: '20px 0' }} />}
-          </div>
+          </DayWrapper>
         ))}
         <Form.Item style={{ marginBottom: 0, marginTop: 36 }}>
           <FormActionWrapper>
