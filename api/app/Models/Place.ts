@@ -181,10 +181,10 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       await this.initPlaces();
     }
     // Will check the open, openAt and CloseAt arrays.
+    // 0 - Sunday, 1 - Monday, ... , 6 - Saturday
+    const day = new Date().getDay();
+    const tomorrow = (day + 1) % 7;
     for (const place of this.places) {
-      // 0 - Sunday, 1 - Monday, ... , 6 - Saturday
-      const day = new Date().getDay();
-      const tomorrow = (day + 1) % 7;
       // If the arrays are set, use them
       if (place.openWeek && place.openAtWeek && place.closeAtWeek) {
         place.openToday = place.openWeek[day];
