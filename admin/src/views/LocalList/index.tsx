@@ -8,10 +8,11 @@ import { message, Spin } from 'antd';
 import FormPlace from '../../components/elements/formPlace';
 import dayjs from 'dayjs';
 import logging from '../../utils/logging';
-import { createPlace, updatePlace } from '../../utils/firestore';
+import { createPlace, createQueueUpdate, updatePlace } from '../../utils/firestore';
 import ModalUpload from '../../components/elements/modalUpload';
 import { API } from '../../utils/api';
 import PrefectureItem from '../../components/elements/prefectureItem';
+import ModalSchedule from '../../components/elements/modalSchedule';
 
 type ListViewProps = {
   user: User;
@@ -21,6 +22,23 @@ type ListViewProps = {
   prefectures: Prefecture[];
 };
 
+type DayProps = {
+  open: boolean;
+  openAt: Date;
+  closeAt: Date;
+};
+
+type WeekDaysProps = {
+  now?: boolean;
+  sunday?: DayProps;
+  monday?: DayProps;
+  tuesday?: DayProps;
+  wednesday?: DayProps;
+  thursday?: DayProps;
+  friday?: DayProps;
+  saturday?: DayProps;
+};
+
 /**
  * List page
  * @params NextPage
@@ -28,6 +46,9 @@ type ListViewProps = {
 const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pageLoading }) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [modal, setModal] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({ open: false });
+  const [modalSchedule, setModalSchedule] = React.useState<{ open: boolean; prefecture?: Prefecture; place?: Place }>({
+    open: false
+  });
   const [modalUpload, setModalUpload] = React.useState<{ open: boolean; prefecture?: Prefecture }>({ open: false });
 
   /**
@@ -61,6 +82,81 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       setLoading(false);
       message.error(`Falha ao ${modal.place ? 'atualizar' : 'inserir'} ponto de vacinação`);
       logging.error('Error submitting place', { err, data });
+    }
+  };
+
+  /**
+   * onSubmitSchedule
+   */
+  const onSubmitSchedule = async (data) => {
+    setLoading(true);
+    try {
+      let days: WeekDaysProps = {};
+      for (const attr in data) {
+        const currentDate = attr.split('-');
+        days[currentDate[1]] = { ...days[currentDate[1]], [currentDate[0]]: data[attr] };
+      }
+
+      let updateData = {
+        openWeek: [],
+        openAtWeek: [],
+        closeAtWeek: [],
+        openAt: undefined,
+        closeAt: undefined
+      };
+      let isOpen = false;
+
+      days = {
+        now: days.now,
+        sunday: days.sunday,
+        monday: days.monday,
+        tuesday: days.tuesday,
+        wednesday: days.wednesday,
+        thursday: days.thursday,
+        friday: days.friday,
+        saturday: days.saturday
+      };
+
+      for (const key in days) {
+        if (key !== 'now') {
+          updateData.openWeek.push(days[key]['open']);
+          updateData.openAtWeek.push(dayjs(days[key]['openAt']).toDate());
+          updateData.closeAtWeek.push(dayjs(days[key]['closeAt']).toDate());
+        } else {
+          isOpen = days[key]['open'];
+        }
+      }
+      const placeQueueStatus = isOpen ? placeQueue.open : placeQueue.closed;
+
+      const todayIndex = new Date().getDay();
+      updateData = {
+        ...updateData,
+        openAt: updateData.openAtWeek[todayIndex],
+        closeAt: updateData.closeAtWeek[todayIndex]
+      };
+
+      await updatePlace(modalSchedule.place.id, modalSchedule.place.prefectureId, {
+        ...modalSchedule.place,
+        ...updateData
+      });
+
+      if (isOpen !== modalSchedule.place.open) {
+        await createQueueUpdate(
+          modalSchedule.place.id,
+          modalSchedule.place.prefectureId,
+          isOpen,
+          placeQueueStatus,
+          user.id
+        );
+      }
+
+      setModalSchedule({ open: false });
+      message.success(`Agenda atualizada com sucesso`);
+      setLoading(false);
+    } catch (err) {
+      setLoading(false);
+      message.error(`Falha ao atualizar agenda`);
+      logging.error('Error submitting schedule modal', { err, data });
     }
   };
 
@@ -113,6 +209,13 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         onSubmit={onSubmitUpload}
         prefecture={modalUpload.prefecture}
       />
+      <ModalSchedule
+        loading={loading}
+        open={modalSchedule.open}
+        onSubmit={onSubmitSchedule}
+        setOpen={setModalSchedule}
+        place={modalSchedule.place}
+      />
       <Spin size="large" spinning={pageLoading} style={{ marginTop: 36 }}>
         {(prefectures || []).map((prefecture) => (
           <PrefectureItem
@@ -122,6 +225,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
             prefecture={prefecture}
             setModal={setModal}
             setModalUpload={setModalUpload}
+            setModalSchedule={setModalSchedule}
           />
         ))}
       </Spin>
