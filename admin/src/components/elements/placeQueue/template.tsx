@@ -2,7 +2,6 @@ import { Place } from '../../../lib/Place';
 import { Prefecture } from '../../../lib/Prefecture';
 import { User } from '../../../lib/User';
 import {
-  placeTypeLabel,
   userRoleType,
   placeQueueLabel,
   placeQueueStatusType,
@@ -10,18 +9,19 @@ import {
   placeQueueHelp
 } from '../../../utils/constraints';
 import {
+  PlaceQueueItemsGrid,
+  PlaceQueueHeader,
   PlaceQueueItem,
   PlaceQueueWrapper,
   PlaceQueueCard,
-  PlaceQueueItemAvatar,
   PlaceQueueItemContent,
   ModalQueue,
   QueueButton,
   QueueTag,
-  ModalQueueContent
+  ModalQueueContent,
+  ButtonsWrapper
 } from './styles';
-import { Typography, Modal, Tag, Space, Col, Radio } from 'antd';
-import { PersonPin } from '../../ui/Icons';
+import { Typography, Modal, Tag, Space, Radio, Input } from 'antd';
 import Button from '../../ui/Button';
 import React from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
@@ -57,7 +57,7 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
   placeQueueUpdate
 }) => {
   const [loadingPlace, setLoadingPlace] = React.useState<string>(undefined);
-  const [filter, setFilter] = React.useState<string>('all');
+  const [filter, setFilter] = React.useState<{ type: string; query?: string }>({ type: 'all' });
   const [data, setData] = React.useState<Place[]>([]);
   const [modalOpen, setModalOpen] = React.useState<{
     open: boolean;
@@ -73,8 +73,12 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
 
   React.useEffect(() => {
     let list = places;
-    if (filter !== 'all') {
+    if (filter.type !== 'all') {
       list = list.filter((f) => f.open);
+    }
+
+    if (filter.query) {
+      list = places.filter((f) => f.title.toLowerCase().includes(filter.query.toLowerCase()));
     }
     setData(list);
   }, [filter, places]);
@@ -129,55 +133,62 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
   return (
     <PlaceQueueWrapper>
       <PlaceQueueCard>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <PlaceQueueHeader>
           {prefecture?.name && <h1>{`Prefeitura de ${prefecture?.name}`}</h1>}
           <Space>
-            <Radio.Group size="large" defaultValue="all" onChange={({ target }) => setFilter(target.value)}>
+            <Input
+              placeholder="Pesquisa"
+              size="large"
+              onChange={({ target }) => setFilter({ ...filter, query: target.value, type: 'all' })}
+            />
+            <Radio.Group
+              size="large"
+              value={filter.type}
+              onChange={({ target }) => setFilter({ ...filter, type: target.value })}
+            >
               <Radio.Button value="all">Todos</Radio.Button>
               <Radio.Button value="open">Abertos</Radio.Button>
             </Radio.Group>
           </Space>
-        </div>
-        {data.map((place) => {
-          const formattedDate = new Date(place.queueUpdatedAt?.seconds * 1000);
-          const haveWarning = !place.open
-            ? false
-            : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());
-          return (
-            <PlaceQueueItem warning={haveWarning} key={place.id}>
-              <PlaceQueueItemAvatar xs={24} sm={24} md={4} lg={2} color={placeQueueColor[place.queueStatus]}>
-                <PersonPin style={{ marginTop: 6 }} />
-                <p>{placeTypeLabel[place.type]}</p>
-              </PlaceQueueItemAvatar>
-              <Col xs={24} sm={24} md={13} lg={17}>
-                <Space wrap align="start">
-                  <PlaceQueueItemContent>
-                    <div>
-                      <Typography.Title level={3}>{place.title}</Typography.Title>
+        </PlaceQueueHeader>
+        <PlaceQueueItemsGrid>
+          {data.map((place) => {
+            const formattedDate = new Date(place.queueUpdatedAt?.seconds * 1000);
+            const haveWarning = !place.open
+              ? false
+              : dayjs(formattedDate).add(minutesUntilWarning, 'minutes').isBefore(dayjs());
+            return (
+              <PlaceQueueItem warning={haveWarning} key={place.id}>
+                <div>
+                  <Space wrap align="start">
+                    <PlaceQueueItemContent>
+                      <div>
+                        <Typography.Title level={3}>{place.title}</Typography.Title>
+                      </div>
+                      {place.open ? (
+                        <QueueTag color={placeQueueColor[place.queueStatus]}>
+                          {placeQueueLabel[place.queueStatus]}
+                        </QueueTag>
+                      ) : (
+                        <Tag color={'default'}>FECHADO</Tag>
+                      )}
+                    </PlaceQueueItemContent>
+                    <div className="queue-tags" style={{ paddingTop: 6 }}>
+                      {!!(place.open && place.queueUpdatedAt) && (
+                        <Tag color={haveWarning ? 'error' : 'default'}>{`Última atualização incluída ${dayjs(
+                          formattedDate
+                        ).fromNow()}`}</Tag>
+                      )}
                     </div>
-                    {place.open && (
-                      <QueueTag color={placeQueueColor[place.queueStatus]}>
-                        {placeQueueLabel[place.queueStatus]}
-                      </QueueTag>
-                    )}
-                  </PlaceQueueItemContent>
-                  <div className="queue-tags" style={{ paddingTop: 6 }}>
-                    {!place.open && <Tag color={'default'}>FECHADO</Tag>}
-                    {!!(place.open && place.queueUpdatedAt) && (
-                      <Tag color={haveWarning ? 'error' : 'default'}>{`Última atualização incluída ${dayjs(
-                        formattedDate
-                      ).fromNow()}`}</Tag>
-                    )}
-                  </div>
-                </Space>
-              </Col>
-              <Col xs={24} sm={24} md={6} lg={4} style={{ justifyContent: 'flex-end' }}>
-                <Space className="queue-action" direction="vertical" align="end">
+                  </Space>
+                </div>
+                <ButtonsWrapper>
                   <Button
                     loading={loading && loadingPlace === place.id}
                     disabled={loading && loadingPlace !== place.id}
                     type={place.open ? 'default' : 'primary'}
                     onClick={() => confirmModal(place)}
+                    style={{ width: '100%' }}
                   >
                     {place.open ? 'Fechar ponto de vacinação' : 'Abrir ponto de vacinação'}
                   </Button>
@@ -193,15 +204,16 @@ const PlaceQueueTemplate: React.FC<PlaceQueueProps> = ({
                           clickedOption: undefined
                         })
                       }
+                      style={{ width: '100%', marginLeft: 10 }}
                     >
                       Atualizar fila
                     </Button>
                   )}
-                </Space>
-              </Col>
-            </PlaceQueueItem>
-          );
-        })}
+                </ButtonsWrapper>
+              </PlaceQueueItem>
+            );
+          })}
+        </PlaceQueueItemsGrid>
       </PlaceQueueCard>
       <ModalQueue
         title="Alterar estado da fila"
