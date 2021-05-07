@@ -1,6 +1,7 @@
 import { BaseCommand, args } from '@adonisjs/core/build/standalone';
 import Prefecture from 'App/Models/Prefecture';
 import Place from 'App/Models/Place';
+import { firestore } from 'firebase-admin';
 // import { minutesDiff } from 'App/Helpers';
 
 export default class HandlePlaces extends BaseCommand {
@@ -70,6 +71,24 @@ export default class HandlePlaces extends BaseCommand {
       for (const place of places) {
         // if (!place.addressZip) continue;
         console.log('Updating ' + place.id + ' ...', place.addressZip);
+
+        /*
+        // Copy Place openToday, openAt and closeAt to week.
+        const openWeek: boolean[] = [];
+        const openAtWeek: firestore.Timestamp[] = [];
+        const closeAtWeek: firestore.Timestamp[] = [];
+        if (place.openToday !== undefined && place.openAt !== undefined && place.closeAt !== undefined) {
+          for (let i = 0; i < 7; i++) {
+            openWeek.push(place.openToday);
+            openAtWeek.push(place.openAt);
+            closeAtWeek.push(place.closeAt);
+          }
+          place.openWeek = openWeek;
+          place.openAtWeek = openAtWeek;
+          place.closeAtWeek = closeAtWeek;
+        }
+        */
+
         // const zip = place.addressZip.startsWith('3') ? place.addressZip.substr(1) : '3' + place.addressZip;
         // console.log('zip', zip);
         await Place.save(

@@ -180,29 +180,51 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
     if (!this._activeObserver) {
       await this.initPlaces();
     }
+    const updates: object[] = [];
     // Will check the open, openAt and CloseAt arrays.
+    // 0 - Sunday, 1 - Monday, ... , 6 - Saturday
+    const day = new Date().getDay();
+    const tomorrow = (day + 1) % 7;
     for (const place of this.places) {
-      // 0 - Sunday, 1 - Monday, ... , 6 - Saturday
-      const day = new Date().getDay();
-      const tomorrow = (day + 1) % 7;
       // If the arrays are set, use them
-      if (place.openWeek && place.openAtWeek && place.closeAtWeek) {
+      if (
+        place.openWeek &&
+        place.openAtWeek &&
+        place.closeAtWeek &&
+        place.openWeek.length === 7 &&
+        place.openAtWeek.length === 7 &&
+        place.closeAtWeek.length === 7
+      ) {
+        updates.push({
+          prefectureId: place.prefectureId,
+          placeId: place.id,
+          openTodayFrom: place.openToday,
+          openTodayTo: place.openWeek[day]
+        });
+
         place.openToday = place.openWeek[day];
         place.openTomorrow = place.openWeek[tomorrow];
 
         place.openAt = place.openAtWeek[day];
         place.closeAt = place.closeAtWeek[day];
+
         // else, check as it was before, by openToday and openTomorrow
       } else if (
         place.openToday !== undefined &&
         place.openTomorrow !== undefined &&
         place.openToday !== place.openTomorrow
       ) {
-        RollbarProvider.info(`Updating Place ${place.id} openToday from ${place.openToday} to ${place.openTomorrow}`);
+        updates.push({
+          prefectureId: place.prefectureId,
+          placeId: place.id,
+          openTodayFrom: place.openToday,
+          openTodayTo: place.openTomorrow
+        });
         place.openToday = place.openTomorrow;
         await this.save(place, place.prefectureId);
       }
     }
+    RollbarProvider.info('Update Open Today/Tomorrow', updates);
   }
 
   /**
@@ -210,6 +232,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
    */
   public async openOrClosePlaces() {
     // console.log(minutesToCheck);
+
     if (!this._activeObserver) {
       await this.initPlaces();
     }
@@ -219,7 +242,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       // console.log(p.openAt && !p.open && p.openToday && timeDiff < minutesToCheck + 1 && timeDiff >= minutesToCheck);
 
       // Only open if opens today and still not open
-      return p.openAt && !p.open && p.openToday && timeDiff === 1;
+      return p.openAt && p.open === false && p.openToday === true && timeDiff === 1;
     });
     // console.log('Places to open', placesToOpen.length);
 
@@ -227,12 +250,17 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       //console.log(p.closeAt ? this.minutesDiff(p.closeAt.toDate(), now) : '');
       const timeDiff = p.closeAt ? minutesDiff(now, p.closeAt.toDate()) : 0;
       // Only closes if open
-      return p.closeAt && p.open && timeDiff === 1;
+      return p.closeAt && p.open === true && timeDiff === 1;
+    });
+
+    RollbarProvider.info(`Open/Close Places`, {
+      placesToOpen,
+      placesToClose
     });
 
     for (const place of placesToOpen) {
       if (!place.id) continue;
-      RollbarProvider.info(`Opening Place ${place.id}`);
+      // RollbarProvider.info(`Opening Place ${place.id}`);
       console.log(`👉 Opening Place ${place.id}`);
       place.open = true;
       place.queueStatus = 'open';
@@ -242,7 +270,7 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
 
     for (const place of placesToClose) {
       if (!place.id) continue;
-      RollbarProvider.info(`Closing Place ${place.id}`);
+      // RollbarProvider.info(`Closing Place ${place.id}`);
       console.log(`👉 Closing Place ${place.id}`);
       place.open = false;
       place.queueStatus = 'closed';

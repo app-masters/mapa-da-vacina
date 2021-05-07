@@ -148,7 +148,6 @@ export const HomeFooterWrapper = styled.footer`
 `;
 
 export const ModalContainerWrapper = styled.div`
-  margin-top: ${(props) => props.theme.spacing.default};
   p {
     margin: 0;
   }

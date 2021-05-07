@@ -15,10 +15,12 @@ export default class PlacesController {
     console.log(request.decodedIdToken);
     //if there's no token, isn't super admin or isn't prefecture admin for a given prefecture, deny.
     if (
-      request.decodedIdToken &&
-      (request.decodedIdToken.role === 'superAdmin' ||
-        (request.decodedIdToken.role === 'prefectureAdmin' &&
-          request.decodedIdToken.prefectureId === data.prefectureId))
+      !(
+        request.decodedIdToken &&
+        (request.decodedIdToken.role === 'superAdmin' ||
+          (request.decodedIdToken.role === 'prefectureAdmin' &&
+            request.decodedIdToken.prefectureId === data.prefectureId))
+      )
     ) {
       throw new Error('Only authenticated superAdmin or prefectureAdmin can load CSV file.');
     }
