@@ -97,56 +97,58 @@ const FormPlaceTemplate: React.FC<FormPlaceTemplateProps> = ({
             ))}
           </Select>
         </Form.Item>
-        <Input.Group compact>
-          <Form.Item
-            name="openAt"
-            label="Abertura"
-            style={{ width: '50%' }}
-            initialValue={initialDateValues.openAt}
-            rules={[
-              { required: true, message: 'Por favor informe o horário de abertura' },
-              ({ getFieldValue }) => ({
-                /**
-                 * validator
-                 */
-                validator(_, value) {
-                  const closeAt = dayjs(getFieldValue('closeAt'));
-                  const selectedTime = dayjs(value);
-                  if (value && (dayjs(selectedTime).isSame(closeAt) || dayjs(selectedTime).isAfter(closeAt))) {
-                    return Promise.reject(new Error('O horário de abertura deve ser antes do de fechamento'));
+        {!place && (
+          <Input.Group compact>
+            <Form.Item
+              name="openAt"
+              label="Abertura"
+              style={{ width: '50%' }}
+              initialValue={initialDateValues.openAt}
+              rules={[
+                { required: true, message: 'Por favor informe o horário de abertura' },
+                ({ getFieldValue }) => ({
+                  /**
+                   * validator
+                   */
+                  validator(_, value) {
+                    const closeAt = dayjs(getFieldValue('closeAt'));
+                    const selectedTime = dayjs(value);
+                    if (value && (dayjs(selectedTime).isSame(closeAt) || dayjs(selectedTime).isAfter(closeAt))) {
+                      return Promise.reject(new Error('O horário de abertura deve ser antes do de fechamento'));
+                    }
+                    return Promise.resolve();
                   }
-                  return Promise.resolve();
-                }
-              })
-            ]}
-          >
-            <TimePicker style={{ width: '100%' }} format="HH:mm" disabled={loading} placeholder="HH:MM" />
-          </Form.Item>
-          <Form.Item
-            name="closeAt"
-            label="Fechamento"
-            style={{ width: '50%' }}
-            initialValue={initialDateValues.closeAt}
-            rules={[
-              { type: 'object' as const, required: true, message: 'Por favor informe o horário de fechamento' },
-              ({ getFieldValue }) => ({
-                /**
-                 * validator
-                 */
-                validator(_, value) {
-                  const openAt = dayjs(getFieldValue('openAt'));
-                  const selectedTime = dayjs(value);
-                  if (value && (dayjs(selectedTime).isSame(openAt) || dayjs(selectedTime).isBefore(openAt))) {
-                    return Promise.reject(new Error('O horário de fechamento deve ser depois do de abertura'));
+                })
+              ]}
+            >
+              <TimePicker style={{ width: '100%' }} format="HH:mm" disabled={loading} placeholder="HH:MM" />
+            </Form.Item>
+            <Form.Item
+              name="closeAt"
+              label="Fechamento"
+              style={{ width: '50%' }}
+              initialValue={initialDateValues.closeAt}
+              rules={[
+                { type: 'object' as const, required: true, message: 'Por favor informe o horário de fechamento' },
+                ({ getFieldValue }) => ({
+                  /**
+                   * validator
+                   */
+                  validator(_, value) {
+                    const openAt = dayjs(getFieldValue('openAt'));
+                    const selectedTime = dayjs(value);
+                    if (value && (dayjs(selectedTime).isSame(openAt) || dayjs(selectedTime).isBefore(openAt))) {
+                      return Promise.reject(new Error('O horário de fechamento deve ser depois do de abertura'));
+                    }
+                    return Promise.resolve();
                   }
-                  return Promise.resolve();
-                }
-              })
-            ]}
-          >
-            <TimePicker style={{ width: '100%' }} format="HH:mm" disabled={loading} placeholder="HH:MM" />
-          </Form.Item>
-        </Input.Group>
+                })
+              ]}
+            >
+              <TimePicker style={{ width: '100%' }} format="HH:mm" disabled={loading} placeholder="HH:MM" />
+            </Form.Item>
+          </Input.Group>
+        )}
         <Form.Item
           label="Rua"
           initialValue={place?.addressStreet}

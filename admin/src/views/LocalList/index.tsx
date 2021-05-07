@@ -29,6 +29,7 @@ type DayProps = {
 };
 
 type WeekDaysProps = {
+  now?: boolean;
   sunday?: DayProps;
   monday?: DayProps;
   tuesday?: DayProps;
@@ -96,14 +97,17 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         days[currentDate[1]] = { ...days[currentDate[1]], [currentDate[0]]: data[attr] };
       }
 
-      const updateData = {
+      let updateData = {
         openWeek: [],
         openAtWeek: [],
-        closeAtWeek: []
+        closeAtWeek: [],
+        openAt: undefined,
+        closeAt: undefined
       };
       let isOpen = false;
 
       days = {
+        now: days.now,
         sunday: days.sunday,
         monday: days.monday,
         tuesday: days.tuesday,
@@ -113,16 +117,28 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         saturday: days.saturday
       };
 
-      for (const day in days) {
-        if (day !== 'now') {
-          updateData.openWeek.push(days[day]['open']);
-          updateData.openAtWeek.push(dayjs(days[day]['openAt']).toDate());
-          updateData.closeAtWeek.push(dayjs(days[day]['closeAt']).toDate());
+      for (const key in days) {
+        if (key !== 'now') {
+          updateData.openWeek.push(days[key]['open']);
+          updateData.openAtWeek.push(dayjs(days[key]['openAt']).toDate());
+          updateData.closeAtWeek.push(dayjs(days[key]['closeAt']).toDate());
         } else {
-          isOpen = days[day]['open'];
+          isOpen = days[key]['open'];
         }
       }
       const placeQueueStatus = isOpen ? placeQueue.open : placeQueue.closed;
+
+      const todayIndex = new Date().getDay();
+      updateData = {
+        ...updateData,
+        openAt: updateData.openAtWeek[todayIndex],
+        closeAt: updateData.closeAtWeek[todayIndex]
+      };
+
+      await updatePlace(modalSchedule.place.id, modalSchedule.place.prefectureId, {
+        ...modalSchedule.place,
+        ...updateData
+      });
 
       if (isOpen !== modalSchedule.place.open) {
         await createQueueUpdate(
@@ -134,18 +150,13 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         );
       }
 
-      await updatePlace(modalSchedule.place.id, modalSchedule.place.prefectureId, {
-        ...modalSchedule.place,
-        ...updateData
-      });
-
       setModalSchedule({ open: false });
       message.success(`Agenda atualizada com sucesso`);
       setLoading(false);
     } catch (err) {
       setLoading(false);
       message.error(`Falha ao atualizar agenda`);
-      logging.error('Error submitting place', { err, data });
+      logging.error('Error submitting schedule modal', { err, data });
     }
   };
 

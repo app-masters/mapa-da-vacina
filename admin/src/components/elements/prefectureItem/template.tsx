@@ -138,7 +138,7 @@ const PrefectureItemTemplate: React.FC<PrefectureItemTemplateProps> = ({
       render: (_, record: Place) => (record.openTomorrow ? <CheckOutlined /> : null)
     },
     {
-      title: 'Horário',
+      title: 'Horário de hoje',
       dataIndex: 'schedule',
       key: 'schedule',
       /**
