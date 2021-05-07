@@ -1,4 +1,4 @@
-import { Card, Col, Modal, Row, Space, Tag } from 'antd';
+import { Card, Modal, Space, Tag } from 'antd';
 import styled from 'styled-components';
 
 export const ModalQueue = styled(Modal)``;
@@ -40,20 +40,39 @@ export const ModalQueueContent = styled(Space)`
 export const PlaceQueueCard = styled(Card)`
   margin-bottom: ${(props) => props.theme.spacing.default};
   h1 {
-    font-size: 50px;
+    font-size: 38px;
   }
 `;
 
-export const PlaceQueueItem = styled(Row)<{ warning: boolean }>`
+export const PlaceQueueHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+
+  @media (max-width: ${(props) => props.theme.breakpoints.xl}) {
+    flex-direction: column;
+    margin-bottom: ${(props) => props.theme.spacing.default};
+  }
+`;
+
+export const PlaceQueueItemsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
+`;
+
+export const PlaceQueueItem = styled.div<{ warning: boolean }>`
   background-color: ${(props) => (props.warning ? props.theme.colors.alertColor : 'transparent')};
-  padding: ${(props) => props.theme.spacing.default} 0px;
-  border-bottom: 1px solid #00000012;
+  padding: ${(props) => props.theme.spacing.default};
+  border: 1px solid #00000012;
+  display: flex;
+  flex-direction: column;
+  border-radius: 4px;
   > div {
     display: flex;
   }
 `;
 
-export const PlaceQueueItemAvatar = styled(Col)<{ color: string }>`
+export const PlaceQueueItemAvatar = styled.div<{ color: string }>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -80,6 +99,12 @@ export const PlaceQueueItemContent = styled.div`
       margin-right: ${(props) => props.theme.spacing.sm};
     }
   }
+`;
+
+export const ButtonsWrapper = styled.div`
+  flex: 1;
+  align-items: flex-end;
+  padding-top: 32px;
 `;
 
 export const QueueButton = styled.div<{ disabled?: boolean; color: string }>`

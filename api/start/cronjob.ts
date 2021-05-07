@@ -7,7 +7,6 @@
 | boot.
 |
 */
-import Config from '@ioc:Adonis/Core/Config';
 
 import RollbarProvider from '@ioc:Adonis/Providers/Rollbar';
 import Place from 'App/Models/Place';
