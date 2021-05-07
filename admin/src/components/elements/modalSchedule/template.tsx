@@ -117,7 +117,7 @@ const WeekDay: React.FC<WeekDayProps> = ({ day, loading, place, index, weekLengt
           </Form.Item>
         </FormHoursWrapper>
       </Input.Group>
-      {index !== weekLength && <Divider style={{ margin: '20px 0' }} />}
+      {index < weekLength && <Divider style={{ margin: '20px 0' }} />}
     </DayWrapper>
   );
 };
