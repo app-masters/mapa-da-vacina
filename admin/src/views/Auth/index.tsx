@@ -47,6 +47,8 @@ const Auth: React.FC = () => {
       <AuthContent>
         <Image src={'/images/logo-mapa.svg'} width={280} height={100} alt="app-logo" />
         <div id="#firebase-auth" />
+        <div id="#firebase-cypress" />
+
       </AuthContent>
     </AuthWrapper>
   );

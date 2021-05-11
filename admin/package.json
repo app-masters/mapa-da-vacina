@@ -20,6 +20,7 @@
     "antd": "^4.15.0",
     "antd-mask-input": "^0.1.15",
     "axios": "^0.21.1",
+    "cypress": "^7.3.0",
     "dayjs": "^1.10.4",
     "firebase": "^8.3.2",
     "firebase-admin": "^9.6.0",
