@@ -138,6 +138,7 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         openToday: updateData.openWeek[todayIndex],
         openTomorrow: updateData.openWeek[todayIndex === updateData.openWeek.length - 1 ? 0 : todayIndex + 1]
       };
+      console.log({ updateData, dataSentToFirebase: { ...modalSchedule.place, ...updateData } });
 
       await updatePlace(modalSchedule.place.id, modalSchedule.place.prefectureId, {
         ...modalSchedule.place,
