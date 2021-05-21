@@ -102,7 +102,9 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
         openAtWeek: [],
         closeAtWeek: [],
         openAt: undefined,
-        closeAt: undefined
+        closeAt: undefined,
+        openToday: undefined,
+        openTomorrow: undefined
       };
       let isOpen = false;
 
@@ -132,8 +134,11 @@ const List: React.FC<ListViewProps> = ({ user, tokenId, prefectures, places, pag
       updateData = {
         ...updateData,
         openAt: updateData.openAtWeek[todayIndex],
-        closeAt: updateData.closeAtWeek[todayIndex]
+        closeAt: updateData.closeAtWeek[todayIndex],
+        openToday: updateData.openWeek[todayIndex],
+        openTomorrow: updateData.openWeek[todayIndex === updateData.openWeek.length - 1 ? 0 : todayIndex + 1]
       };
+      console.log({ updateData, dataSentToFirebase: { ...modalSchedule.place, ...updateData } });
 
       await updatePlace(modalSchedule.place.id, modalSchedule.place.prefectureId, {
         ...modalSchedule.place,
