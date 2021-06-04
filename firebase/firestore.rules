@@ -8,24 +8,24 @@ rules_version = '2';
 service cloud.firestore {
     match /databases/{database}/documents {
     match /{document=**} {
-      allow read: if true;
+      allow read: if request.auth.uid != null;
       allow write: if request.auth.uid != null && request.auth.token.role == 'superAdmin';
     }
     // request.auth.uid verificar em admin
     match /prefecture/{prefId}/{document=**} {
-      allow read: if true;
+      allow read: if request.auth.uid != null;
       allow write: if
         request.auth.token.prefectureId == prefId && request.auth.token.role == 'prefectureAdmin';
     }
 
     match /prefecture/{prefId}/place/{placeId}/{document=**} {
-      allow read: if true;
+      allow read: if request.auth.uid != null;
       allow write: if
         request.auth.token.prefectureId == prefId &&  request.auth.token.placeId == placeId && request.auth.token.role == 'placeAdmin';
     }
     
     match /prefecture/{prefId}/place/{placeId}/queueStatus/{queueStatusId} {
-        allow read: if true;
+        allow read: if request.auth.uid != null;
         allow write: if
           request.auth.token.prefectureId == prefId &&  request.auth.token.placeId == placeId && request.auth.token.role == 'queueObserver';
     }
