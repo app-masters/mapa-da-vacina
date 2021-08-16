@@ -110,7 +110,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, coordinate, showQueueUpdatedA
             {`${item.addressStreet ? item.addressStreet : ''}${
               item.addressDistrict ? ', ' + item.addressDistrict : ''
             }`}
-            {item.distance && (
+            {!!(item.distance && item.distance > 0) && (
               <label
                 className="location-label"
                 style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}
@@ -120,7 +120,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, coordinate, showQueueUpdatedA
         </div>
       </CardItemContent>
       <CardItemContent align="center" justify="center" md={6} sm={24}>
-        {canUpdate && (
+        {item.open && canUpdate && (
           <Button className="queue-button" type="action" size="large" onClick={publicUpdate}>
             Informar fila
           </Button>
