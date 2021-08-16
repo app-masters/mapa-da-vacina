@@ -120,7 +120,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, coordinate, showQueueUpdatedA
         </div>
       </CardItemContent>
       <CardItemContent align="center" justify="center" md={6} sm={24}>
-        {item.open && canUpdate && (
+        {canUpdate && (
           <Button className="queue-button" type="action" size="large" onClick={publicUpdate}>
             Informar fila
           </Button>
