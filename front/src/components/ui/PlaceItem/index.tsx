@@ -110,7 +110,7 @@ const CardItem: React.FC<CardItemProps> = ({ item, coordinate, showQueueUpdatedA
             {`${item.addressStreet ? item.addressStreet : ''}${
               item.addressDistrict ? ', ' + item.addressDistrict : ''
             }`}
-            {item.distance && (
+            {!!(item.distance && item.distance > 0) && (
               <label
                 className="location-label"
                 style={{ marginLeft: item.googleMapsUrl ? 0 : 4 }}

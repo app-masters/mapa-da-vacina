@@ -130,6 +130,7 @@ export const BlockIcon = styled.div<{ $open?: boolean }>`
 export const HeaderCard = styled.div`
   display: flex;
   flex-wrap: wrap;
+  font-weight: 400;
   @media (max-width: ${(props) => props.theme.breakpoints.md}) {
     font-size: 24px;
     padding-top: ${(props) => props.theme.spacing.default};

@@ -1,7 +1,7 @@
 import PlaceListTemplate from './template';
 import Pin from '../../ui/Icons/Pin';
 import Sort from '../../ui/Icons/Sort';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BlockIcon, ButtonIconWrapper, HeaderCard, StyledSpace } from './styles';
 import { Place } from '../../../lib/Place';
 import { placeQueue } from '../../../utils/constraints';
@@ -45,6 +45,12 @@ const PlaceList: React.FC<PlaceListProps> = ({ prefecture, loading, publicUpdate
     order: undefined,
     placeType: undefined
   });
+
+  useEffect(() => {
+    if (coordinate) {
+      setFilter((v) => ({ ...v, order: 'distance' }));
+    }
+  }, [coordinate]);
 
   const data: Place[] = React.useMemo(() => {
     let listPlaces = prefecture.places || [];
