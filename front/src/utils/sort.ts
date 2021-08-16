@@ -5,11 +5,13 @@ import { Place } from '../lib/Place';
  */
 export const sortPlacesByDistance = (places: Place[]) => {
   if (places.length > 0) {
-    return places.sort((a, b) => {
-      if (!b.distance) return -1;
-      if (!a.distance) return 0;
-      return a.distance - b.distance;
-    });
+    return places
+      .map((m) => ({ ...m, distance: m.distance || 0 }))
+      .sort((a, b) => {
+        if (!b.distance) return -1;
+        if (!a.distance) return 1;
+        return a.distance - b.distance;
+      });
   }
 };
 
