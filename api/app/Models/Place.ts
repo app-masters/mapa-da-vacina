@@ -252,11 +252,12 @@ export class PlaceRepository extends BaseRepository<PlaceType> {
       // Only closes if open
       return p.closeAt && p.open === true && timeDiff === 1;
     });
-
-    RollbarProvider.info(`Open/Close Places`, {
-      placesToOpen,
-      placesToClose
-    });
+    if (placesToClose.length + placesToClose.length > 0) {
+      RollbarProvider.info(`Open/Close Places`, {
+        placesToOpen,
+        placesToClose
+      });
+    }
 
     for (const place of placesToOpen) {
       if (!place.id) continue;
